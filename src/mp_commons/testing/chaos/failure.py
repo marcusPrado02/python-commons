@@ -22,6 +22,8 @@ class FailureInjector:
     async def call(self, coro: object) -> object:
         import inspect
         if random.random() < self._rate:  # noqa: S311
+            if inspect.isawaitable(coro):
+                coro.close()  # type: ignore[union-attr]
             raise self._factory()
         if inspect.isawaitable(coro):
             return await coro  # type: ignore[misc]

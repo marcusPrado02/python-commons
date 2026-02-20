@@ -13,6 +13,10 @@ class InMemoryInboxRepository(InboxRepository):
     async def save(self, record: InboxRecord) -> None:
         self._records[record.message_id] = record
 
+    async def find_by_message_id(self, message_id: str) -> InboxRecord | None:
+        return self._records.get(message_id)
+
+    # Keep the old ``get`` alias for backwards compat
     async def get(self, message_id: str) -> InboxRecord | None:
         return self._records.get(message_id)
 
@@ -20,8 +24,32 @@ class InMemoryInboxRepository(InboxRepository):
         if message_id in self._records:
             r = self._records[message_id]
             self._records[message_id] = InboxRecord(
-                message_id=r.message_id, consumer_group=r.consumer_group,
-                status=InboxStatus.PROCESSED, received_at=r.received_at,
+                id=r.id,
+                message_id=r.message_id,
+                topic=r.topic,
+                payload=r.payload,
+                headers=r.headers,
+                status=InboxStatus.PROCESSED,
+                received_at=r.received_at,
+                processed_at=r.processed_at,
+                consumer_group=r.consumer_group,
+                error=r.error,
+            )
+
+    async def mark_failed(self, message_id: str, error: str) -> None:
+        if message_id in self._records:
+            r = self._records[message_id]
+            self._records[message_id] = InboxRecord(
+                id=r.id,
+                message_id=r.message_id,
+                topic=r.topic,
+                payload=r.payload,
+                headers=r.headers,
+                status=InboxStatus.FAILED,
+                received_at=r.received_at,
+                processed_at=r.processed_at,
+                consumer_group=r.consumer_group,
+                error=error,
             )
 
     def all_records(self) -> list[InboxRecord]:

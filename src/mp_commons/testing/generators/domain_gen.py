@@ -13,8 +13,9 @@ def email_gen(domain: str = "example.com") -> str:
 
 def money_gen(min_cents: int = 1, max_cents: int = 100000) -> object:
     """Generate a random ``Money`` value object."""
-    from mp_commons.kernel.types import Currency, Money
-    currencies = [Currency.EUR, Currency.USD, Currency.GBP]
+    from mp_commons.kernel.types import Money
+    import random
+    currencies = ["EUR", "USD", "GBP"]
     amount = random.randint(min_cents, max_cents)  # noqa: S311
     return Money(amount=amount, currency=random.choice(currencies))  # noqa: S311
 
@@ -26,17 +27,14 @@ def slug_gen(length: int = 8) -> str:
     return slug.strip("-")
 
 
-def domain_event_gen(event_type: str = "TestEvent", aggregate_id: str | None = None, **payload: object) -> object:
+def domain_event_gen(event_id: str | None = None, **payload: object) -> object:
     """Generate a minimal ``DomainEvent`` for tests."""
     from mp_commons.kernel.ddd import DomainEvent
-    from mp_commons.kernel.types import EntityId
     from datetime import UTC, datetime
-    agg_id = EntityId(aggregate_id or "test-aggregate")
+    import uuid
     return DomainEvent(
-        event_type=event_type,
-        aggregate_id=agg_id,
+        event_id=event_id or str(uuid.uuid4()),
         occurred_at=datetime.now(UTC),
-        payload=payload or {},
     )
 
 
