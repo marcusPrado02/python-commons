@@ -53,10 +53,11 @@ httpx = ["httpx>=0.27"]
 requests = ["requests>=2.31"]
 keycloak = ["python-jose[cryptography]>=3.3", "httpx>=0.27"]
 vault = ["hvac>=2.1"]
+mongodb = ["motor>=3.3"]
 
 # Meta-extras
 all-adapters = [
-  "mp-commons[fastapi,sqlalchemy,redis,kafka,nats,rabbitmq,httpx,keycloak,vault,otel]",
+  "mp-commons[fastapi,sqlalchemy,redis,kafka,nats,rabbitmq,httpx,keycloak,vault,mongodb,otel]",
 ]
 dev = [
   "mp-commons[all-adapters,pydantic,structlog,tenacity,crypto,dotenv]",
@@ -69,6 +70,7 @@ dev = [
   "coverage[toml]>=7.4",
   "respx>=0.21",
   "time-machine>=2.14",
+  "testcontainers>=4.8",
 ]
 
 [project.urls]
