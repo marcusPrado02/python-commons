@@ -34,6 +34,12 @@ class Some(Generic[T]):
     def map(self, func: Callable[[T], T]) -> "Some[T]":
         return Some(func(self._value))
 
+    def flat_map(self, func: "Callable[[T], Option[T]]") -> "Option[T]":
+        return func(self._value)
+
+    def filter(self, predicate: "Callable[[T], bool]") -> "Option[T]":
+        return self if predicate(self._value) else Nothing()
+
     def __iter__(self) -> Iterator[T]:
         yield self._value
 
@@ -59,6 +65,12 @@ class Nothing(Generic[T]):
         return default
 
     def map(self, func: Callable[[T], T]) -> "Nothing[T]":  # noqa: ARG002
+        return self
+
+    def flat_map(self, func: "Callable[[T], Option[T]]") -> "Nothing[T]":  # noqa: ARG002
+        return self
+
+    def filter(self, predicate: "Callable[[T], bool]") -> "Nothing[T]":  # noqa: ARG002
         return self
 
     def __iter__(self) -> Iterator[T]:

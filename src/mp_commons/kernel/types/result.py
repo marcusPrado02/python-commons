@@ -35,6 +35,9 @@ class Ok(Generic[T]):
     def map(self, func: Callable[[T], "T"]) -> "Ok[T]":
         return Ok(func(self._value))
 
+    def flat_map(self, func: "Callable[[T], Result[T, E]]"  ) -> "Result[T, E]":
+        return func(self._value)
+
     def __repr__(self) -> str:
         return f"Ok({self._value!r})"
 
@@ -64,6 +67,9 @@ class Err(Generic[E]):
         return default
 
     def map(self, func: Callable[[T], T]) -> "Err[E]":  # noqa: ARG002
+        return self
+
+    def flat_map(self, func: "Callable[[T], Result[T, E]]"  ) -> "Err[E]":  # noqa: ARG002
         return self
 
     def __repr__(self) -> str:

@@ -26,5 +26,22 @@ class Slug:
     def __str__(self) -> str:
         return self.value
 
+    @classmethod
+    def from_text(cls, text: str) -> "Slug":
+        """Normalise arbitrary text into a URL-safe slug.
+
+        Rules applied in order:
+        1. Lowercase + strip surrounding whitespace.
+        2. Remove characters that are not word chars, spaces, or hyphens.
+        3. Replace runs of whitespace/underscores with a single hyphen.
+        4. Collapse consecutive hyphens.
+        5. Strip leading/trailing hyphens.
+        """
+        value = text.lower().strip()
+        value = re.sub(r"[^\w\s-]", "", value)
+        value = re.sub(r"[\s_]+", "-", value)
+        value = re.sub(r"-+", "-", value).strip("-")
+        return cls(value)
+
 
 __all__ = ["Slug"]

@@ -5,7 +5,7 @@ from __future__ import annotations
 import dataclasses
 import re
 from decimal import Decimal
-from typing import Final
+from typing import Any, Final
 
 from mp_commons.kernel.errors.domain import ValidationError
 
@@ -45,6 +45,38 @@ class Money:
     @classmethod
     def of(cls, amount: "str | int | float | Decimal", currency: str) -> "Money":
         return cls(Decimal(str(amount)), currency.upper())
+
+    def multiply(self, factor: "int | float | Decimal") -> "Money":
+        """Return a new ``Money`` scaled by *factor* (must keep amount non-negative)."""
+        result = self.amount * Decimal(str(factor))
+        if result < 0:
+            raise ValidationError("multiply() would produce negative Money")
+        return Money(result, self.currency)
+
+    @classmethod
+    def __get_pydantic_core_schema__(
+        cls,
+        source_type: Any,
+        handler: Any,
+    ) -> Any:
+        try:
+            from pydantic_core import core_schema
+
+            def _validate(v: Any) -> "Money":
+                if isinstance(v, cls):
+                    return v
+                if isinstance(v, dict):
+                    return cls.of(v["amount"], v["currency"])
+                raise ValueError(f"Cannot convert {v!r} to Money")
+
+            return core_schema.no_info_plain_validator_function(
+                _validate,
+                serialization=core_schema.plain_serializer_function_ser_schema(
+                    lambda m: {"amount": str(m.amount), "currency": m.currency},
+                ),
+            )
+        except ImportError:
+            raise
 
 
 __all__ = ["Money"]

@@ -24,7 +24,7 @@ from mp_commons.kernel.types.option import Nothing, Option, Some
 from mp_commons.kernel.types.phone import PhoneNumber
 from mp_commons.kernel.types.result import Err, Ok, Result
 from mp_commons.kernel.types.slug import Slug
-from mp_commons.kernel.types.uid import ULID, UUIDv7
+from mp_commons.kernel.types.uid import ULID, UID, UUIDv7
 
 __all__ = [
     "CorrelationId",
@@ -41,6 +41,7 @@ __all__ = [
     "Some",
     "TenantId",
     "TraceId",
+    "UID",
     "ULID",
     "UUIDv7",
     "UserId",

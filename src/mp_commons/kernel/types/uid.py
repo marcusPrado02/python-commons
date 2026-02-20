@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import base64
 import dataclasses
+import secrets
 import uuid
 
 from mp_commons.kernel.errors.domain import ValidationError
@@ -59,4 +61,35 @@ class UUIDv7:
             raise ImportError("Install 'uuid-utils' to generate UUIDv7") from exc
 
 
-__all__ = ["ULID", "UUIDv7"]
+@dataclasses.dataclass(frozen=True, slots=True)
+class UID:
+    """12-character URL-safe base64 random identifier (stdlib only).
+
+    Uses 9 random bytes (``secrets.token_bytes``) encoded as 12 URL-safe
+    base64 characters — no padding, no external dependencies.
+
+    Examples::
+
+        uid = UID.generate()
+        uid.value  # e.g. 'aB3-xQ7_kR2z'
+    """
+
+    value: str
+
+    def __post_init__(self) -> None:
+        if len(self.value) != 12:  # noqa: PLR2004
+            from mp_commons.kernel.errors.domain import ValidationError
+
+            raise ValidationError(f"UID must be exactly 12 characters, got {len(self.value)}")
+
+    def __str__(self) -> str:
+        return self.value
+
+    @classmethod
+    def generate(cls) -> "UID":
+        """Return a new cryptographically random 12-char URL-safe base64 ``UID``."""
+        raw = secrets.token_bytes(9)  # 9 bytes → 12 base64 chars (no padding)
+        return cls(base64.urlsafe_b64encode(raw).decode())
+
+
+__all__ = ["ULID", "UID", "UUIDv7"]
