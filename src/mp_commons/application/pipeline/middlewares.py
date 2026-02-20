@@ -106,6 +106,20 @@ class AuthzMiddleware(Middleware):
         return await next_(request)
 
 
+class CorrelationMiddleware(Middleware):
+    """Stamp a ``correlation_id`` on the request context if absent."""
+
+    async def __call__(self, request: Any, next_: Next) -> Any:
+        import uuid
+
+        if not getattr(request, "correlation_id", None):
+            try:
+                object.__setattr__(request, "correlation_id", str(uuid.uuid4()))
+            except (AttributeError, TypeError):
+                pass
+        return await next_(request)
+
+
 class ValidationMiddleware(Middleware):
     """Call ``request.validate()`` if it exists."""
 
@@ -145,6 +159,7 @@ class TimeoutMiddleware(Middleware):
 
 __all__ = [
     "AuthzMiddleware",
+    "CorrelationMiddleware",
     "IdempotencyMiddleware",
     "LoggingMiddleware",
     "MetricsMiddleware",

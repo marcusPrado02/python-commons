@@ -3,6 +3,7 @@ from mp_commons.application.pipeline.middleware import Handler, Middleware, Next
 from mp_commons.application.pipeline.pipeline import Pipeline
 from mp_commons.application.pipeline.middlewares import (
     AuthzMiddleware,
+    CorrelationMiddleware,
     IdempotencyMiddleware,
     LoggingMiddleware,
     MetricsMiddleware,
@@ -15,6 +16,7 @@ from mp_commons.application.pipeline.middlewares import (
 
 __all__ = [
     "AuthzMiddleware",
+    "CorrelationMiddleware",
     "Handler",
     "IdempotencyMiddleware",
     "LoggingMiddleware",
