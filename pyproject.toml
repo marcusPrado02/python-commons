@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mp-commons"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Platform shared library – DDD/Hexagonal building blocks for Python services"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -79,6 +79,9 @@ Repository = "https://github.com/marcusPrado02/python-commons"
 # ---------------------------------------------------------------------------
 # Tool configuration
 # ---------------------------------------------------------------------------
+[tool.hatch.version]
+path = "src/mp_commons/__init__.py"
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/mp_commons"]
 

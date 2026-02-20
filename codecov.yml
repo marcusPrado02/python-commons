@@ -1,0 +1,30 @@
+# Codecov configuration for mp-commons
+# https://docs.codecov.com/docs/codecov-yaml
+
+coverage:
+  # Overall project coverage target
+  status:
+    project:
+      default:
+        target: 90%
+        threshold: 1%   # allow 1% drop before CI fails
+        if_not_found: success
+    patch:
+      default:
+        target: 85%
+        threshold: 2%
+        if_not_found: success
+
+comment:
+  layout: "reach,diff,flags,tree"
+  behavior: default
+  require_changes: true   # only post if coverage changed
+  require_base: true
+  require_head: true
+
+# Ignore generated / vendor files from coverage
+ignore:
+  - "tests/**"
+  - "docs/**"
+  - "**/__init__.py"
+  - "src/mp_commons/adapters/**"   # adapters need integration tests
