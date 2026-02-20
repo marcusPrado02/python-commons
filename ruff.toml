@@ -1,0 +1,43 @@
+line-length = 100
+target-version = "py312"
+
+[lint]
+select = [
+  "E", "W",     # pycodestyle
+  "F",          # pyflakes
+  "I",          # isort
+  "UP",         # pyupgrade
+  "B",          # flake8-bugbear
+  "C4",         # flake8-comprehensions
+  "SIM",        # flake8-simplify
+  "TCH",        # flake8-type-checking
+  "RUF",        # ruff-specific
+  "ANN",        # flake8-annotations
+  "PT",         # flake8-pytest-style
+  "S",          # bandit (security)
+  "PIE",        # misc lints
+  "ERA",        # eradicate (commented-out code)
+  "PL",         # pylint
+  "PERF",       # perflint
+]
+
+ignore = [
+  "ANN101",  # missing type for self
+  "ANN102",  # missing type for cls
+  "S101",    # use of assert (needed in tests + invariants)
+  "PLR0913", # too many arguments – fine for rich constructors
+  "PLR2004", # magic value in comparison
+]
+
+[lint.per-file-ignores]
+"tests/**" = ["S", "ANN", "PLR"]
+"src/mp_commons/testing/**" = ["S", "ANN"]
+
+[lint.isort]
+known-first-party = ["mp_commons"]
+force-sort-within-sections = true
+
+[format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
