@@ -1,0 +1,55 @@
+name: "✨ Feature Request"
+description: "Propose a new feature or enhancement for mp-commons."
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an improvement!
+        Please describe the problem you need to solve and the solution you have in mind.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: "Problem statement"
+      description: "What problem does this feature solve? What are you trying to achieve?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: "Proposed solution"
+      description: "Describe the API or behaviour you'd like to see, ideally with a code example."
+      render: python
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: "Alternatives considered"
+      description: "Have you tried any workarounds? What other approaches did you consider?"
+
+  - type: dropdown
+    id: layer
+    attributes:
+      label: "Affected layer"
+      options:
+        - "kernel"
+        - "application"
+        - "resilience"
+        - "observability"
+        - "config"
+        - "adapter"
+        - "testing"
+        - "packaging / CI"
+        - "other"
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: "Additional context"
+      description: "Links to relevant ADRs, issues, or external references."
