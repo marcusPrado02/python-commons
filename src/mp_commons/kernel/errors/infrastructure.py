@@ -13,6 +13,43 @@ class InfrastructureError(BaseError):
     default_code = "infrastructure_error"
 
 
+class ConnectionError(InfrastructureError):  # noqa: A001
+    """Failed to connect to an external resource (DB, broker, cache, …)."""
+
+    default_code = "connection_error"
+
+    def __init__(
+        self,
+        resource: str,
+        message: str | None = None,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(message or f"Could not connect to '{resource}'", **kwargs)
+        self.resource = resource
+
+
+class TimeoutError(InfrastructureError):  # noqa: A001
+    """An I/O operation exceeded its deadline."""
+
+    default_code = "infrastructure_timeout"
+
+
+class SerializationError(InfrastructureError):
+    """Failed to serialize or deserialize a payload."""
+
+    default_code = "serialization_error"
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        payload_type: str | None = None,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(message, **kwargs)
+        self.payload_type = payload_type
+
+
 class ExternalServiceError(InfrastructureError):
     """An external service returned an unexpected response."""
 
@@ -32,6 +69,9 @@ class ExternalServiceError(InfrastructureError):
 
 
 __all__ = [
+    "ConnectionError",
     "ExternalServiceError",
     "InfrastructureError",
+    "SerializationError",
+    "TimeoutError",
 ]

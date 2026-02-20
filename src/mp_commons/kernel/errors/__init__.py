@@ -14,6 +14,9 @@ Hierarchy::
     │   ├── RateLimitError
     │   └── TimeoutError
     └── InfrastructureError  (infrastructure.py)
+        ├── ConnectionError
+        ├── TimeoutError
+        ├── SerializationError
         └── ExternalServiceError
 """
 
@@ -33,21 +36,27 @@ from mp_commons.kernel.errors.domain import (
     ValidationError,
 )
 from mp_commons.kernel.errors.infrastructure import (
+    ConnectionError,
     ExternalServiceError,
     InfrastructureError,
+    SerializationError,
 )
+from mp_commons.kernel.errors.infrastructure import TimeoutError as InfrastructureTimeoutError
 
 __all__ = [
     "ApplicationError",
     "BaseError",
     "ConflictError",
+    "ConnectionError",
     "DomainError",
     "ExternalServiceError",
     "ForbiddenError",
     "InfrastructureError",
+    "InfrastructureTimeoutError",
     "InvariantViolationError",
     "NotFoundError",
     "RateLimitError",
+    "SerializationError",
     "TimeoutError",
     "UnauthorizedError",
     "ValidationError",

@@ -30,17 +30,27 @@ class BaseError(Exception):
         self.code = code or self.default_code
         self.detail: dict[str, Any] = detail or {}
         self.cause = cause
+        if cause is not None:
+            self.__cause__ = cause
 
-    def __repr__(self) -> str:  # pragma: no cover
+    def __str__(self) -> str:
+        """Return a JSON-serialisable single-line string representation."""
+        import json
+        return json.dumps(self.to_dict(), ensure_ascii=False, default=str)
+
+    def __repr__(self) -> str:
         return f"{type(self).__name__}(code={self.code!r}, message={self.message!r})"
 
     def to_dict(self) -> dict[str, Any]:
         """Serialise to a plain dict (safe for logging / HTTP responses)."""
-        return {
+        payload: dict[str, Any] = {
             "code": self.code,
             "message": self.message,
             "detail": self.detail,
         }
+        if self.cause is not None:
+            payload["cause"] = repr(self.cause)
+        return payload
 
 
 __all__ = ["BaseError"]

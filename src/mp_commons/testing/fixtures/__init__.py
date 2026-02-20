@@ -13,9 +13,6 @@ try:
     from mp_commons.testing.fixtures.correlation import correlation_fixture
     from mp_commons.testing.fixtures.tenant import tenant_fixture
 
-    def pytest_plugins() -> list[str]:
-        return ["mp_commons.testing.fixtures"]
-
 except ImportError:
     pass
 
@@ -27,6 +24,5 @@ __all__ = [
     "fake_message_bus",
     "fake_outbox_repo",
     "fake_policy_engine",
-    "pytest_plugins",
     "tenant_fixture",
 ]
