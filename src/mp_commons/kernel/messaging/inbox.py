@@ -46,8 +46,27 @@ class InboxRepository(abc.ABC):
     async def mark_failed(self, record_id: str, error: str) -> None: ...
 
 
+class InboxStore(abc.ABC):
+    """Simplified inbox port — idempotent record + duplicate check.
+
+    Lighter-weight alternative to ``InboxRepository`` for cases where
+    only deduplication matters (not full record lifecycle).
+    """
+
+    @abc.abstractmethod
+    async def record(self, message_id: str) -> None:
+        """Persist *message_id* as processed."""
+        ...
+
+    @abc.abstractmethod
+    async def has_been_processed(self, message_id: str) -> bool:
+        """Return ``True`` if *message_id* was already recorded."""
+        ...
+
+
 __all__ = [
     "InboxRecord",
     "InboxRepository",
     "InboxStatus",
+    "InboxStore",
 ]

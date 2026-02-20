@@ -65,6 +65,26 @@ class EventPublisher(abc.ABC):
     async def publish(self, topic: str, payload: Any, headers: MessageHeaders | None = None) -> None: ...
 
 
+@dataclasses.dataclass(frozen=True)
+class MessageEnvelope:
+    """Wraps a raw ``Message`` with routing and tracing metadata.
+
+    Intended as the wire-level envelope that travels through brokers,
+    carrying the original payload bytes together with all the headers
+    needed for routing, deduplication, and observability.
+    """
+
+    message_id: MessageId = dataclasses.field(default_factory=lambda: str(uuid4()))
+    topic: str = ""
+    payload: bytes = b""
+    headers: MessageHeaders = dataclasses.field(default_factory=MessageHeaders)
+    occurred_at: datetime = dataclasses.field(default_factory=lambda: datetime.now(UTC))
+    #: Stable identifier of the originating aggregate / source.
+    source: str = ""
+    #: Consumer group this envelope is targeted at (empty = broadcast).
+    consumer_group: str = ""
+
+
 class EventConsumer(abc.ABC):
     """Port: subscribe to domain events."""
 
@@ -85,6 +105,7 @@ __all__ = [
     "EventVersion",
     "Message",
     "MessageBus",
+    "MessageEnvelope",
     "MessageHeaders",
     "MessageId",
     "MessageSerializer",

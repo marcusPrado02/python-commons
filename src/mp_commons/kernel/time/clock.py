@@ -1,7 +1,7 @@
 """Kernel time – Clock protocol + implementations."""
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime, timedelta
 from typing import Protocol
 
 
@@ -9,6 +9,8 @@ class Clock(Protocol):
     """Port: abstract clock for deterministic testing."""
 
     def now(self) -> datetime: ...
+    def today(self) -> date: ...
+    def timestamp(self) -> float: ...
 
 
 class SystemClock:
@@ -16,6 +18,12 @@ class SystemClock:
 
     def now(self) -> datetime:
         return datetime.now(UTC)
+
+    def today(self) -> date:
+        return datetime.now(UTC).date()
+
+    def timestamp(self) -> float:
+        return datetime.now(UTC).timestamp()
 
 
 class FrozenClock:
@@ -27,9 +35,14 @@ class FrozenClock:
     def now(self) -> datetime:
         return self._fixed
 
+    def today(self) -> date:
+        return self._fixed.date()
+
+    def timestamp(self) -> float:
+        return self._fixed.timestamp()
+
     def advance(self, **kwargs: int | float) -> None:
         """Advance the frozen time by the given ``timedelta`` kwargs."""
-        from datetime import timedelta
         self._fixed += timedelta(**kwargs)
 
 

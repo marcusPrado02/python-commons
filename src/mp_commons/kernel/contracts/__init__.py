@@ -5,6 +5,7 @@ from mp_commons.kernel.contracts.contract import (
     Contract,
     ContractId,
     ContractRegistry,
+    ContractVersion,
     OpenAPILoader,
     SchemaVersion,
 )
@@ -15,6 +16,7 @@ __all__ = [
     "Contract",
     "ContractId",
     "ContractRegistry",
+    "ContractVersion",
     "OpenAPILoader",
     "SchemaVersion",
 ]

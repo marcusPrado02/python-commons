@@ -6,6 +6,7 @@ from mp_commons.kernel.messaging.message import (
     EventVersion,
     Message,
     MessageBus,
+    MessageEnvelope,
     MessageHeaders,
     MessageId,
     MessageSerializer,
@@ -20,6 +21,7 @@ from mp_commons.kernel.messaging.inbox import (
     InboxRecord,
     InboxRepository,
     InboxStatus,
+    InboxStore,
 )
 from mp_commons.kernel.messaging.idempotency import (
     DeduplicationPolicy,
@@ -27,8 +29,18 @@ from mp_commons.kernel.messaging.idempotency import (
     IdempotencyRecord,
     IdempotencyStore,
 )
+from mp_commons.kernel.messaging.dead_letter import (
+    DeadLetterEntry,
+    DeadLetterStore,
+)
+from mp_commons.kernel.messaging.scheduled import (
+    ScheduledMessage,
+    ScheduledMessageStore,
+)
 
 __all__ = [
+    "DeadLetterEntry",
+    "DeadLetterStore",
     "DeduplicationPolicy",
     "EventConsumer",
     "EventName",
@@ -40,8 +52,10 @@ __all__ = [
     "InboxRecord",
     "InboxRepository",
     "InboxStatus",
+    "InboxStore",
     "Message",
     "MessageBus",
+    "MessageEnvelope",
     "MessageHeaders",
     "MessageId",
     "MessageSerializer",
@@ -49,4 +63,6 @@ __all__ = [
     "OutboxRecord",
     "OutboxRepository",
     "OutboxStatus",
+    "ScheduledMessage",
+    "ScheduledMessageStore",
 ]

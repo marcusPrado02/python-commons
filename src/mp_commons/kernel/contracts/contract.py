@@ -11,6 +11,35 @@ type SchemaVersion = int
 type ContractId = str
 
 
+@dataclasses.dataclass(frozen=True, order=True)
+class ContractVersion:
+    """Semantic version for a contract schema.
+
+    Supports full ordering so that ``v1 < v2`` comparisons work naturally.
+
+    Example::
+
+        v = ContractVersion.from_str("2.1.0")
+        assert v.major == 2 and v.minor == 1 and v.patch == 0
+    """
+
+    major: int
+    minor: int
+    patch: int
+
+    def __str__(self) -> str:
+        return f"{self.major}.{self.minor}.{self.patch}"
+
+    @classmethod
+    def from_str(cls, value: str) -> "ContractVersion":
+        """Parse a ``"major.minor.patch"`` string."""
+        parts = value.strip().split(".")
+        if len(parts) != 3:  # noqa: PLR2004
+            raise ValueError(f"Invalid ContractVersion string: {value!r}")
+        major, minor, patch = (int(p) for p in parts)
+        return cls(major=major, minor=minor, patch=patch)
+
+
 @dataclasses.dataclass(frozen=True)
 class Contract:
     """Represents a versioned API schema contract."""
@@ -32,6 +61,9 @@ class ContractRegistry(abc.ABC):
     @abc.abstractmethod
     async def check_compatibility(self, existing: Contract, candidate: Contract) -> bool: ...
 
+    @abc.abstractmethod
+    async def list_versions(self, id: ContractId) -> list[ContractVersion]: ...
+
 
 class OpenAPILoader(abc.ABC):
     """Port: load an OpenAPI specification from a source."""
@@ -52,6 +84,7 @@ __all__ = [
     "Contract",
     "ContractId",
     "ContractRegistry",
+    "ContractVersion",
     "OpenAPILoader",
     "SchemaVersion",
 ]
