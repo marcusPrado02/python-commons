@@ -6,6 +6,7 @@ import abc
 from typing import Generic, TypeVar
 
 from mp_commons.kernel.ddd.aggregate import AggregateRoot
+from mp_commons.kernel.ddd.specification import Specification
 from mp_commons.kernel.types.ids import EntityId
 
 TAggregate = TypeVar("TAggregate", bound=AggregateRoot)
@@ -29,6 +30,14 @@ class Repository(abc.ABC, Generic[TAggregate]):
 
     @abc.abstractmethod
     async def delete(self, id: EntityId) -> None: ...
+
+    @abc.abstractmethod
+    async def find_all(self) -> list[TAggregate]: ...
+
+    @abc.abstractmethod
+    async def find_by(
+        self, spec: "Specification[TAggregate]"
+    ) -> list[TAggregate]: ...
 
 
 __all__ = ["Repository"]

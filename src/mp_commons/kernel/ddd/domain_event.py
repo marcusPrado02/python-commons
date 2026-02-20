@@ -8,7 +8,7 @@ from typing import Any
 from uuid import uuid4
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True, kw_only=True)
 class DomainEvent:
     """Base class for domain events.
 

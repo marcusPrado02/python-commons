@@ -2,87 +2,89 @@
 
 from __future__ import annotations
 
-from typing import Generic, Protocol, TypeVar
+import abc
+from typing import Generic, TypeVar
 
 T = TypeVar("T")
 
 
-class Specification(Protocol[T]):
-    """Boolean rule that determines if a candidate satisfies a criterion."""
+class BaseSpecification(abc.ABC, Generic[T]):
+    """Abstract base for specifications — provides operator overloads.
 
+    Subclass this (or ``Specification``) and implement ``is_satisfied_by``.
+
+    Example::
+
+        class ActiveUser(BaseSpecification[User]):
+            def is_satisfied_by(self, candidate: User) -> bool:
+                return candidate.is_active
+
+        spec = ActiveUser() & HasVerifiedEmail()
+    """
+
+    @abc.abstractmethod
     def is_satisfied_by(self, candidate: T) -> bool: ...
 
-    def and_(self, other: "Specification[T]") -> "AndSpecification[T]":
+    # Named combinators ------------------------------------------------
+    def and_(self, other: "BaseSpecification[T]") -> "AndSpecification[T]":
         return AndSpecification(self, other)
 
-    def or_(self, other: "Specification[T]") -> "OrSpecification[T]":
+    def or_(self, other: "BaseSpecification[T]") -> "OrSpecification[T]":
         return OrSpecification(self, other)
 
     def not_(self) -> "NotSpecification[T]":
         return NotSpecification(self)
 
+    # Operator overloads -----------------------------------------------
+    def __and__(self, other: "BaseSpecification[T]") -> "AndSpecification[T]":
+        return AndSpecification(self, other)
 
-class AndSpecification(Generic[T]):
+    def __or__(self, other: "BaseSpecification[T]") -> "OrSpecification[T]":
+        return OrSpecification(self, other)
+
+    def __invert__(self) -> "NotSpecification[T]":
+        return NotSpecification(self)
+
+
+# Keep the old Protocol name as an alias for backwards-compatibility
+Specification = BaseSpecification  # type: ignore[misc]
+
+
+class AndSpecification(BaseSpecification[T]):
     """Conjunction of two specifications."""
 
-    def __init__(self, left: Specification[T], right: Specification[T]) -> None:
+    def __init__(self, left: BaseSpecification[T], right: BaseSpecification[T]) -> None:
         self._left = left
         self._right = right
 
     def is_satisfied_by(self, candidate: T) -> bool:
         return self._left.is_satisfied_by(candidate) and self._right.is_satisfied_by(candidate)
 
-    def and_(self, other: Specification[T]) -> "AndSpecification[T]":
-        return AndSpecification(self, other)
 
-    def or_(self, other: Specification[T]) -> "OrSpecification[T]":
-        return OrSpecification(self, other)
-
-    def not_(self) -> "NotSpecification[T]":
-        return NotSpecification(self)
-
-
-class OrSpecification(Generic[T]):
+class OrSpecification(BaseSpecification[T]):
     """Disjunction of two specifications."""
 
-    def __init__(self, left: Specification[T], right: Specification[T]) -> None:
+    def __init__(self, left: BaseSpecification[T], right: BaseSpecification[T]) -> None:
         self._left = left
         self._right = right
 
     def is_satisfied_by(self, candidate: T) -> bool:
         return self._left.is_satisfied_by(candidate) or self._right.is_satisfied_by(candidate)
 
-    def and_(self, other: Specification[T]) -> AndSpecification[T]:
-        return AndSpecification(self, other)
 
-    def or_(self, other: Specification[T]) -> "OrSpecification[T]":
-        return OrSpecification(self, other)
-
-    def not_(self) -> "NotSpecification[T]":
-        return NotSpecification(self)
-
-
-class NotSpecification(Generic[T]):
+class NotSpecification(BaseSpecification[T]):
     """Negation of a specification."""
 
-    def __init__(self, spec: Specification[T]) -> None:
+    def __init__(self, spec: BaseSpecification[T]) -> None:
         self._spec = spec
 
     def is_satisfied_by(self, candidate: T) -> bool:
         return not self._spec.is_satisfied_by(candidate)
 
-    def and_(self, other: Specification[T]) -> AndSpecification[T]:
-        return AndSpecification(self, other)
-
-    def or_(self, other: Specification[T]) -> OrSpecification[T]:
-        return OrSpecification(self, other)
-
-    def not_(self) -> "NotSpecification[T]":
-        return NotSpecification(self)
-
 
 __all__ = [
     "AndSpecification",
+    "BaseSpecification",
     "NotSpecification",
     "OrSpecification",
     "Specification",

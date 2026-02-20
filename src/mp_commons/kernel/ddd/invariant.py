@@ -19,6 +19,12 @@ class Invariant:
             raise InvariantViolationError(message)
 
     @staticmethod
+    def ensure(condition: bool, message: str) -> None:
+        """Alias for :meth:`require`."""
+        if not condition:
+            raise InvariantViolationError(message)
+
+    @staticmethod
     def not_none(value: T | None, name: str = "value") -> T:
         """Assert *value* is not None, returning it typed."""
         if value is None:

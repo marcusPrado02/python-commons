@@ -23,11 +23,15 @@ class AggregateRoot(Entity):
         self._events.append(event)
         self._version += 1
 
-    def collect_events(self) -> list[DomainEvent]:
-        """Return and clear pending domain events."""
+    def pull_events(self) -> list[DomainEvent]:
+        """Return and clear pending domain events (canonical name)."""
         events = list(self._events)
         self._events.clear()
         return events
+
+    def collect_events(self) -> list[DomainEvent]:
+        """Alias for :meth:`pull_events` for backwards compatibility."""
+        return self.pull_events()
 
     @property
     def version(self) -> int:
