@@ -1,6 +1,8 @@
-"""Unit tests for CircuitBreaker state transitions."""
+"""Unit tests for CircuitBreaker state transitions — §16."""
 
 from __future__ import annotations
+
+import asyncio
 
 import pytest
 
@@ -44,63 +46,116 @@ async def succeed() -> str:
 
 
 class TestCircuitBreakerTransitions:
-    @pytest.mark.asyncio
-    async def test_starts_closed(self) -> None:
+    def test_starts_closed(self) -> None:
         cb = make_breaker()
         assert cb.state == CircuitBreakerState.CLOSED
 
-    @pytest.mark.asyncio
-    async def test_opens_after_threshold(self) -> None:
-        cb = make_breaker(failure_threshold=3)
-        for _ in range(3):
-            with pytest.raises(RuntimeError):
-                await cb.call(fail)
-        assert cb.state == CircuitBreakerState.OPEN
+    def test_opens_after_threshold(self) -> None:
+        async def run() -> None:
+            cb = make_breaker(failure_threshold=3)
+            for _ in range(3):
+                with pytest.raises(RuntimeError):
+                    await cb.call(fail)
+            assert cb.state == CircuitBreakerState.OPEN
 
-    @pytest.mark.asyncio
-    async def test_open_rejects_calls(self) -> None:
-        cb = make_breaker(failure_threshold=2)
-        for _ in range(2):
-            with pytest.raises(RuntimeError):
-                await cb.call(fail)
+        asyncio.run(run())
 
-        # should reject without calling the function
-        with pytest.raises((ApplicationError, Exception)):
+    def test_open_rejects_calls(self) -> None:
+        async def run() -> None:
+            # Use a long timeout so the circuit stays OPEN (won't probe immediately)
+            cb = make_breaker(failure_threshold=2, timeout_seconds=1000.0)
+            for _ in range(2):
+                with pytest.raises(RuntimeError):
+                    await cb.call(fail)
+            # should reject without calling the function
+            with pytest.raises((ApplicationError, Exception)):
+                await cb.call(succeed)
+
+        asyncio.run(run())
+
+    def test_half_open_after_timeout(self) -> None:
+        async def run() -> None:
+            cb = make_breaker(failure_threshold=2, timeout_seconds=0)
+            for _ in range(2):
+                with pytest.raises(RuntimeError):
+                    await cb.call(fail)
+            # state is OPEN; with timeout=0 the next call would trigger HALF_OPEN
+            assert cb.state in (CircuitBreakerState.OPEN, CircuitBreakerState.HALF_OPEN)
+
+        asyncio.run(run())
+
+    def test_transitions_to_half_open_on_next_call(self) -> None:
+        async def run() -> None:
+            cb = make_breaker(failure_threshold=2, timeout_seconds=0)
+            for _ in range(2):
+                with pytest.raises(RuntimeError):
+                    await cb.call(fail)
+            # trigger transition: call succeed → should probe (HALF_OPEN) then succeed
+            result = await cb.call(succeed)
+            assert result == "ok"
+            # state should be HALF_OPEN or CLOSED after one success (threshold=2)
+            assert cb.state in (CircuitBreakerState.HALF_OPEN, CircuitBreakerState.CLOSED)
+
+        asyncio.run(run())
+
+    def test_closes_after_success_threshold_in_half_open(self) -> None:
+        async def run() -> None:
+            cb = make_breaker(failure_threshold=2, success_threshold=2, timeout_seconds=0)
+            # Trip the breaker
+            for _ in range(2):
+                with pytest.raises(RuntimeError):
+                    await cb.call(fail)
+            # Force HALF_OPEN by manipulating internal state for testability
+            cb._state = CircuitBreakerState.HALF_OPEN  # type: ignore[attr-defined]
+            cb._success_count = 0  # type: ignore[attr-defined]
             await cb.call(succeed)
+            await cb.call(succeed)
+            assert cb.state == CircuitBreakerState.CLOSED
 
-    @pytest.mark.asyncio
-    async def test_half_open_after_timeout(self) -> None:
-        cb = make_breaker(failure_threshold=2, timeout_seconds=0)
-        for _ in range(2):
+        asyncio.run(run())
+
+    def test_success_resets_failure_count_in_closed(self) -> None:
+        async def run() -> None:
+            cb = make_breaker(failure_threshold=3)
             with pytest.raises(RuntimeError):
                 await cb.call(fail)
-
-        # With timeout=0 the circuit should probe next call (HALF_OPEN)
-        assert cb.state in (CircuitBreakerState.OPEN, CircuitBreakerState.HALF_OPEN)
-
-    @pytest.mark.asyncio
-    async def test_closes_after_success_threshold_in_half_open(self) -> None:
-        cb = make_breaker(failure_threshold=2, success_threshold=2, timeout_seconds=0)
-        # Trip the breaker
-        for _ in range(2):
+            # One success should reset failure counter
+            await cb.call(succeed)
             with pytest.raises(RuntimeError):
                 await cb.call(fail)
+            assert cb.state == CircuitBreakerState.CLOSED  # still closed; threshold=3
 
-        # Force HALF_OPEN by manipulating internal state for testability
-        cb._state = CircuitBreakerState.HALF_OPEN  # type: ignore[attr-defined]
-        cb._half_open_successes = 0  # type: ignore[attr-defined]
+        asyncio.run(run())
 
-        await cb.call(succeed)
-        await cb.call(succeed)
-        assert cb.state == CircuitBreakerState.CLOSED
+    def test_excluded_exception_does_not_trip_breaker(self) -> None:
+        async def run() -> None:
+            policy = CircuitBreakerPolicy(
+                failure_threshold=2,
+                excluded_exceptions=(ValueError,),
+            )
+            cb = CircuitBreaker(name="test", policy=policy)
 
-    @pytest.mark.asyncio
-    async def test_success_resets_failure_count_in_closed(self) -> None:
-        cb = make_breaker(failure_threshold=3)
-        with pytest.raises(RuntimeError):
-            await cb.call(fail)
-        # One success should reset failure counter
-        await cb.call(succeed)
-        with pytest.raises(RuntimeError):
-            await cb.call(fail)
-        assert cb.state == CircuitBreakerState.CLOSED  # still closed; threshold=3
+            async def excluded_fail() -> None:
+                raise ValueError("excluded")
+
+            for _ in range(5):
+                with pytest.raises(ValueError):
+                    await cb.call(excluded_fail)
+            # breaker should still be closed because ValueError is excluded
+            assert cb.state == CircuitBreakerState.CLOSED
+
+        asyncio.run(run())
+
+
+# ---------------------------------------------------------------------------
+# Public surface smoke test
+# ---------------------------------------------------------------------------
+
+
+class TestPublicReExports:
+    def test_all_symbols_importable(self) -> None:
+        import importlib
+
+        mod = importlib.import_module("mp_commons.resilience.circuit_breaker")
+        for name in mod.__all__:
+            assert hasattr(mod, name), f"{name!r} missing"
