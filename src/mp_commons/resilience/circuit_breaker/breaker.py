@@ -6,7 +6,7 @@ import logging
 import time
 from typing import Awaitable, Callable, TypeVar
 
-from mp_commons.kernel.errors import ExternalServiceError
+from mp_commons.resilience.circuit_breaker.errors import CircuitOpenError
 from mp_commons.resilience.circuit_breaker.state import CircuitBreakerState
 from mp_commons.resilience.circuit_breaker.policy import CircuitBreakerPolicy
 
@@ -34,7 +34,7 @@ class CircuitBreaker:
         async with self._lock:
             self._maybe_transition_half_open()
             if self._state == CircuitBreakerState.OPEN:
-                raise ExternalServiceError(self.name, f"Circuit breaker '{self.name}' is OPEN")
+                raise CircuitOpenError(self.name)
 
         try:
             result = await func()
