@@ -13,8 +13,10 @@ from mp_commons.application.pipeline.middlewares import (
     UnitOfWorkMiddleware,
     ValidationMiddleware,
 )
+from mp_commons.application.pipeline.audit_middleware import AuditMiddleware
 
 __all__ = [
+    "AuditMiddleware",
     "AuthzMiddleware",
     "CorrelationMiddleware",
     "Handler",
