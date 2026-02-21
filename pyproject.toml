@@ -71,6 +71,7 @@ dev = [
   "respx>=0.21",
   "time-machine>=2.14",
   "testcontainers>=4.8",
+  "pytest-benchmark>=5.0",
 ]
 
 [project.urls]
