@@ -197,3 +197,94 @@ class TestPublicReExports:
         mod = importlib.import_module("mp_commons.application.cqrs")
         for name in mod.__all__:
             assert hasattr(mod, name), f"{name!r} missing"
+
+
+# ---------------------------------------------------------------------------
+# MiddlewareAwareCommandBus (§9.6)
+# ---------------------------------------------------------------------------
+
+
+class TestMiddlewareAwareCommandBus:
+    def test_dispatches_command_to_handler(self) -> None:
+        from mp_commons.application.cqrs import MiddlewareAwareCommandBus
+        from mp_commons.application.pipeline import Pipeline
+
+        handler = CreateOrderHandler()
+        bus = MiddlewareAwareCommandBus(Pipeline())
+        bus.register(CreateOrder, handler)
+
+        asyncio.run(bus.dispatch(CreateOrder("banana")))
+        assert handler.handled == ["banana"]
+
+    def test_middleware_is_invoked(self) -> None:
+        from mp_commons.application.cqrs import MiddlewareAwareCommandBus
+        from mp_commons.application.pipeline import Middleware, Pipeline
+
+        touched: list[str] = []
+
+        class _TouchMiddleware(Middleware):
+            async def __call__(self, request: object, next_: object) -> object:  # type: ignore[override]
+                touched.append("before")
+                result = await next_(request)  # type: ignore[operator]
+                touched.append("after")
+                return result
+
+        handler = CreateOrderHandler()
+        bus = MiddlewareAwareCommandBus(Pipeline().add(_TouchMiddleware()))
+        bus.register(CreateOrder, handler)
+
+        asyncio.run(bus.dispatch(CreateOrder("cherry")))
+        assert touched == ["before", "after"]
+        assert handler.handled == ["cherry"]
+
+    def test_unregistered_command_raises_key_error(self) -> None:
+        from mp_commons.application.cqrs import MiddlewareAwareCommandBus
+        from mp_commons.application.pipeline import Pipeline
+
+        bus = MiddlewareAwareCommandBus(Pipeline())
+        with pytest.raises(KeyError, match="CreateOrder"):
+            asyncio.run(bus.dispatch(CreateOrder("x")))
+
+    def test_returns_handler_result(self) -> None:
+        from mp_commons.application.cqrs import MiddlewareAwareCommandBus, QueryHandler
+        from mp_commons.application.pipeline import Pipeline
+
+        class EchoHandler(CommandHandler[CreateOrder]):
+            async def handle(self, command: CreateOrder) -> str:
+                return f"echo:{command.item}"
+
+        bus = MiddlewareAwareCommandBus(Pipeline())
+        bus.register(CreateOrder, EchoHandler())
+
+        result = asyncio.run(bus.dispatch(CreateOrder("echo-me")))
+        assert result == "echo:echo-me"
+
+    def test_multiple_commands_independently_dispatched(self) -> None:
+        from mp_commons.application.cqrs import Command, MiddlewareAwareCommandBus
+        from mp_commons.application.pipeline import Pipeline
+
+        class CancelOrder(Command):
+            def __init__(self, order_id: str) -> None:
+                self.order_id = order_id
+
+        class CancelOrderHandler(CommandHandler[CancelOrder]):
+            def __init__(self) -> None:
+                self.cancelled: list[str] = []
+
+            async def handle(self, command: CancelOrder) -> None:
+                self.cancelled.append(command.order_id)
+
+        create_handler = CreateOrderHandler()
+        cancel_handler = CancelOrderHandler()
+
+        bus = MiddlewareAwareCommandBus(Pipeline())
+        bus.register(CreateOrder, create_handler)
+        bus.register(CancelOrder, cancel_handler)
+
+        async def _run() -> None:
+            await bus.dispatch(CreateOrder("grape"))
+            await bus.dispatch(CancelOrder("order-99"))
+
+        asyncio.run(_run())
+        assert create_handler.handled == ["grape"]
+        assert cancel_handler.cancelled == ["order-99"]
