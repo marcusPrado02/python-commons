@@ -14,6 +14,27 @@ def _require_httpx() -> Any:
         raise ImportError("Install 'mp-commons[httpx]' to use the HTTPX adapter") from exc
 
 
+def _correlation_headers() -> dict[str, str]:
+    """Extract correlation fields from the current :class:`CorrelationContext`."""
+    try:
+        from mp_commons.observability.correlation import CorrelationContext
+        ctx = CorrelationContext.get()
+        if ctx is None:
+            return {}
+        headers: dict[str, str] = {}
+        if ctx.correlation_id:
+            headers["X-Correlation-ID"] = ctx.correlation_id
+        if ctx.tenant_id:
+            headers["X-Tenant-ID"] = ctx.tenant_id
+        if ctx.user_id:
+            headers["X-User-ID"] = ctx.user_id
+        if ctx.trace_id:
+            headers["X-Trace-ID"] = ctx.trace_id
+        return headers
+    except Exception:  # noqa: BLE001 – never break the request over missing correlation
+        return {}
+
+
 class HttpxHttpClient:
     """Thin async httpx wrapper with structured error mapping."""
 
@@ -45,6 +66,11 @@ class HttpxHttpClient:
 
     async def _request(self, method: str, url: str, **kwargs: Any) -> Any:
         httpx = _require_httpx()
+        # Inject correlation headers; explicit headers in kwargs take precedence.
+        corr = _correlation_headers()
+        if corr:
+            existing = kwargs.get("headers") or {}
+            kwargs["headers"] = {**corr, **existing}
         try:
             response = await self._client.request(method, url, **kwargs)
             response.raise_for_status()

@@ -1,4 +1,8 @@
 """Config validation errors."""
-from mp_commons.config.validation.errors import ConfigError, MissingRequiredSettingError
+from mp_commons.config.validation.errors import (
+    ConfigError,
+    InvalidSettingValueError,
+    MissingRequiredSettingError,
+)
 
-__all__ = ["ConfigError", "MissingRequiredSettingError"]
+__all__ = ["ConfigError", "InvalidSettingValueError", "MissingRequiredSettingError"]

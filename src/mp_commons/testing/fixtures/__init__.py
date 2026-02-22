@@ -9,6 +9,7 @@ try:
         fake_message_bus,
         fake_outbox_repo,
     )
+    from mp_commons.testing.fixtures.principal import fake_principal, security_context
     from mp_commons.testing.fixtures.security import fake_policy_engine
     from mp_commons.testing.fixtures.correlation import correlation_fixture
     from mp_commons.testing.fixtures.tenant import tenant_fixture
@@ -24,5 +25,7 @@ __all__ = [
     "fake_message_bus",
     "fake_outbox_repo",
     "fake_policy_engine",
+    "fake_principal",
+    "security_context",
     "tenant_fixture",
 ]

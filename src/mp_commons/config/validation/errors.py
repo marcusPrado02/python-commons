@@ -16,4 +16,17 @@ class MissingRequiredSettingError(ConfigError):
         self.setting_name = setting_name
 
 
-__all__ = ["ConfigError", "MissingRequiredSettingError"]
+class InvalidSettingValueError(ConfigError):
+    """A setting's value is present but semantically invalid."""
+    default_code = "invalid_setting_value"
+
+    def __init__(self, setting_name: str, value: object, reason: str) -> None:
+        super().__init__(
+            f"Setting '{setting_name}' has invalid value {value!r}: {reason}"
+        )
+        self.setting_name = setting_name
+        self.value = value
+        self.reason = reason
+
+
+__all__ = ["ConfigError", "InvalidSettingValueError", "MissingRequiredSettingError"]
