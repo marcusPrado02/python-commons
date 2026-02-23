@@ -5,6 +5,7 @@ import json
 from typing import Any
 
 from mp_commons.kernel.messaging import Message, MessageBus
+from mp_commons.resilience.retry.policy import RetryPolicy
 
 
 def _require_aio_pika() -> Any:
@@ -18,15 +19,25 @@ def _require_aio_pika() -> Any:
 class RabbitMQMessageBus(MessageBus):
     """RabbitMQ publisher implementing ``MessageBus`` via aio-pika."""
 
-    def __init__(self, url: str = "amqp://guest:guest@localhost/") -> None:
+    def __init__(
+        self,
+        url: str = "amqp://guest:guest@localhost/",
+        retry_policy: RetryPolicy | None = None,
+    ) -> None:
         _require_aio_pika()
         self._url = url
+        self._retry = retry_policy
         self._connection: Any = None
         self._channel: Any = None
 
     async def connect(self) -> None:
         aio_pika = _require_aio_pika()
-        self._connection = await aio_pika.connect_robust(self._url)
+        if self._retry is not None:
+            self._connection = await self._retry.execute_async(
+                lambda: aio_pika.connect_robust(self._url)
+            )
+        else:
+            self._connection = await aio_pika.connect_robust(self._url)
         self._channel = await self._connection.channel()
 
     async def close(self) -> None:

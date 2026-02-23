@@ -1,9 +1,13 @@
-"""HashiCorp Vault adapter – VaultSecretStore."""
+"""HashiCorp Vault adapter – VaultSecretStore and VaultTokenRenewer."""
 from __future__ import annotations
 
+import asyncio
+import logging
 from typing import Any
 
 from mp_commons.config.secrets import SecretRef, SecretStore
+
+logger = logging.getLogger(__name__)
 
 
 def _require_hvac() -> Any:
@@ -42,4 +46,63 @@ class VaultSecretStore(SecretStore):
         return response["data"]["data"]
 
 
-__all__ = ["VaultSecretStore"]
+class VaultTokenRenewer:
+    """Background asyncio task that renews the Vault token before it expires.
+
+    Usage::
+
+        async with VaultTokenRenewer(vault_client) as renewer:
+            ...  # token renewed automatically in background
+    """
+
+    def __init__(
+        self,
+        client: Any,
+        *,
+        renew_before_seconds: int = 300,
+        check_interval: float = 60.0,
+    ) -> None:
+        self._client = client
+        self._renew_before = renew_before_seconds
+        self._interval = check_interval
+        self._task: asyncio.Task[None] | None = None
+        self._running = False
+
+    async def start(self) -> None:
+        """Start the background renewal loop."""
+        self._running = True
+        self._task = asyncio.create_task(self._renew_loop())
+
+    async def stop(self) -> None:
+        """Stop the background renewal loop."""
+        self._running = False
+        if self._task is not None:
+            self._task.cancel()
+            try:
+                await self._task
+            except asyncio.CancelledError:
+                pass
+
+    async def __aenter__(self) -> "VaultTokenRenewer":
+        await self.start()
+        return self
+
+    async def __aexit__(self, *_: Any) -> None:
+        await self.stop()
+
+    async def _renew_loop(self) -> None:
+        while self._running:
+            try:
+                info = self._client.auth.token.lookup_self()
+                ttl: int = info["data"]["ttl"]
+                if ttl <= self._renew_before:
+                    self._client.auth.token.renew_self()
+                    logger.debug("vault.token_renewed remaining_ttl=%d", ttl)
+                else:
+                    logger.debug("vault.token_ok remaining_ttl=%d", ttl)
+            except Exception as exc:
+                logger.warning("vault.token_renew_failed exc=%r", exc)
+            await asyncio.sleep(self._interval)
+
+
+__all__ = ["VaultSecretStore", "VaultTokenRenewer"]
