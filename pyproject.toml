@@ -128,3 +128,20 @@ exclude_dirs = ["tests", "docs"]
 skips = ["B101"]   # assert — used intentionally in invariants & tests
 confidence = "MEDIUM"
 severity = "MEDIUM"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "ANN", "S", "RUF"]
+ignore = [
+  "ANN101",  # missing type annotation for self
+  "ANN102",  # missing type annotation for cls
+  "S101",    # use of assert is intentional (tests & invariants)
+]
+
+[tool.ruff.lint.isort]
+kwargs-last = true
+force-sort-within-sections = true
+known-first-party = ["mp_commons"]

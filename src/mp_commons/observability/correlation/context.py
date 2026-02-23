@@ -53,5 +53,40 @@ class CorrelationContext:
     def clear() -> None:
         _CTX_VAR.set(None)
 
+    @staticmethod
+    def set_from_headers(headers: dict[str, str]) -> "RequestContext":
+        """Extract correlation context from HTTP headers and store it.
+
+        Priority order for correlation ID:
+        ``X-Correlation-ID`` → ``X-Request-ID`` → generated UUID.
+
+        W3C ``traceparent`` header (format ``ver-trace_id-parent_id-flags``) is
+        parsed to populate :attr:`RequestContext.trace_id`.
+
+        All header names are matched case-insensitively.
+        """
+        norm: dict[str, str] = {k.lower(): v for k, v in headers.items()}
+
+        correlation_id = (
+            norm.get("x-correlation-id")
+            or norm.get("x-request-id")
+            or str(uuid4())
+        )
+
+        # W3C traceparent: 00-{trace-id}-{parent-id}-{flags}
+        trace_id: str | None = None
+        traceparent = norm.get("traceparent")
+        if traceparent:
+            parts = traceparent.split("-")
+            if len(parts) >= 2 and parts[1]:
+                trace_id = parts[1]
+
+        ctx = RequestContext(
+            correlation_id=correlation_id,
+            trace_id=trace_id,
+        )
+        _CTX_VAR.set(ctx)
+        return ctx
+
 
 __all__ = ["CorrelationContext", "RequestContext"]
