@@ -14,6 +14,8 @@ from mp_commons.testing.fakes import (
     InMemoryOutboxRepository,
 )
 from mp_commons.testing.generators import (
+    Builder,
+    DataclassBuilder,
     correlation_id_gen,
     domain_event_gen,
     email_gen,
@@ -23,6 +25,8 @@ from mp_commons.testing.generators import (
 )
 
 __all__ = [
+    "Builder",
+    "DataclassBuilder",
     "FakeClock",
     "FakePolicyEngine",
     "InMemoryIdempotencyStore",
