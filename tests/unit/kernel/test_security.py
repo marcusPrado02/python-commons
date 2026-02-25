@@ -259,3 +259,219 @@ class TestPublicReExports:
         mod = importlib.import_module("mp_commons.kernel.security")
         for name in mod.__all__:
             assert hasattr(mod, name), f"{name!r} missing"
+
+
+# ===========================================================================
+# §62 — Authorization / RBAC
+# ===========================================================================
+
+
+class TestRBACRole:
+    def test_exact_permission_match(self) -> None:
+        from mp_commons.kernel.security import Permission, RBACRole
+
+        role = RBACRole("editor", frozenset({Permission("articles:write")}))
+        assert role.has_permission(Permission("articles:write"))
+
+    def test_wildcard_resource_action(self) -> None:
+        from mp_commons.kernel.security import Permission, RBACRole
+
+        role = RBACRole("admin", frozenset({Permission("orders:*")}))
+        assert role.has_permission("orders:read")
+        assert role.has_permission("orders:write")
+        assert role.has_permission("orders:delete")
+        assert not role.has_permission("users:read")
+
+    def test_global_wildcard(self) -> None:
+        from mp_commons.kernel.security import Permission, RBACRole
+
+        role = RBACRole("superadmin", frozenset({Permission("*")}))
+        assert role.has_permission("anything:goes")
+        assert role.has_permission("totally:random")
+
+    def test_no_permission_match(self) -> None:
+        from mp_commons.kernel.security import Permission, RBACRole
+
+        role = RBACRole("viewer", frozenset({Permission("articles:read")}))
+        assert not role.has_permission("articles:write")
+        assert not role.has_permission("orders:read")
+
+    def test_empty_permissions(self) -> None:
+        from mp_commons.kernel.security import RBACRole
+
+        role = RBACRole("guest")
+        assert not role.has_permission("anything:read")
+
+    def test_permission_by_string(self) -> None:
+        from mp_commons.kernel.security import Permission, RBACRole
+
+        role = RBACRole("dev", frozenset({Permission("repos:push")}))
+        assert role.has_permission("repos:push")
+        assert not role.has_permission("repos:admin")
+
+
+class TestInMemoryRoleStore:
+    def setup_method(self) -> None:
+        from mp_commons.kernel.security import InMemoryRoleStore
+
+        self.store = InMemoryRoleStore()
+
+    def test_add_and_get_roles(self) -> None:
+        from mp_commons.kernel.security import RBACRole
+
+        role = RBACRole("editor")
+        self.store.add_role("u1", role)
+        assert role in self.store.get_roles("u1")
+
+    def test_remove_role(self) -> None:
+        from mp_commons.kernel.security import RBACRole
+
+        role = RBACRole("editor")
+        self.store.add_role("u1", role)
+        self.store.remove_role("u1", role)
+        assert role not in self.store.get_roles("u1")
+
+    def test_get_roles_empty(self) -> None:
+        assert self.store.get_roles("unknown") == []
+
+    def test_has_permission_via_role(self) -> None:
+        from mp_commons.kernel.security import Permission, RBACRole
+
+        role = RBACRole("editor", frozenset({Permission("posts:write")}))
+        self.store.add_role("u1", role)
+        assert self.store.has_permission("u1", Permission("posts:write"))
+        assert not self.store.has_permission("u1", Permission("posts:delete"))
+
+    def test_clear_removes_all(self) -> None:
+        from mp_commons.kernel.security import RBACRole
+
+        self.store.add_role("u1", RBACRole("r"))
+        self.store.clear()
+        assert self.store.get_roles("u1") == []
+
+
+class TestRBACPolicy:
+    def test_direct_permission_allows(self) -> None:
+        from mp_commons.kernel.security import Permission, Principal, RBACPolicy
+
+        principal = Principal(
+            subject="alice",
+            permissions=frozenset({Permission("orders:cancel")}),
+        )
+        policy = RBACPolicy(Permission("orders:cancel"))
+        assert policy.evaluate(principal).allowed
+
+    def test_missing_permission_denies(self) -> None:
+        from mp_commons.kernel.security import Permission, Principal, RBACPolicy
+
+        principal = Principal(subject="bob")
+        policy = RBACPolicy(Permission("orders:cancel"))
+        result = policy.evaluate(principal)
+        assert not result.allowed
+        assert result.reason is not None
+        assert "orders:cancel" in result.reason
+
+    def test_wildcard_direct_permission_allows(self) -> None:
+        from mp_commons.kernel.security import Permission, Principal, RBACPolicy
+
+        principal = Principal(
+            subject="admin",
+            permissions=frozenset({Permission("orders:*")}),
+        )
+        policy = RBACPolicy("orders:cancel")
+        assert policy.evaluate(principal).allowed
+
+    def test_allows_via_role_store(self) -> None:
+        from mp_commons.kernel.security import (
+            InMemoryRoleStore,
+            Permission,
+            Principal,
+            RBACPolicy,
+            RBACRole,
+        )
+
+        store = InMemoryRoleStore()
+        store.add_role("charlie", RBACRole("manager", frozenset({Permission("reports:export")})))
+        principal = Principal(subject="charlie")
+
+        policy = RBACPolicy("reports:export", role_store=store)
+        assert policy.evaluate(principal).allowed
+
+    def test_result_bool(self) -> None:
+        from mp_commons.kernel.security import Permission, Principal, RBACPolicy
+
+        p = Principal(subject="x", permissions=frozenset({Permission("a:b")}))
+        result = RBACPolicy("a:b").evaluate(p)
+        assert bool(result) is True
+
+
+class TestRequirePermissionDecorator:
+    def setup_method(self) -> None:
+        from mp_commons.kernel.security import SecurityContext
+
+        SecurityContext.clear()
+
+    def test_async_allowed(self) -> None:
+        import asyncio
+
+        from mp_commons.kernel.security import Permission, Principal, SecurityContext, require_permission
+
+        @require_permission("orders:read")
+        async def handler() -> str:
+            return "ok"
+
+        principal = Principal(subject="u", permissions=frozenset({Permission("orders:read")}))
+        SecurityContext.set_current(principal)
+        result = asyncio.run(handler())
+        assert result == "ok"
+
+    def test_async_raises_forbidden(self) -> None:
+        import asyncio
+
+        from mp_commons.kernel.errors import ForbiddenError
+        from mp_commons.kernel.security import Principal, SecurityContext, require_permission
+
+        @require_permission("orders:cancel")
+        async def handler() -> str:
+            return "ok"
+
+        principal = Principal(subject="u")
+        SecurityContext.set_current(principal)
+        with pytest.raises(ForbiddenError):
+            asyncio.run(handler())
+
+    def test_raises_unauthorized_when_no_principal(self) -> None:
+        import asyncio
+
+        from mp_commons.kernel.errors import UnauthorizedError
+        from mp_commons.kernel.security import require_permission
+
+        @require_permission("any:perm")
+        async def handler() -> str:
+            return "ok"
+
+        with pytest.raises(UnauthorizedError):
+            asyncio.run(handler())
+
+    def test_sync_allowed(self) -> None:
+        from mp_commons.kernel.security import Permission, Principal, SecurityContext, require_permission
+
+        @require_permission("data:read")
+        def sync_handler() -> str:
+            return "synced"
+
+        principal = Principal(subject="u", permissions=frozenset({Permission("data:read")}))
+        SecurityContext.set_current(principal)
+        assert sync_handler() == "synced"
+
+    def test_sync_raises_forbidden(self) -> None:
+        from mp_commons.kernel.errors import ForbiddenError
+        from mp_commons.kernel.security import Principal, SecurityContext, require_permission
+
+        @require_permission("data:delete")
+        def sync_handler() -> str:
+            return "deleted"
+
+        SecurityContext.set_current(Principal(subject="u"))
+        with pytest.raises(ForbiddenError):
+            sync_handler()

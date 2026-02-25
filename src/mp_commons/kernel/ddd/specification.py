@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import abc
-from typing import Generic, TypeVar
+from typing import Callable, Generic, TypeVar
 
 T = TypeVar("T")
 
@@ -82,9 +82,35 @@ class NotSpecification(BaseSpecification[T]):
         return not self._spec.is_satisfied_by(candidate)
 
 
+class LambdaSpecification(BaseSpecification[T]):
+    """Wraps a plain callable as a ``Specification``.
+
+    Example::
+
+        adults_only = LambdaSpecification(lambda u: u.age >= 18, name="adults_only")
+        assert adults_only.is_satisfied_by(user)
+    """
+
+    def __init__(
+        self,
+        predicate: Callable[[T], bool],
+        *,
+        name: str = "",
+    ) -> None:
+        self._predicate = predicate
+        self.name: str = name or getattr(predicate, "__name__", "<lambda>")
+
+    def is_satisfied_by(self, candidate: T) -> bool:
+        return self._predicate(candidate)
+
+    def __repr__(self) -> str:  # pragma: no cover
+        return f"LambdaSpecification({self.name!r})"
+
+
 __all__ = [
     "AndSpecification",
     "BaseSpecification",
+    "LambdaSpecification",
     "NotSpecification",
     "OrSpecification",
     "Specification",
