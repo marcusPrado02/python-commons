@@ -19,7 +19,10 @@ from mp_commons.testing.generators import (
     correlation_id_gen,
     domain_event_gen,
     email_gen,
+    email_strategy,
+    entity_id_strategy,
     money_gen,
+    money_strategy,
     slug_gen,
     ulid_gen,
 )
@@ -36,7 +39,10 @@ __all__ = [
     "correlation_id_gen",
     "domain_event_gen",
     "email_gen",
+    "email_strategy",
+    "entity_id_strategy",
     "money_gen",
+    "money_strategy",
     "slug_gen",
     "ulid_gen",
 ]
