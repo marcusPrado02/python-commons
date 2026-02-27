@@ -72,6 +72,7 @@ dev = [
   "time-machine>=2.14",
   "testcontainers>=4.8",
   "pytest-benchmark>=5.0",
+  "mutmut>=2.4",
 ]
 
 [project.urls]
@@ -145,3 +146,9 @@ ignore = [
 kwargs-last = true
 force-sort-within-sections = true
 known-first-party = ["mp_commons"]
+
+[tool.mutmut]
+paths_to_mutate = "src/mp_commons"
+backup = false
+runner = "python -m pytest -x -q"
+tests_dir = "tests/unit/"

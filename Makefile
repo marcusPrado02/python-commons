@@ -81,6 +81,10 @@ docs: ## List all ADRs
 # Housekeeping
 # ---------------------------------------------------------------------------
 
+mutation-test: ## Run mutation testing with mutmut (use-coverage mode)
+	$(UV) run mutmut run --use-coverage || true
+	$(UV) run mutmut results
+
 clean: ## Remove build artefacts, caches, and coverage data
 	rm -rf dist/ build/ .eggs/ *.egg-info
 	rm -rf htmlcov/ .coverage .coverage.* coverage.xml
