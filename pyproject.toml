@@ -73,6 +73,8 @@ dev = [
   "testcontainers>=4.8",
   "pytest-benchmark>=5.0",
   "mutmut>=2.4",
+  "mkdocs-material>=9.5",
+  "mkdocstrings[python]>=0.24",
 ]
 
 [project.urls]
