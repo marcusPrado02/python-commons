@@ -901,3 +901,62 @@ class TestTenantAware:
 
         with pytest.raises(ValidationError):
             MyObj()
+
+
+# ===========================================================================
+# §59.4 – QuotaPolicy
+# ===========================================================================
+
+
+class TestQuotaPolicy:
+    """§59.4 – QuotaPolicy delegates to RateLimitResult."""
+
+    def _make_result(self, allowed: bool, remaining: int = 0, retry_after: float = 0.0):
+        from datetime import UTC, datetime, timedelta
+        from mp_commons.application.rate_limit.rate_limiter import (
+            Quota, RateLimitDecision, RateLimitResult
+        )
+        quota = Quota(key="test", limit=10, window_seconds=60)
+        decision = RateLimitDecision.ALLOWED if allowed else RateLimitDecision.DENIED
+        reset_at = datetime.now(UTC) + timedelta(seconds=retry_after)
+        return RateLimitResult(decision=decision, remaining=remaining, reset_at=reset_at, quota=quota)
+
+    def test_allows_when_quota_not_exceeded(self) -> None:
+        from mp_commons.kernel.ddd.policies import QuotaPolicy
+
+        result = self._make_result(allowed=True, remaining=5)
+        policy = QuotaPolicy()
+        outcome = policy.evaluate(result)
+        assert outcome.allowed is True
+        assert "5" in (outcome.reason or "")
+
+    def test_denies_when_quota_exceeded(self) -> None:
+        from mp_commons.kernel.ddd.policies import QuotaPolicy
+
+        result = self._make_result(allowed=False, remaining=0, retry_after=30.0)
+        policy = QuotaPolicy()
+        outcome = policy.evaluate(result)
+        assert outcome.allowed is False
+        assert outcome.reason is not None
+        assert "exceeded" in outcome.reason.lower()
+
+    def test_denial_includes_quota_key(self) -> None:
+        from mp_commons.kernel.ddd.policies import QuotaPolicy
+
+        result = self._make_result(allowed=False, remaining=0, retry_after=5.0)
+        policy = QuotaPolicy()
+        outcome = policy.evaluate(result)
+        assert "test" in (outcome.reason or "")
+
+    def test_policy_composes_with_allaof(self) -> None:
+        from mp_commons.kernel.ddd.policies import QuotaPolicy, AllOf, PolicyResult
+        from mp_commons.kernel.ddd.policies import Policy
+
+        class AlwaysAllow(Policy):
+            def evaluate(self, ctx) -> PolicyResult:
+                return PolicyResult.permit()
+
+        result = self._make_result(allowed=True, remaining=3)
+        composed = AllOf(AlwaysAllow(), QuotaPolicy())
+        outcome = composed.evaluate(result)
+        assert outcome.allowed is True

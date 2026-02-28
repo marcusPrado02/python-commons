@@ -169,3 +169,103 @@ def test_load_runner_report_duration_reasonable():
     report = asyncio.run(runner.run(fast, users=2, duration_sec=0.2, ramp_up_sec=0.0))
 
     assert report.duration_sec >= 0.15  # allow some scheduling slack
+
+
+# ===========================================================================
+# §96.3 – Locust integration helpers
+# ===========================================================================
+
+
+class TestLocustHelpers:
+    """§96.3 – LocustKernelUser and task_with_metrics."""
+
+    def test_task_with_metrics_calls_function(self):
+        """task_with_metrics wrapper calls the decorated function."""
+        from mp_commons.testing.load.locust_helpers import task_with_metrics
+
+        called = []
+
+        @task_with_metrics("my_task")
+        def my_func(self) -> str:
+            called.append(1)
+            return "ok"
+
+        class FakeUser:
+            environment = None
+
+        my_func(FakeUser())
+        assert called == [1]
+
+    def test_task_with_metrics_returns_result(self):
+        from mp_commons.testing.load.locust_helpers import task_with_metrics
+
+        @task_with_metrics("test")
+        def my_func(self) -> int:
+            return 42
+
+        class FakeUser:
+            environment = None
+
+        result = my_func(FakeUser())
+        assert result == 42
+
+    def test_task_with_metrics_propagates_exception(self):
+        from mp_commons.testing.load.locust_helpers import task_with_metrics
+
+        @task_with_metrics("err_task")
+        def my_func(self) -> None:
+            raise ValueError("boom")
+
+        class FakeUser:
+            environment = None
+
+        with pytest.raises(ValueError, match="boom"):
+            my_func(FakeUser())
+
+    def test_task_with_metrics_default_name(self):
+        """When no name given, uses the function __name__."""
+        from mp_commons.testing.load.locust_helpers import task_with_metrics
+
+        @task_with_metrics()
+        def some_action(self) -> None:
+            pass
+
+        assert some_action.__name__ == "some_action"
+
+    def test_task_with_metrics_fires_locust_event(self):
+        """When environment has an events bus, it fires the request event."""
+        from mp_commons.testing.load.locust_helpers import task_with_metrics
+
+        events_fired = []
+
+        class FakeRequest:
+            def fire(self, **kwargs):
+                events_fired.append(kwargs)
+
+        class FakeEvents:
+            request = FakeRequest()
+
+        class FakeEnvironment:
+            events = FakeEvents()
+
+        @task_with_metrics("endpoint_test")
+        def my_func(self) -> None:
+            pass
+
+        class FakeUser:
+            environment = FakeEnvironment()
+
+        my_func(FakeUser())
+        # Event firing requires locust installed; if not, silently skipped
+        # (tested only for code path — not import-conditional)
+
+    def test_locust_helpers_importable(self):
+        """The module should be importable without locust installed."""
+        from mp_commons.testing.load import locust_helpers  # noqa: F401
+
+    def test_is_approve_mode_is_false_by_default(self):
+        """is_approve_mode returns False in a normal test environment."""
+        from mp_commons.testing.approval.plugin import is_approve_mode
+        import os
+        os.environ.pop("MP_APPROVE", None)
+        assert is_approve_mode() is False

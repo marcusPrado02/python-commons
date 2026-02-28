@@ -104,12 +104,31 @@ class FastAPICorrelationIdMiddleware:
 # ---------------------------------------------------------------------------
 
 class FastAPITenantMiddleware:
-    """Extract ``X-Tenant-ID`` header and set :class:`TenantContext`."""
+    """Extract ``X-Tenant-ID`` header and set :class:`TenantContext`.
 
-    def __init__(self, app: "ASGIApp", header_name: str = "X-Tenant-ID") -> None:
+    Parameters
+    ----------
+    app:
+        The inner ASGI application.
+    header_name:
+        Name of the HTTP header that carries the tenant identifier.
+        Defaults to ``X-Tenant-ID``.
+    require_tenant:
+        When ``True`` requests that do not include the header receive a
+        ``400 Bad Request`` response and the inner app is **not** called.
+        Defaults to ``False`` for backwards-compatibility.
+    """
+
+    def __init__(
+        self,
+        app: "ASGIApp",
+        header_name: str = "X-Tenant-ID",
+        require_tenant: bool = False,
+    ) -> None:
         _require_fastapi()
         self.app = app
         self._header = header_name.lower().encode()
+        self._require_tenant = require_tenant
 
     async def __call__(self, scope: "Scope", receive: "Receive", send: "Send") -> None:
         if scope["type"] == "http":
@@ -120,6 +139,21 @@ class FastAPITenantMiddleware:
             tenant_raw = headers.get(self._header, b"").decode().strip()
             if tenant_raw:
                 TenantContext.set(TenantId(tenant_raw))
+            elif self._require_tenant:
+                # Return 400 without calling the inner app
+                body = b'{"detail":"X-Tenant-ID header is required"}'
+                await send(
+                    {
+                        "type": "http.response.start",
+                        "status": 400,
+                        "headers": [
+                            (b"content-type", b"application/json"),
+                            (b"content-length", str(len(body)).encode()),
+                        ],
+                    }
+                )
+                await send({"type": "http.response.body", "body": body})
+                return
 
         await self.app(scope, receive, send)
 

@@ -173,6 +173,51 @@ class ExpiryPolicy(Policy[_TimestampedContext]):
         return PolicyResult.permit()
 
 
+# ---------------------------------------------------------------------------
+# §59.4 – QuotaPolicy
+# ---------------------------------------------------------------------------
+
+
+class QuotaPolicy(Policy["_RateLimitResult"]):
+    """Evaluates whether a :class:`~mp_commons.application.rate_limit.RateLimitResult`
+    reports remaining capacity.
+
+    Delegates the decision to the ``RateLimitResult`` already obtained from a
+    :class:`~mp_commons.application.rate_limit.RateLimiter`.  The async
+    ``RateLimiter.check()`` call must be performed by the calling layer; the
+    result is then handed to ``evaluate`` as the *context*.
+
+    Example::
+
+        result = await rate_limiter.check(quota, user_id)
+        policy_result = QuotaPolicy().evaluate(result)
+        if not policy_result:
+            raise QuotaExceededError(policy_result.reason)
+    """
+
+    def evaluate(self, context: "_RateLimitResult") -> PolicyResult:  # type: ignore[override]
+        if context.allowed:
+            return PolicyResult.permit(
+                f"quota has {context.remaining} request(s) remaining "
+                f"(window: {context.quota.window_label})"
+            )
+        retry = context.retry_after_seconds
+        return PolicyResult.deny(
+            f"quota exceeded for '{context.quota.key}'; "
+            f"retry after {retry:.0f}s (limit: {context.quota.window_label})"
+        )
+
+
+# ---------------------------------------------------------------------------
+# Local type alias (avoid circular import — RateLimitResult imported lazily)
+# ---------------------------------------------------------------------------
+
+try:
+    from mp_commons.application.rate_limit.rate_limiter import RateLimitResult as _RateLimitResult  # noqa: F401
+except ImportError:  # pragma: no cover  — library not installed in minimal envs
+    _RateLimitResult = object  # type: ignore[assignment,misc]
+
+
 __all__ = [
     "AllOf",
     "AnyOf",
@@ -180,4 +225,5 @@ __all__ = [
     "NoneOf",
     "Policy",
     "PolicyResult",
+    "QuotaPolicy",
 ]

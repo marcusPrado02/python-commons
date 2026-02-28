@@ -1,0 +1,47 @@
+name: Deploy Docs
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  # Allow manual trigger for re-deployments
+  workflow_dispatch:
+
+permissions:
+  contents: write   # needed for mkdocs gh-deploy (pushes to gh-pages branch)
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    name: Build & Deploy MkDocs
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Full history required for mkdocs git-revision-date plugin (if used)
+          fetch-depth: 0
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v2
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install docs dependencies
+        run: uv pip install -e ".[docs,dev]"
+
+      - name: Build docs (strict)
+        run: uv run mkdocs build --strict
+        # Fails fast on warnings — keeps docs quality high
+
+      - name: Configure Git for gh-deploy
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Deploy to GitHub Pages
+        run: uv run mkdocs gh-deploy --force
+        # Pushes the built site/ directory to the gh-pages branch

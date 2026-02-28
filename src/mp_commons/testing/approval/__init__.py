@@ -7,10 +7,12 @@ from mp_commons.testing.approval.asserter import (
     HtmlApprovalAsserter,
     JsonApprovalAsserter,
 )
+from mp_commons.testing.approval.plugin import is_approve_mode
 
 __all__ = [
     "ApprovalAsserter",
     "ApprovalError",
     "HtmlApprovalAsserter",
     "JsonApprovalAsserter",
+    "is_approve_mode",
 ]

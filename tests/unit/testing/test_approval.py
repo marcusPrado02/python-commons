@@ -165,3 +165,79 @@ def test_html_asserter_detects_structural_mismatch(tmp_path):
     a2 = HtmlApprovalAsserter(directory=str(tmp_path), approve=False)
     with pytest.raises(ApprovalError):
         a2.approve(html2, "test_html_mismatch")
+
+
+# §97.4 – --approve plugin flag
+# ---------------------------------------------------------------------------
+
+
+def test_is_approve_mode_default_false():
+    """is_approve_mode() returns False when MP_APPROVE not set."""
+    import os
+    # Ensure env var is not set
+    os.environ.pop("MP_APPROVE", None)
+    from mp_commons.testing.approval.plugin import is_approve_mode, _APPROVE_MODE
+    # Module-level flag should be False in normal test run
+    assert not is_approve_mode()
+
+
+def test_asserter_uses_mp_approve_env(tmp_path):
+    """ApprovalAsserter defaults approve=True when MP_APPROVE=1."""
+    import os
+    os.environ["MP_APPROVE"] = "1"
+    try:
+        asserter = ApprovalAsserter(directory=str(tmp_path))
+        assert asserter._approve is True
+    finally:
+        os.environ.pop("MP_APPROVE", None)
+
+
+def test_asserter_approve_false_when_env_unset(tmp_path):
+    """ApprovalAsserter defaults approve=False when MP_APPROVE not set."""
+    import os
+    os.environ.pop("MP_APPROVE", None)
+    asserter = ApprovalAsserter(directory=str(tmp_path))
+    assert asserter._approve is False
+
+
+def test_asserter_explicit_approve_overrides_env(tmp_path):
+    """Explicitly passing approve=False overrides MP_APPROVE env var."""
+    import os
+    os.environ["MP_APPROVE"] = "1"
+    try:
+        asserter = ApprovalAsserter(directory=str(tmp_path), approve=False)
+        assert asserter._approve is False
+    finally:
+        os.environ.pop("MP_APPROVE", None)
+
+
+def test_approve_plugin_session_finish_promotes_files(tmp_path):
+    """pytest_sessionfinish bulk-promotes .received.txt to .approved.txt."""
+    import mp_commons.testing.approval.plugin as plugin
+
+    # Set approve mode
+    orig = plugin._APPROVE_MODE
+    plugin._APPROVE_MODE = True
+    approvals_dir = tmp_path / "tests" / "__approvals__"
+    approvals_dir.mkdir(parents=True)
+
+    # Create some received files
+    (approvals_dir / "test_a.received.txt").write_text("A")
+    (approvals_dir / "test_b.received.txt").write_text("B")
+
+    # Patch Path("tests/__approvals__") to point to tmp_path / "tests" / "__approvals__"
+    import importlib, os
+    orig_cwd = os.getcwd()
+    os.chdir(tmp_path)
+    try:
+        plugin.pytest_sessionfinish(session=None, exitstatus=0)
+    finally:
+        os.chdir(orig_cwd)
+        plugin._APPROVE_MODE = orig
+
+    approved_a = approvals_dir / "test_a.approved.txt"
+    approved_b = approvals_dir / "test_b.approved.txt"
+    assert approved_a.exists()
+    assert approved_b.exists()
+    assert approved_a.read_text() == "A"
+    assert approved_b.read_text() == "B"

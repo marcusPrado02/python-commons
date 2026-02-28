@@ -499,3 +499,75 @@ class TestErrorResponses:
         from mp_commons.adapters.fastapi.deps import error_responses
         result = error_responses(418)
         assert "418" in result
+
+
+# ===========================================================================
+# §61.4 – FastAPITenantMiddleware require_tenant
+# ===========================================================================
+
+
+class TestFastAPITenantMiddlewareRequireTenant:
+    """§61.4 – TenantMiddleware raises 400 when require_tenant=True and header absent."""
+
+    def test_require_tenant_returns_400_when_header_missing(self) -> None:
+        from mp_commons.adapters.fastapi import FastAPITenantMiddleware
+
+        app = FastAPI()
+        app.add_middleware(FastAPITenantMiddleware, require_tenant=True)
+
+        @app.get("/t")
+        async def endpoint() -> dict[str, str]:
+            return {"ok": "1"}
+
+        client = TestClient(app, raise_server_exceptions=False)
+        resp = client.get("/t")
+        assert resp.status_code == 400
+
+    def test_require_tenant_passes_through_when_header_present(self) -> None:
+        from mp_commons.adapters.fastapi import FastAPITenantMiddleware
+        from mp_commons.kernel.ddd.tenant import TenantContext
+
+        app = FastAPI()
+        app.add_middleware(FastAPITenantMiddleware, require_tenant=True)
+        captured: list[Any] = []
+
+        @app.get("/t")
+        async def endpoint() -> dict[str, str]:
+            captured.append(TenantContext.get())
+            return {"ok": "1"}
+
+        client = TestClient(app)
+        resp = client.get("/t", headers={"X-Tenant-ID": "acme"})
+        assert resp.status_code == 200
+        assert captured and str(captured[0]) == "acme"
+
+    def test_require_tenant_false_allows_missing_header(self) -> None:
+        """require_tenant=False (default) does not block missing header."""
+        from mp_commons.adapters.fastapi import FastAPITenantMiddleware
+
+        app = FastAPI()
+        app.add_middleware(FastAPITenantMiddleware, require_tenant=False)
+
+        @app.get("/t")
+        async def endpoint() -> dict[str, str]:
+            return {"ok": "1"}
+
+        client = TestClient(app)
+        resp = client.get("/t")
+        assert resp.status_code == 200
+
+    def test_require_tenant_400_response_body_is_json(self) -> None:
+        from mp_commons.adapters.fastapi import FastAPITenantMiddleware
+
+        app = FastAPI()
+        app.add_middleware(FastAPITenantMiddleware, require_tenant=True)
+
+        @app.get("/t")
+        async def endpoint() -> dict[str, str]:
+            return {"ok": "1"}
+
+        client = TestClient(app, raise_server_exceptions=False)
+        resp = client.get("/t")
+        assert resp.status_code == 400
+        data = resp.json()
+        assert "detail" in data

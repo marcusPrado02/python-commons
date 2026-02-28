@@ -7,15 +7,27 @@ from mp_commons.adapters.sqlalchemy.idempotency import SqlAlchemyIdempotencyStor
 from mp_commons.adapters.sqlalchemy.audit import SQLAlchemyAuditStore
 from mp_commons.adapters.sqlalchemy.event_store import SQLAlchemyEventStore
 from mp_commons.adapters.sqlalchemy.mixins import SoftDeleteMixin, TimestampMixin
+from mp_commons.adapters.sqlalchemy.specification import (
+    SQLAlchemyAndSpecification,
+    SQLAlchemyNotSpecification,
+    SQLAlchemyOrSpecification,
+    SQLAlchemySpecification,
+)
+from mp_commons.adapters.sqlalchemy.tenant_filter import TenantFilter
 
 __all__ = [
     "SQLAlchemyAuditStore",
+    "SQLAlchemyAndSpecification",
     "SQLAlchemyEventStore",
+    "SQLAlchemyNotSpecification",
+    "SQLAlchemyOrSpecification",
+    "SQLAlchemySpecification",
     "SqlAlchemyIdempotencyStore",
     "SqlAlchemyOutboxRepository",
     "SqlAlchemyRepositoryBase",
     "SqlAlchemySessionFactory",
     "SqlAlchemyUnitOfWork",
     "SoftDeleteMixin",
+    "TenantFilter",
     "TimestampMixin",
 ]

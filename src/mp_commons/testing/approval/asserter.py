@@ -4,6 +4,7 @@ from __future__ import annotations
 import difflib
 import html as _html_module
 import json
+import os
 import re
 from html.parser import HTMLParser
 from pathlib import Path
@@ -33,9 +34,13 @@ class ApprovalAsserter:
     def __init__(
         self,
         directory: str | Path = "tests/__approvals__",
-        approve: bool = False,
+        approve: bool | None = None,
     ) -> None:
         self._dir = Path(directory)
+        # If approve not explicitly set, check the MP_APPROVE environment variable
+        # (set by the --approve pytest flag via mp_commons.testing.approval.plugin)
+        if approve is None:
+            approve = os.environ.get("MP_APPROVE", "").lower() in ("1", "true", "yes")
         self._approve = approve
 
     def _received_path(self, name: str) -> Path:

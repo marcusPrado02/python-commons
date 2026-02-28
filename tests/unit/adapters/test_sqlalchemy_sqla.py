@@ -620,3 +620,159 @@ class TestSoftDeleteMixin:
             await engine.dispose()
 
         asyncio.run(run())
+
+
+# ===========================================================================
+# §58.4 – SQLAlchemySpecification
+# ===========================================================================
+
+
+class TestSQLAlchemySpecification:
+    """§58.4 – SQLAlchemySpecification produces ColumnElements and composes."""
+
+    def _make_spec_and_model(self):
+        from sqlalchemy import Boolean
+        from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+        from mp_commons.adapters.sqlalchemy.specification import SQLAlchemySpecification
+
+        class Spec58Base(DeclarativeBase):
+            pass
+
+        class ProductModel(Spec58Base):
+            __tablename__ = "products_test"
+            id: Mapped[int] = mapped_column(Integer, primary_key=True)
+            active: Mapped[bool] = mapped_column(Boolean, default=True)
+            price: Mapped[int] = mapped_column(Integer, default=0)
+
+        class ActiveSpec(SQLAlchemySpecification):
+            def is_satisfied_by(self, candidate) -> bool:
+                return candidate.active
+
+            def to_expression(self):
+                from sqlalchemy import true
+                return ProductModel.active.is_(true())
+
+        class PricedSpec(SQLAlchemySpecification):
+            def __init__(self, threshold: int) -> None:
+                self._threshold = threshold
+
+            def is_satisfied_by(self, candidate) -> bool:
+                return candidate.price >= self._threshold
+
+            def to_expression(self):
+                return ProductModel.price >= self._threshold
+
+        return ProductModel, ActiveSpec, PricedSpec
+
+    def test_to_expression_returns_column_element(self):
+        from sqlalchemy.sql.elements import ClauseElement
+        _, ActiveSpec, _ = self._make_spec_and_model()
+        expr = ActiveSpec().to_expression()
+        assert isinstance(expr, ClauseElement)
+
+    def test_and_spec_produces_and_expression(self):
+        from sqlalchemy.sql.elements import ClauseElement
+        _, ActiveSpec, PricedSpec = self._make_spec_and_model()
+        spec = ActiveSpec() & PricedSpec(100)
+        expr = spec.to_expression()
+        assert isinstance(expr, ClauseElement)
+        assert "AND" in str(expr).upper()
+
+    def test_or_spec_produces_or_expression(self):
+        from sqlalchemy.sql.elements import ClauseElement
+        _, ActiveSpec, PricedSpec = self._make_spec_and_model()
+        spec = ActiveSpec() | PricedSpec(100)
+        expr = spec.to_expression()
+        assert isinstance(expr, ClauseElement)
+        assert "OR" in str(expr).upper()
+
+    def test_not_spec_produces_not_expression(self):
+        from sqlalchemy.sql.elements import ClauseElement
+        _, ActiveSpec, _ = self._make_spec_and_model()
+        spec = ~ActiveSpec()
+        expr = spec.to_expression()
+        assert isinstance(expr, ClauseElement)
+        assert "NOT" in str(expr).upper()
+
+    def test_in_memory_is_satisfied_by_still_works(self):
+        _, ActiveSpec, PricedSpec = self._make_spec_and_model()
+
+        class FakeProduct:
+            def __init__(self, active: bool, price: int) -> None:
+                self.active = active
+                self.price = price
+
+        spec = ActiveSpec() & PricedSpec(50)
+        assert spec.is_satisfied_by(FakeProduct(True, 100)) is True
+        assert spec.is_satisfied_by(FakeProduct(False, 100)) is False
+
+    def test_chained_and_spec(self):
+        from sqlalchemy.sql.elements import ClauseElement
+        _, ActiveSpec, PricedSpec = self._make_spec_and_model()
+        spec = ActiveSpec() & PricedSpec(10) & PricedSpec(50)
+        expr = spec.to_expression()
+        assert isinstance(expr, ClauseElement)
+
+    def test_non_sql_spec_raises_type_error_on_and(self):
+        from mp_commons.kernel.ddd.specification import BaseSpecification
+        from mp_commons.adapters.sqlalchemy.specification import (
+            SQLAlchemySpecification, SQLAlchemyAndSpecification, _get_expression
+        )
+
+        class NonSqlSpec(BaseSpecification):
+            def is_satisfied_by(self, candidate) -> bool:
+                return True
+
+        class SqlSpec(SQLAlchemySpecification):
+            def is_satisfied_by(self, candidate) -> bool:
+                return True
+            def to_expression(self):
+                from sqlalchemy import true
+                return true()
+
+        with pytest.raises(TypeError, match="to_expression"):
+            composite = SQLAlchemyAndSpecification(SqlSpec(), NonSqlSpec())
+            composite.to_expression()
+
+
+# ===========================================================================
+# §61.5 – TenantFilter SQLAlchemy event
+# ===========================================================================
+
+
+class TestTenantFilter:
+    """§61.5 – TenantFilter install/uninstall lifecycle."""
+
+    def test_is_not_installed_by_default(self):
+        from mp_commons.adapters.sqlalchemy.tenant_filter import TenantFilter
+        TenantFilter.uninstall()  # ensure clean state
+        assert TenantFilter.is_installed() is False
+
+    def test_install_sets_installed_flag(self):
+        from mp_commons.adapters.sqlalchemy.tenant_filter import TenantFilter
+        try:
+            TenantFilter.install()
+            assert TenantFilter.is_installed() is True
+        finally:
+            TenantFilter.uninstall()
+
+    def test_install_is_idempotent(self):
+        from mp_commons.adapters.sqlalchemy.tenant_filter import TenantFilter
+        try:
+            TenantFilter.install()
+            TenantFilter.install()  # second call is no-op
+            assert TenantFilter.is_installed() is True
+        finally:
+            TenantFilter.uninstall()
+
+    def test_uninstall_removes_flag(self):
+        from mp_commons.adapters.sqlalchemy.tenant_filter import TenantFilter
+        TenantFilter.install()
+        TenantFilter.uninstall()
+        assert TenantFilter.is_installed() is False
+
+    def test_uninstall_is_safe_when_not_installed(self):
+        from mp_commons.adapters.sqlalchemy.tenant_filter import TenantFilter
+        TenantFilter.uninstall()
+        TenantFilter.uninstall()  # safe no-op
+        assert TenantFilter.is_installed() is False
