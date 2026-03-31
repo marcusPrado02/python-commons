@@ -1,4 +1,6 @@
-"""Resilience – retry, circuit breaker, bulkhead, timeouts, hedge, fallback, deadline, throttle."""
+"""Resilience – retry, circuit breaker, bulkhead, timeouts, hedge, fallback, deadline, throttle,
+backpressure, and graceful shutdown.
+"""
 
 from mp_commons.resilience.circuit_breaker import (
     CircuitBreaker,
@@ -12,9 +14,13 @@ from mp_commons.resilience.hedge import HedgePolicy, HedgeResult
 from mp_commons.resilience.fallback import CachedFallbackPolicy, FallbackPolicy
 from mp_commons.resilience.deadline import DeadlineContext, DeadlineExceededError, deadline_aware
 from mp_commons.resilience.throttle import ThrottlePolicy, ThrottledError, TokenBucket
+from mp_commons.resilience.backpressure import BackpressureError, BackpressurePolicy
+from mp_commons.resilience.graceful_shutdown import GracefulShutdown
 
 __all__ = [
     "BackoffStrategy",
+    "BackpressureError",
+    "BackpressurePolicy",
     "Bulkhead",
     "CachedFallbackPolicy",
     "CircuitBreaker",
@@ -25,6 +31,7 @@ __all__ = [
     "DeadlineContext",
     "DeadlineExceededError",
     "FallbackPolicy",
+    "GracefulShutdown",
     "HedgePolicy",
     "HedgeResult",
     "JitterStrategy",
