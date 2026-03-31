@@ -3,9 +3,11 @@ from mp_commons.adapters.fastapi.deps import FastAPIPaginationDep, error_respons
 from mp_commons.adapters.fastapi.exception_mapper import FastAPIExceptionMapper
 from mp_commons.adapters.fastapi.middleware import (
     FastAPICorrelationIdMiddleware,
+    FastAPIIncomingWebhookMiddleware,
     FastAPIMetricsMiddleware,
     FastAPIRateLimitMiddleware,
     FastAPIRequestContextMiddleware,
+    FastAPISecurityHeadersMiddleware,
     FastAPISecurityMiddleware,
     FastAPITenantMiddleware,
 )
@@ -15,11 +17,13 @@ __all__ = [
     "FastAPICorrelationIdMiddleware",
     "FastAPIExceptionMapper",
     "FastAPIHealthRouter",
+    "FastAPIIncomingWebhookMiddleware",
     "FastAPIMetricsMiddleware",
     "FastAPIMetricsRouter",
     "FastAPIPaginationDep",
     "FastAPIRateLimitMiddleware",
     "FastAPIRequestContextMiddleware",
+    "FastAPISecurityHeadersMiddleware",
     "FastAPISecurityMiddleware",
     "FastAPITenantMiddleware",
     "error_responses",

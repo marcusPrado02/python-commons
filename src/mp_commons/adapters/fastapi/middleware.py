@@ -373,11 +373,208 @@ class FastAPIRequestContextMiddleware:
         await self.app(scope, receive, send)
 
 
+# ---------------------------------------------------------------------------
+# S-02 – Incoming webhook signature verification middleware
+# ---------------------------------------------------------------------------
+
+
+class FastAPIIncomingWebhookMiddleware:
+    """Verify the ``X-Hub-Signature-256`` HMAC-SHA256 signature on incoming
+    webhook requests.
+
+    Any request whose path starts with *path_prefix* must carry a valid
+    ``X-Hub-Signature-256: sha256=<hex>`` header.  Requests with a missing or
+    invalid signature receive ``401 Unauthorized`` and the inner application
+    is **not** called.
+
+    Signature computation follows the GitHub webhook convention::
+
+        signature = "sha256=" + HMAC-SHA256(secret, request_body).hexdigest()
+
+    Parameters
+    ----------
+    app:
+        The inner ASGI application.
+    secret:
+        Shared secret used to verify the HMAC signature.  Accepts both
+        ``str`` (UTF-8 encoded) and ``bytes``.
+    path_prefix:
+        Only requests whose path starts with this prefix are verified.
+        Defaults to ``"/webhooks"``.
+    header_name:
+        Name of the signature header.  Defaults to ``"x-hub-signature-256"``.
+
+    Usage::
+
+        app.add_middleware(
+            FastAPIIncomingWebhookMiddleware,
+            secret="my-webhook-secret",
+            path_prefix="/webhooks",
+        )
+    """
+
+    _HEADER = b"x-hub-signature-256"
+
+    def __init__(
+        self,
+        app: "ASGIApp",
+        secret: str | bytes,
+        path_prefix: str = "/webhooks",
+        header_name: str = "x-hub-signature-256",
+    ) -> None:
+        _require_fastapi()
+        self.app = app
+        self._secret: bytes = secret.encode() if isinstance(secret, str) else secret
+        self._path_prefix = path_prefix.encode()
+        self._header = header_name.lower().encode()
+
+    async def __call__(self, scope: "Scope", receive: "Receive", send: "Send") -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        path: bytes = scope.get("path", "").encode() if isinstance(scope.get("path"), str) else scope.get("raw_path", b"")
+        if not path.startswith(self._path_prefix):
+            await self.app(scope, receive, send)
+            return
+
+        # Buffer the full request body
+        body = bytearray()
+        more_body = True
+        while more_body:
+            message = await receive()
+            body.extend(message.get("body", b""))
+            more_body = message.get("more_body", False)
+
+        headers = dict(scope.get("headers", []))
+        sig_header = headers.get(self._header, b"").decode().strip()
+
+        if not self._verify(bytes(body), sig_header):
+            error_body = b'{"detail":"Invalid or missing webhook signature"}'
+            await send({
+                "type": "http.response.start",
+                "status": 401,
+                "headers": [
+                    (b"content-type", b"application/json"),
+                    (b"content-length", str(len(error_body)).encode()),
+                ],
+            })
+            await send({"type": "http.response.body", "body": error_body})
+            return
+
+        # Replay the buffered body so the inner app can read it
+        body_bytes = bytes(body)
+        body_consumed = False
+
+        async def replay_receive() -> Any:
+            nonlocal body_consumed
+            if not body_consumed:
+                body_consumed = True
+                return {"type": "http.request", "body": body_bytes, "more_body": False}
+            return await receive()
+
+        await self.app(scope, replay_receive, send)
+
+    def _verify(self, body: bytes, signature: str) -> bool:
+        import hashlib
+        import hmac
+
+        if not signature.startswith("sha256="):
+            return False
+        expected = "sha256=" + hmac.new(self._secret, body, hashlib.sha256).hexdigest()
+        return hmac.compare_digest(expected, signature)
+
+
+# ---------------------------------------------------------------------------
+# S-04 – Security headers middleware
+# ---------------------------------------------------------------------------
+
+_DEFAULT_CSP = (
+    "default-src 'self'; "
+    "script-src 'self'; "
+    "style-src 'self'; "
+    "img-src 'self' data:; "
+    "font-src 'self'; "
+    "object-src 'none'; "
+    "frame-ancestors 'none'"
+)
+
+
+class FastAPISecurityHeadersMiddleware:
+    """Add security-related HTTP response headers to every response.
+
+    Default headers added:
+
+    * ``Content-Security-Policy``
+    * ``Strict-Transport-Security``
+    * ``X-Frame-Options: DENY``
+    * ``X-Content-Type-Options: nosniff``
+    * ``Referrer-Policy: strict-origin-when-cross-origin``
+    * ``Permissions-Policy``
+
+    All headers can be overridden or disabled by passing ``None`` as the value.
+
+    Usage::
+
+        app.add_middleware(FastAPISecurityHeadersMiddleware)
+
+        # Or with custom CSP:
+        app.add_middleware(
+            FastAPISecurityHeadersMiddleware,
+            content_security_policy="default-src 'self'; script-src 'nonce-{nonce}'",
+        )
+    """
+
+    def __init__(
+        self,
+        app: "ASGIApp",
+        *,
+        content_security_policy: str | None = _DEFAULT_CSP,
+        strict_transport_security: str | None = "max-age=63072000; includeSubDomains; preload",
+        x_frame_options: str | None = "DENY",
+        x_content_type_options: str | None = "nosniff",
+        referrer_policy: str | None = "strict-origin-when-cross-origin",
+        permissions_policy: str | None = "geolocation=(), microphone=(), camera=()",
+    ) -> None:
+        _require_fastapi()
+        self.app = app
+        self._headers: list[tuple[bytes, bytes]] = []
+        _pairs = [
+            (b"content-security-policy", content_security_policy),
+            (b"strict-transport-security", strict_transport_security),
+            (b"x-frame-options", x_frame_options),
+            (b"x-content-type-options", x_content_type_options),
+            (b"referrer-policy", referrer_policy),
+            (b"permissions-policy", permissions_policy),
+        ]
+        for name, value in _pairs:
+            if value is not None:
+                self._headers.append((name, value.encode()))
+
+    async def __call__(self, scope: "Scope", receive: "Receive", send: "Send") -> None:
+        if scope["type"] not in ("http", "websocket"):
+            await self.app(scope, receive, send)
+            return
+
+        extra = self._headers
+
+        async def send_with_headers(message: Any) -> None:
+            if message["type"] == "http.response.start":
+                headers_list: list[tuple[bytes, bytes]] = list(message.get("headers", []))
+                headers_list.extend(extra)
+                message = {**message, "headers": headers_list}
+            await send(message)
+
+        await self.app(scope, receive, send_with_headers)
+
+
 __all__ = [
     "FastAPICorrelationIdMiddleware",
+    "FastAPIIncomingWebhookMiddleware",
     "FastAPIMetricsMiddleware",
     "FastAPIRateLimitMiddleware",
     "FastAPIRequestContextMiddleware",
+    "FastAPISecurityHeadersMiddleware",
     "FastAPISecurityMiddleware",
     "FastAPITenantMiddleware",
 ]
