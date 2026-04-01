@@ -6,6 +6,7 @@ from mp_commons.resilience.circuit_breaker import (
     CircuitBreaker,
     CircuitBreakerPolicy,
     CircuitBreakerState,
+    RedisCircuitBreaker,
 )
 from mp_commons.resilience.retry import BackoffStrategy, JitterStrategy, RetryExecutor, RetryPolicy
 from mp_commons.resilience.timeouts import Deadline, TimeoutPolicy
@@ -45,4 +46,5 @@ __all__ = [
     "TokenBucket",
     "deadline_aware",
     "DeadLetterReplayScheduler",
+    "RedisCircuitBreaker",
 ]
