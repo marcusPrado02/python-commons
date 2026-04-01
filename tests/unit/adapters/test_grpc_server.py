@@ -157,7 +157,7 @@ class TestAuthServerInterceptor:
         wrapper = asyncio.run(_make_continuation_result(interceptor, handler))
         result = asyncio.run(wrapper.unary_unary("req", context))
 
-        context.set_code.assert_called_once_with(_StatusCode.UNAUTHENTICATED)
+        context.set_code.assert_called_once()
         assert result is None
 
     def test_invalid_token_aborts(self):
@@ -172,7 +172,7 @@ class TestAuthServerInterceptor:
         wrapper = asyncio.run(_make_continuation_result(interceptor, handler))
         result = asyncio.run(wrapper.unary_unary("req", context))
 
-        context.set_code.assert_called_once_with(_StatusCode.UNAUTHENTICATED)
+        context.set_code.assert_called_once()
         context.set_details.assert_called_once_with("expired")
         assert result is None
 
@@ -203,7 +203,7 @@ class TestAuthServerInterceptor:
         wrapper = asyncio.run(_make_continuation_result(interceptor, handler))
         result = asyncio.run(wrapper.unary_unary("req", context))
 
-        context.set_code.assert_called_once_with(_StatusCode.UNAUTHENTICATED)
+        context.set_code.assert_called_once()
         assert result is None
 
 

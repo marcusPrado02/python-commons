@@ -134,7 +134,7 @@ class TestSQLAlchemyInstrumentation:
         import mp_commons.adapters.opentelemetry.sqlalchemy_instrumentation as _mod
 
         with patch.object(_mod, "_get_tracer", return_value=tracer):
-            _before_cursor_execute(conn, None, "SELECT 1", None, None, False)
+            _mod._before_cursor_execute(conn, None, "SELECT 1", None, None, False)
 
         tracer.start_span.assert_called_once()
         call_kwargs = tracer.start_span.call_args
@@ -169,7 +169,7 @@ class TestKafkaTracePropagation:
 
         with patch.object(_mod, "_get_propagator", return_value=None):
             headers: list = []
-            inject_trace_headers(headers)
+            _mod.inject_trace_headers(headers)
             assert headers == []
 
     def test_extract_attaches_context(self):
@@ -185,7 +185,7 @@ class TestKafkaTracePropagation:
         import mp_commons.adapters.opentelemetry.kafka_propagation as _mod
 
         with patch.object(_mod, "_get_propagator", return_value=None):
-            token = extract_trace_context([("traceparent", b"00-x-y-01")])
+            token = _mod.extract_trace_context([("traceparent", b"00-x-y-01")])
             assert token is None
 
     def test_inject_does_not_raise_on_propagator_error(self):
@@ -195,4 +195,4 @@ class TestKafkaTracePropagation:
         bad_propagator.inject.side_effect = RuntimeError("otel broken")
         with patch.object(_mod, "_get_propagator", return_value=bad_propagator):
             headers: list = []
-            inject_trace_headers(headers)  # must not raise
+            _mod.inject_trace_headers(headers)  # must not raise
