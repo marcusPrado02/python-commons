@@ -17,8 +17,8 @@ These are the only officially open items from the 100-section BACKLOG.
 
 | # | Task | Priority | Status |
 |---|------|----------|--------|
-| B-01 | **§42.1** — Create GitHub Environment named `pypi` in repository settings (required for OIDC publish job in CI) | High | ⬜ |
-| B-02 | **§42.2** — Configure Trusted Publisher on PyPI — link `github.com/marcusPrado02/python-commons`, environment `pypi`, workflow `ci.yml` | High | ⬜ |
+| B-01 | **§42.1** — Create GitHub Environment named `pypi` in repository settings (required for OIDC publish job in CI) | High | ✅ N/A — switched to GitHub Packages; GITHUB_TOKEN used directly, no environment needed |
+| B-02 | **§42.2** — Configure Trusted Publisher on PyPI — link `github.com/marcusPrado02/python-commons`, environment `pypi`, workflow `ci.yml` | High | ✅ N/A — switched to GitHub Packages; Trusted Publisher is PyPI-specific |
 | B-03 | **§48.6** — Integration tests for Elasticsearch adapter using `testcontainers-python` — index/get/delete round-trip, DSL search returns matching docs only | High | ✅ |
 | B-04 | **§49.6** — Integration tests for S3/MinIO adapter using `testcontainers-python` — full CRUD, presigned URL accessible via HTTP GET | High | ✅ |
 | B-05 | **§54.6** — Integration tests for DynamoDB adapter using LocalStack via `testcontainers-python` — CRUD, GSI query, TTL attribute present | High | ✅ |
@@ -164,7 +164,7 @@ These are the only officially open items from the 100-section BACKLOG.
 
 | Category | Total Tasks | Done |
 |----------|------------|------|
-| Remaining BACKLOG (§42, §48–§57) | 8 | 6 |
+| Remaining BACKLOG (§42, §48–§57) | 8 | 8 |
 | CI/CD & Release Pipeline | 7 | 7 |
 | Missing Adapters | 10 | 10 |
 | gRPC Server-Side Enhancements | 4 | 4 |
@@ -175,4 +175,4 @@ These are the only officially open items from the 100-section BACKLOG.
 | Advanced Testing | 10 | 10 |
 | Performance & Benchmarking | 4 | 4 |
 | Documentation Completeness | 5 | 5 |
-| **Total** | **70** | **68** |
+| **Total** | **70** | **70** |
