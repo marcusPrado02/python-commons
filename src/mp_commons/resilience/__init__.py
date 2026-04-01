@@ -16,6 +16,7 @@ from mp_commons.resilience.deadline import DeadlineContext, DeadlineExceededErro
 from mp_commons.resilience.throttle import ThrottlePolicy, ThrottledError, TokenBucket
 from mp_commons.resilience.backpressure import BackpressureError, BackpressurePolicy
 from mp_commons.resilience.graceful_shutdown import GracefulShutdown
+from mp_commons.resilience.dead_letter_scheduler import DeadLetterReplayScheduler
 
 __all__ = [
     "BackoffStrategy",
@@ -43,4 +44,5 @@ __all__ = [
     "TimeoutPolicy",
     "TokenBucket",
     "deadline_aware",
+    "DeadLetterReplayScheduler",
 ]

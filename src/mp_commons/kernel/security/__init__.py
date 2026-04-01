@@ -12,6 +12,14 @@ from mp_commons.kernel.security.rbac import (
     RBACRole,
     require_permission,
 )
+from mp_commons.kernel.security.pkce import (
+    PKCEError,
+    PKCEVerificationError,
+    compute_code_challenge,
+    generate_code_verifier,
+    generate_pkce_pair,
+    verify_code_challenge,
+)
 
 __all__ = [
     "AuditEvent",
@@ -34,4 +42,11 @@ __all__ = [
     "Role",
     "SecurityContext",
     "require_permission",
+    # PKCE — RFC 7636
+    "PKCEError",
+    "PKCEVerificationError",
+    "compute_code_challenge",
+    "generate_code_verifier",
+    "generate_pkce_pair",
+    "verify_code_challenge",
 ]
