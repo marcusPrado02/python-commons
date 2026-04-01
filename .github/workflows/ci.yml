@@ -54,6 +54,11 @@ jobs:
           fail_ci_if_error: false
 
   integration:
+    # C-01 — Full integration test suite.
+    # PostgreSQL and Redis are provided as sidecar services.
+    # All other adapters (Elasticsearch, S3/MinIO, DynamoDB, Cassandra,
+    # Redis Streams, Pulsar, MongoDB, etc.) are spun up on-demand by
+    # testcontainers-python — Docker is available on ubuntu-latest runners.
     name: Integration Tests
     runs-on: ubuntu-latest
     needs: [test]
@@ -84,6 +89,8 @@ jobs:
         env:
           DATABASE_URL: "postgresql+asyncpg://test:test@localhost:5432/test"
           REDIS_URL: "redis://localhost:6379/0"
+          # testcontainers-python manages all other service containers automatically
+          TESTCONTAINERS_RYUK_DISABLED: "false"
         run: uv run pytest tests/integration -x -q -m integration
 
   security:

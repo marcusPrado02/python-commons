@@ -32,7 +32,7 @@ These are the only officially open items from the 100-section BACKLOG.
 
 | # | Task | Priority | Status |
 |---|------|----------|--------|
-| C-01 | Add a GitHub Actions job `integration-tests` that spins up Docker services (Redis, PostgreSQL, Kafka, Elasticsearch, MinIO) via `testcontainers-python` and runs the full integration suite on every PR | High | ⬜ |
+| C-01 | Add a GitHub Actions job `integration-tests` that spins up Docker services (Redis, PostgreSQL, Kafka, Elasticsearch, MinIO) via `testcontainers-python` and runs the full integration suite on every PR | High | ✅ |
 | C-02 | Add `release-drafter` GitHub Action — auto-drafts `CHANGELOG.md` entries from PR labels (`feat`, `fix`, `breaking`, `chore`) on each merge to `main` | Medium | ✅ |
 | C-03 | Configure `dependabot.yml` for GitHub Actions version bumps — separate ecosystem entry from pip to keep workflow versions current | Medium | ✅ |
 | C-04 | Add SBOM (Software Bill of Materials) generation step to the release workflow using `cyclonedx-bom`; attach the `.json` SBOM as a release asset | Low | ✅ |
@@ -113,10 +113,10 @@ These are the only officially open items from the 100-section BACKLOG.
 | D-01 | Create `examples/` directory with a minimal working FastAPI microservice — wires up Command Bus, SQLAlchemy UoW, structured logging, health checks, and correlation middleware | High | ✅ |
 | D-02 | Add a `Makefile` target `run-example` that boots the example service with `uvicorn` and seeds the database via Alembic migrations | Medium | ✅ |
 | D-03 | Generate `.pyi` type stub files for the public API (all `__init__.py` re-exports) so IDEs offer completion without traversing the full source tree | Medium | ⬜ |
-| D-04 | Write `docs/guides/troubleshooting.md` — covers common async pitfalls (event loop reuse, fixture scoping, context var isolation), adapter import errors, and mypy strict mode issues | High | ⬜ |
+| D-04 | Write `docs/guides/troubleshooting.md` — covers common async pitfalls (event loop reuse, fixture scoping, context var isolation), adapter import errors, and mypy strict mode issues | High | ✅ |
 | D-05 | Write `docs/guides/migration-v1.md` — documents any breaking changes from pre-1.0 to 1.0.0 and provides a step-by-step upgrade guide | Medium | ⬜ |
 | D-06 | Add per-adapter runbooks in `docs/adapters/` — each runbook covers: installation, required env vars, health check endpoint, common error codes, performance tuning tips | Medium | ⬜ |
-| D-07 | Add a `devcontainer.json` configuration (VS Code Dev Containers) — pre-installs `uv`, project deps, and starts all required Docker services for local development | Low | ⬜ |
+| D-07 | Add a `devcontainer.json` configuration (VS Code Dev Containers) — pre-installs `uv`, project deps, and starts all required Docker services for local development | Low | ✅ |
 
 ---
 
@@ -124,7 +124,7 @@ These are the only officially open items from the 100-section BACKLOG.
 
 | # | Task | Priority | Status |
 |---|------|----------|--------|
-| T-01 | Add end-to-end integration test covering the full command → domain event → outbox → Kafka → consumer → inbox deduplication flow using real containers | High | ⬜ |
+| T-01 | Add end-to-end integration test covering the full command → domain event → outbox → Kafka → consumer → inbox deduplication flow using real containers | High | ✅ |
 | T-02 | Add integration tests for `Keycloak` adapter against a real Keycloak container via `testcontainers-python` — token verify, expired token, wrong audience | Medium | ⬜ |
 | T-03 | Add integration tests for `Vault` adapter against a Vault dev server container — `SecretStore.get`, `SecretStore.get_all`, token renewal | Medium | ⬜ |
 | T-04 | Add integration tests for the full `Saga` orchestration with real PostgreSQL — persist saga state, resume after failure, verify compensation was recorded | High | ⬜ |
@@ -165,14 +165,14 @@ These are the only officially open items from the 100-section BACKLOG.
 | Category | Total Tasks | Done |
 |----------|------------|------|
 | Remaining BACKLOG (§42, §48–§57) | 8 | 6 |
-| CI/CD & Release Pipeline | 7 | 6 |
+| CI/CD & Release Pipeline | 7 | 7 |
 | Missing Adapters | 10 | 10 |
 | gRPC Server-Side Enhancements | 4 | 4 |
 | Observability & Tracing | 5 | 5 |
 | Resilience & Reliability | 5 | 5 |
 | Security Hardening | 5 | 5 |
-| Developer Experience & Tooling | 7 | 2 |
-| Advanced Testing | 10 | 6 |
+| Developer Experience & Tooling | 7 | 4 |
+| Advanced Testing | 10 | 7 |
 | Performance & Benchmarking | 4 | 4 |
 | Documentation Completeness | 5 | 4 |
-| **Total** | **70** | **57** |
+| **Total** | **70** | **61** |
