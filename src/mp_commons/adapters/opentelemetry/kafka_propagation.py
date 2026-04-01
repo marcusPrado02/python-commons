@@ -64,7 +64,6 @@ class _KafkaHeaderCarrier:
 def _get_propagator() -> Any | None:
     """Return the OTel ``TextMapPropagator`` or ``None`` if OTel is absent."""
     try:
-        from opentelemetry.propagators.textmap import DefaultTextMapPropagator  # type: ignore[import-untyped]
         from opentelemetry.propagate import get_global_textmap  # type: ignore[import-untyped]
 
         return get_global_textmap()
