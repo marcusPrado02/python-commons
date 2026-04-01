@@ -26,6 +26,7 @@ from mp_commons.testing.generators import (
     slug_gen,
     ulid_gen,
 )
+from mp_commons.testing.tenant_isolation import TenantIsolationValidator, TenantLeakError
 
 __all__ = [
     "Builder",
@@ -36,6 +37,8 @@ __all__ = [
     "InMemoryInboxRepository",
     "InMemoryMessageBus",
     "InMemoryOutboxRepository",
+    "TenantIsolationValidator",
+    "TenantLeakError",
     "correlation_id_gen",
     "domain_event_gen",
     "email_gen",
