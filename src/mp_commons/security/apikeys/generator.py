@@ -7,7 +7,13 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from typing import Protocol
 
-import bcrypt
+def _require_bcrypt():  # type: ignore[no-untyped-def]
+    try:
+        import bcrypt  # type: ignore[import-untyped]
+        return bcrypt
+    except ImportError as exc:
+        raise ImportError("Install 'bcrypt' to use the API key security module") from exc
+
 
 __all__ = [
     "ApiKey",
@@ -76,7 +82,8 @@ class ApiKeyGenerator:
     ) -> tuple[str, ApiKey]:
         raw_key = secrets.token_urlsafe(32)
         key_id = raw_key[:_PREFIX_LEN]
-        key_hash = bcrypt.hashpw(raw_key.encode(), bcrypt.gensalt(rounds=self._rounds))
+        _bcrypt = _require_bcrypt()
+        key_hash = _bcrypt.hashpw(raw_key.encode(), _bcrypt.gensalt(rounds=self._rounds))
         expires_at = (
             datetime.now(timezone.utc) + timedelta(days=ttl_days)
             if ttl_days is not None
@@ -105,6 +112,6 @@ class ApiKeyVerifier:
         record = await self._store.find_by_id(key_id)
         if record is None or not record.is_valid():
             return None
-        if bcrypt.checkpw(raw_key.encode(), record.key_hash):
+        if _require_bcrypt().checkpw(raw_key.encode(), record.key_hash):
             return record
         return None
