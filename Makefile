@@ -4,7 +4,7 @@ UV            := uv
 SRC           := src
 TESTS         := tests
 
-.PHONY: help install install-dev lint format typecheck test test-unit test-integration test-cov security clean build docs run-example
+.PHONY: help install install-dev lint format typecheck test test-unit test-integration test-cov security clean build docs run-example stubs
 
 help: ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -68,6 +68,10 @@ test-fast: ## Run unit tests in parallel (pytest-xdist)
 
 build: ## Build source distribution and wheel
 	$(UV) build
+
+stubs: ## Generate .pyi type stubs for the public API using stubgen
+	$(UV) run --with mypy stubgen -p mp_commons -o $(SRC) --include-private
+	@echo "Stubs written to $(SRC)/mp_commons/**/*.pyi"
 
 # ---------------------------------------------------------------------------
 # Docs

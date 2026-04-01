@@ -112,10 +112,10 @@ These are the only officially open items from the 100-section BACKLOG.
 |---|------|----------|--------|
 | D-01 | Create `examples/` directory with a minimal working FastAPI microservice — wires up Command Bus, SQLAlchemy UoW, structured logging, health checks, and correlation middleware | High | ✅ |
 | D-02 | Add a `Makefile` target `run-example` that boots the example service with `uvicorn` and seeds the database via Alembic migrations | Medium | ✅ |
-| D-03 | Generate `.pyi` type stub files for the public API (all `__init__.py` re-exports) so IDEs offer completion without traversing the full source tree | Medium | ⬜ |
+| D-03 | Generate `.pyi` type stub files for the public API (all `__init__.py` re-exports) so IDEs offer completion without traversing the full source tree | Medium | ✅ |
 | D-04 | Write `docs/guides/troubleshooting.md` — covers common async pitfalls (event loop reuse, fixture scoping, context var isolation), adapter import errors, and mypy strict mode issues | High | ✅ |
-| D-05 | Write `docs/guides/migration-v1.md` — documents any breaking changes from pre-1.0 to 1.0.0 and provides a step-by-step upgrade guide | Medium | ⬜ |
-| D-06 | Add per-adapter runbooks in `docs/adapters/` — each runbook covers: installation, required env vars, health check endpoint, common error codes, performance tuning tips | Medium | ⬜ |
+| D-05 | Write `docs/guides/migration-v1.md` — documents any breaking changes from pre-1.0 to 1.0.0 and provides a step-by-step upgrade guide | Medium | ✅ |
+| D-06 | Add per-adapter runbooks in `docs/adapters/` — each runbook covers: installation, required env vars, health check endpoint, common error codes, performance tuning tips | Medium | ✅ |
 | D-07 | Add a `devcontainer.json` configuration (VS Code Dev Containers) — pre-installs `uv`, project deps, and starts all required Docker services for local development | Low | ✅ |
 
 ---
@@ -171,8 +171,8 @@ These are the only officially open items from the 100-section BACKLOG.
 | Observability & Tracing | 5 | 5 |
 | Resilience & Reliability | 5 | 5 |
 | Security Hardening | 5 | 5 |
-| Developer Experience & Tooling | 7 | 4 |
+| Developer Experience & Tooling | 7 | 7 |
 | Advanced Testing | 10 | 7 |
 | Performance & Benchmarking | 4 | 4 |
 | Documentation Completeness | 5 | 4 |
-| **Total** | **70** | **61** |
+| **Total** | **70** | **64** |
