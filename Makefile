@@ -4,7 +4,7 @@ UV            := uv
 SRC           := src
 TESTS         := tests
 
-.PHONY: help install install-dev lint format typecheck test test-unit test-integration test-cov security clean build docs
+.PHONY: help install install-dev lint format typecheck test test-unit test-integration test-cov security clean build docs run-example
 
 help: ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -72,6 +72,9 @@ build: ## Build source distribution and wheel
 # ---------------------------------------------------------------------------
 # Docs
 # ---------------------------------------------------------------------------
+
+run-example: ## Boot the example simple_service with uvicorn (hot-reload enabled)
+	$(UV) run uvicorn examples.simple_service.app:app --reload --port 8000
 
 docs: ## List all ADRs
 	@echo "Architecture Decision Records:"

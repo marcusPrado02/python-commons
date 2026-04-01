@@ -10,13 +10,24 @@ from datetime import datetime, timezone
 from typing import Any, Awaitable, Callable, TypeVar
 
 __all__ = [
+    "CURRENT_SCHEMA_VERSION",
     "ConsoleEventEmitter",
     "EventEmitter",
+    "SchemaVersionError",
     "StructuredEvent",
     "instrument",
 ]
 
+#: The schema version this library writes.  Consumers should reject events
+#: whose ``schema_version`` exceeds this value.
+CURRENT_SCHEMA_VERSION: int = 1
+
 T = TypeVar("T")
+
+
+class SchemaVersionError(ValueError):
+    """Raised when an event carries a ``schema_version`` that is newer than
+    :data:`CURRENT_SCHEMA_VERSION` and therefore cannot be safely processed."""
 
 
 def _default_serializer(obj: Any) -> Any:
@@ -33,9 +44,14 @@ class StructuredEvent:
     trace_id: str | None = None
     duration_ms: float | None = None
     fields: dict[str, Any] = field(default_factory=dict)
+    #: Schema version for backward-compatible evolution.  Always 1 for events
+    #: produced by this library.  Consumers must reject events where this value
+    #: exceeds :data:`CURRENT_SCHEMA_VERSION`.
+    schema_version: int = CURRENT_SCHEMA_VERSION
 
     def to_dict(self) -> dict[str, Any]:
         return {
+            "schema_version": self.schema_version,
             "name": self.name,
             "service": self.service,
             "timestamp": self.timestamp.isoformat(),
@@ -46,6 +62,37 @@ class StructuredEvent:
 
     def to_json(self) -> str:
         return json.dumps(self.to_dict(), default=_default_serializer)
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "StructuredEvent":
+        """Deserialize a :class:`StructuredEvent` from a plain dictionary.
+
+        Raises :class:`SchemaVersionError` if ``data["schema_version"]``
+        exceeds :data:`CURRENT_SCHEMA_VERSION` — forward-compatibility guard.
+        """
+        version = int(data.get("schema_version", 1))
+        if version > CURRENT_SCHEMA_VERSION:
+            raise SchemaVersionError(
+                f"Cannot deserialize StructuredEvent with schema_version={version}; "
+                f"this library only supports up to version {CURRENT_SCHEMA_VERSION}. "
+                "Upgrade mp-commons to process this event."
+            )
+        reserved = {"schema_version", "name", "service", "timestamp", "trace_id", "duration_ms"}
+        ts_raw = data.get("timestamp")
+        timestamp = (
+            datetime.fromisoformat(ts_raw)
+            if isinstance(ts_raw, str)
+            else (ts_raw or datetime.now(timezone.utc))
+        )
+        return cls(
+            name=data["name"],
+            service=data["service"],
+            timestamp=timestamp,
+            trace_id=data.get("trace_id"),
+            duration_ms=data.get("duration_ms"),
+            fields={k: v for k, v in data.items() if k not in reserved},
+            schema_version=version,
+        )
 
 
 class EventEmitter:
