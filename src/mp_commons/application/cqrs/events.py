@@ -39,9 +39,11 @@ class InProcessEventBus(EventBus):
     def register(
         self, event_type: type[DomainEvent], handler: EventHandler[Any]
     ) -> None:
+        """Append *handler* to the list of subscribers for *event_type*."""
         self._handlers.setdefault(event_type, []).append(handler)
 
     async def publish(self, event: DomainEvent) -> None:
+        """Broadcast *event* concurrently to all registered handlers for its type."""
         handlers = self._handlers.get(type(event), [])
         if handlers:
             await asyncio.gather(*(h.handle(event) for h in handlers))

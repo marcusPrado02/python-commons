@@ -32,6 +32,7 @@ class ULID:
 
     @classmethod
     def generate(cls) -> "ULID":
+        """Return a new monotonically increasing ULID (requires ``python-ulid``)."""
         try:
             from ulid import ULID as _ULID  # type: ignore[import-untyped]
             return cls(str(_ULID()))
@@ -54,6 +55,7 @@ class UUIDv7:
 
     @classmethod
     def generate(cls) -> "UUIDv7":
+        """Return a new time-ordered UUIDv7 (requires ``uuid-utils``)."""
         try:
             import uuid_utils  # type: ignore[import-untyped]
             return cls(uuid.UUID(str(uuid_utils.uuid7())))

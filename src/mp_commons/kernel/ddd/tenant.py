@@ -19,14 +19,17 @@ class TenantContext:
 
     @staticmethod
     def set(tenant_id: TenantId) -> Any:
+        """Set the active tenant and return a reset token for later restoration."""
         return _TENANT_CTX_VAR.set(tenant_id)
 
     @staticmethod
     def get() -> TenantId | None:
+        """Return the current tenant, or ``None`` if no tenant is active."""
         return _TENANT_CTX_VAR.get()
 
     @staticmethod
     def require() -> TenantId:
+        """Return the current tenant or raise ``ValidationError`` if absent."""
         tenant = _TENANT_CTX_VAR.get()
         if tenant is None:
             raise ValidationError("No tenant in context")
@@ -34,10 +37,12 @@ class TenantContext:
 
     @staticmethod
     def reset(token: Any) -> None:
+        """Restore context to the state captured in *token* (from :meth:`set`)."""
         _TENANT_CTX_VAR.reset(token)
 
     @staticmethod
     def clear() -> None:
+        """Remove the active tenant from the current context."""
         _TENANT_CTX_VAR.set(None)
 
     @staticmethod

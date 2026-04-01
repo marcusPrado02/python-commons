@@ -35,9 +35,11 @@ class InProcessCommandBus(CommandBus):
         self._handlers: dict[type[Command], CommandHandler[Any]] = {}
 
     def register(self, command_type: type[Command], handler: CommandHandler[Any]) -> None:
+        """Map *command_type* to *handler*, overwriting any prior registration."""
         self._handlers[command_type] = handler
 
     async def dispatch(self, command: Command) -> Any:
+        """Route *command* to its handler; raise ``KeyError`` if none is registered."""
         handler = self._handlers.get(type(command))
         if handler is None:
             raise KeyError(f"No handler registered for {type(command).__name__!r}")

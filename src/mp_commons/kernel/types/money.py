@@ -44,6 +44,7 @@ class Money:
 
     @classmethod
     def of(cls, amount: "str | int | float | Decimal", currency: str) -> "Money":
+        """Construct from a loose numeric type and an ISO 4217 currency string."""
         return cls(Decimal(str(amount)), currency.upper())
 
     def multiply(self, factor: "int | float | Decimal") -> "Money":

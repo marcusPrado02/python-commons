@@ -156,7 +156,7 @@ These are the only officially open items from the 100-section BACKLOG.
 | DOC-02 | Add architecture decision record `ADR-0007-multi-tenancy.md` — documents the `TenantContext` + `TenantFilter` approach, trade-offs vs row-level security, and how to opt out | Medium | ✅ |
 | DOC-03 | Add architecture decision record `ADR-0008-event-sourcing.md` — documents `EventStore` design, optimistic concurrency approach, snapshot strategy, and integration with `ProjectionStore` | Medium | ✅ |
 | DOC-04 | Add `docs/security/threat-model.md` — STRIDE analysis for the library's security primitives: JWT verification, API key management, encryption, PII redaction | Medium | ✅ |
-| DOC-05 | Ensure all public classes and functions have complete docstrings — run `mkdocstrings` in strict mode and fix every missing/incomplete docstring in the public API surface | High | ⬜ |
+| DOC-05 | Ensure all public classes and functions have complete docstrings — run `mkdocstrings` in strict mode and fix every missing/incomplete docstring in the public API surface | High | ✅ |
 
 ---
 
@@ -174,5 +174,5 @@ These are the only officially open items from the 100-section BACKLOG.
 | Developer Experience & Tooling | 7 | 7 |
 | Advanced Testing | 10 | 10 |
 | Performance & Benchmarking | 4 | 4 |
-| Documentation Completeness | 5 | 4 |
-| **Total** | **70** | **67** |
+| Documentation Completeness | 5 | 5 |
+| **Total** | **70** | **68** |

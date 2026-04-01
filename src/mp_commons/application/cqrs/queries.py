@@ -36,9 +36,11 @@ class InProcessQueryBus(QueryBus):
         self._handlers: dict[type[Query], QueryHandler[Any, Any]] = {}
 
     def register(self, query_type: type[Query], handler: QueryHandler[Any, Any]) -> None:
+        """Map *query_type* to *handler*, overwriting any prior registration."""
         self._handlers[query_type] = handler
 
     async def ask(self, query: Query) -> Any:
+        """Route *query* to its handler; raise ``KeyError`` if none is registered."""
         handler = self._handlers.get(type(query))
         if handler is None:
             raise KeyError(f"No handler registered for {type(query).__name__!r}")

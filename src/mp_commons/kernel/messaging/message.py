@@ -42,27 +42,37 @@ class MessageSerializer(abc.ABC, Generic[T]):
     """Port: serialize / deserialize message payloads."""
 
     @abc.abstractmethod
-    def serialize(self, payload: T) -> bytes: ...
+    def serialize(self, payload: T) -> bytes:
+        """Encode *payload* into a byte string for transport."""
+        ...
 
     @abc.abstractmethod
-    def deserialize(self, data: bytes, target_type: type[T]) -> T: ...
+    def deserialize(self, data: bytes, target_type: type[T]) -> T:
+        """Decode *data* bytes back into an instance of *target_type*."""
+        ...
 
 
 class MessageBus(abc.ABC):
     """Port: publish messages to a transport (Kafka, NATS, Redis Streams…)."""
 
     @abc.abstractmethod
-    async def publish(self, message: Message[Any]) -> None: ...
+    async def publish(self, message: Message[Any]) -> None:
+        """Deliver a single *message* to the underlying transport."""
+        ...
 
     @abc.abstractmethod
-    async def publish_batch(self, messages: list[Message[Any]]) -> None: ...
+    async def publish_batch(self, messages: list[Message[Any]]) -> None:
+        """Deliver multiple *messages* atomically or as a batch where possible."""
+        ...
 
 
 class EventPublisher(abc.ABC):
     """Port: domain-event publisher with routing by event type."""
 
     @abc.abstractmethod
-    async def publish(self, topic: str, payload: Any, headers: MessageHeaders | None = None) -> None: ...
+    async def publish(self, topic: str, payload: Any, headers: MessageHeaders | None = None) -> None:
+        """Publish *payload* to *topic*, attaching optional *headers*."""
+        ...
 
 
 @dataclasses.dataclass(frozen=True)
@@ -89,13 +99,19 @@ class EventConsumer(abc.ABC):
     """Port: subscribe to domain events."""
 
     @abc.abstractmethod
-    async def subscribe(self, topic: str) -> None: ...
+    async def subscribe(self, topic: str) -> None:
+        """Register interest in events from *topic*."""
+        ...
 
     @abc.abstractmethod
-    async def start(self) -> None: ...
+    async def start(self) -> None:
+        """Begin consuming messages from all subscribed topics."""
+        ...
 
     @abc.abstractmethod
-    async def stop(self) -> None: ...
+    async def stop(self) -> None:
+        """Gracefully stop consuming and release transport resources."""
+        ...
 
 
 __all__ = [

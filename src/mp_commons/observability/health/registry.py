@@ -9,6 +9,8 @@ __all__ = ["HealthReport", "HealthRegistry"]
 
 @dataclass
 class HealthReport:
+    """Aggregated result from running all registered health checks."""
+
     results: dict[str, HealthStatus] = field(default_factory=dict)
 
     @property
@@ -16,6 +18,7 @@ class HealthReport:
         return all(s.healthy for s in self.results.values())
 
     def to_dict(self) -> dict:
+        """Serialise the report to a plain dict suitable for HTTP responses."""
         return {
             "healthy": self.overall,
             "checks": {
@@ -36,9 +39,11 @@ class HealthRegistry:
         self._checks: list[HealthCheck] = []
 
     def register(self, check: HealthCheck) -> None:
+        """Add *check* to the set of probes executed by :meth:`run_all`."""
         self._checks.append(check)
 
     async def run_all(self) -> HealthReport:
+        """Execute every registered check concurrently and return an aggregated report."""
         report = HealthReport()
         for check in self._checks:
             try:

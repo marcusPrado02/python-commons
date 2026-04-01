@@ -4,6 +4,8 @@ from enum import Enum
 
 
 class CircuitBreakerState(str, Enum):
+    """Finite states of a circuit breaker (CLOSED → OPEN → HALF_OPEN → CLOSED)."""
+
     CLOSED = "CLOSED"
     OPEN = "OPEN"
     HALF_OPEN = "HALF_OPEN"

@@ -1,3 +1,4 @@
+"""Application inbox – exactly-once message processor."""
 from __future__ import annotations
 
 from datetime import datetime, timezone
@@ -9,7 +10,11 @@ __all__ = ["CommandBus", "InboxProcessor"]
 
 
 class CommandBus(Protocol):
-    async def dispatch(self, event_type: str, payload: Any) -> None: ...
+    """Minimal command bus interface required by :class:`InboxProcessor`."""
+
+    async def dispatch(self, event_type: str, payload: Any) -> None:
+        """Dispatch *payload* as the given *event_type* to the appropriate handler."""
+        ...
 
 
 class InboxProcessor:
@@ -20,6 +25,7 @@ class InboxProcessor:
         self._bus = command_bus
 
     async def process(self, record: InboxRecord) -> InboxRecord:
+        """Process *record*, skipping duplicates and marking status on completion."""
         # Duplicate check
         if await self._store.is_duplicate(record.id):
             record.status = InboxStatus.DUPLICATE
