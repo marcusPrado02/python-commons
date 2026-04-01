@@ -101,6 +101,43 @@ jobs:
       - name: pip-audit
         run: uv run pip-audit --require-hashes -r <(uv pip compile pyproject.toml)
 
+  mutation:
+    name: Mutation Testing (opt-in)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v2
+      - name: Set up Python
+        run: uv python install 3.12
+      - name: Install dev deps + mutmut
+        run: |
+          uv pip install -e ".[dev]"
+          uv pip install mutmut
+      - name: Run unit tests to build coverage baseline
+        run: |
+          uv run pytest tests/unit -q \
+            --cov=src/mp_commons \
+            --cov-report=xml \
+            -m "not integration"
+      - name: Run mutation testing
+        run: |
+          uv run mutmut run --use-coverage
+          uv run mutmut results
+      - name: Check mutation score
+        run: |
+          SCORE=$(uv run mutmut results | grep -oP 'Survived: \K\d+')
+          KILLED=$(uv run mutmut results | grep -oP 'Killed: \K\d+')
+          TOTAL=$((SCORE + KILLED))
+          if [ "$TOTAL" -eq 0 ]; then
+            echo "No mutations generated" && exit 0
+          fi
+          PCT=$((KILLED * 100 / TOTAL))
+          echo "Mutation score: ${PCT}% (killed ${KILLED}/${TOTAL})"
+          if [ "$PCT" -lt 80 ]; then
+            echo "ERROR: Mutation score ${PCT}% is below the 80% threshold" && exit 1
+          fi
+
   publish:
     name: Publish to PyPI
     runs-on: ubuntu-latest
@@ -109,10 +146,21 @@ jobs:
     environment: "pypi"
     permissions:
       id-token: write
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v2
       - name: Build
         run: uv build
-      - name: Publish
+      - name: Generate SBOM (CycloneDX JSON)
+        run: |
+          uv pip install cyclonedx-bom
+          uv run cyclonedx-py environment --output-format json --outfile sbom.json
+      - name: Upload SBOM as release asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: sbom.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
