@@ -4,23 +4,16 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    types: [opened, reopened, synchronize]
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
 
 jobs:
   update_release_draft:
     name: Draft Next Release Notes
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
     steps:
-      # release-drafter/release-drafter reads only PR titles and labels set by
-      # maintainers — it does not pass any untrusted input to shell commands.
       - uses: release-drafter/release-drafter@v6
         with:
           config-name: release-drafter.yml

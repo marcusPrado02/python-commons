@@ -21,8 +21,8 @@ jobs:
       - uses: astral-sh/setup-uv@v2
       - name: Set up Python
         run: uv python install 3.12
-      - name: Install docs deps
-        run: uv pip install -e ".[docs,dev]"
+      - name: Install deps
+        run: uv sync --extra dev
       - name: mkdocs build --strict
         run: uv run mkdocs build --strict
 
@@ -40,8 +40,8 @@ jobs:
       - uses: astral-sh/setup-uv@v2
       - name: Set up Python
         run: uv python install 3.12
-      - name: Install docs deps
-        run: uv pip install -e ".[docs,dev]"
+      - name: Install deps
+        run: uv sync --extra dev
       - name: Configure Git for gh-deploy
         run: |
           git config user.name  "github-actions[bot]"
