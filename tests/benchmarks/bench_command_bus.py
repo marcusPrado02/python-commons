@@ -100,3 +100,24 @@ def test_bus_dispatch_pipeline_overhead(benchmark, event_loop):
 
     result = benchmark(run)
     assert result == "ok"
+
+
+def test_bus_dispatch_9_middleware_pipeline(benchmark, event_loop):
+    """P-03 — InProcessCommandBus with 9-noop-middleware pipeline.
+
+    Target: ≥10 000 dispatches/s (median < 100 µs).
+    """
+    bus = _make_bus()
+    pipeline = _make_pipeline(9)
+    cmd = _PlaceOrder()
+
+    def run():
+        return event_loop.run_until_complete(
+            pipeline.execute(cmd, bus.dispatch)
+        )
+
+    result = benchmark(run)
+    assert result == "ok"
+    # pytest-benchmark captures stats; assert median < 1 ms (10× our target)
+    # so the test acts as a regression guard even in CI
+    assert benchmark.stats["median"] < 1e-3  # 1 ms
