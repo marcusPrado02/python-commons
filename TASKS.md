@@ -125,9 +125,9 @@ These are the only officially open items from the 100-section BACKLOG.
 | # | Task | Priority | Status |
 |---|------|----------|--------|
 | T-01 | Add end-to-end integration test covering the full command → domain event → outbox → Kafka → consumer → inbox deduplication flow using real containers | High | ✅ |
-| T-02 | Add integration tests for `Keycloak` adapter against a real Keycloak container via `testcontainers-python` — token verify, expired token, wrong audience | Medium | ⬜ |
-| T-03 | Add integration tests for `Vault` adapter against a Vault dev server container — `SecretStore.get`, `SecretStore.get_all`, token renewal | Medium | ⬜ |
-| T-04 | Add integration tests for the full `Saga` orchestration with real PostgreSQL — persist saga state, resume after failure, verify compensation was recorded | High | ⬜ |
+| T-02 | Add integration tests for `Keycloak` adapter against a real Keycloak container via `testcontainers-python` — token verify, expired token, wrong audience | Medium | ✅ |
+| T-03 | Add integration tests for `Vault` adapter against a Vault dev server container — `SecretStore.get`, `SecretStore.get_all`, token renewal | Medium | ✅ |
+| T-04 | Add integration tests for the full `Saga` orchestration with real PostgreSQL — persist saga state, resume after failure, verify compensation was recorded | High | ✅ |
 | T-05 | Add `hypothesis`-based property tests for `Result[T, E]` — `map` / `flat_map` laws (identity, associativity, monad laws) | Medium | ✅ |
 | T-06 | Add `hypothesis`-based property tests for `Money` — commutativity of `add`, currency mismatch always raises, `multiply` never returns negative for positive inputs | Medium | ✅ |
 | T-07 | Add fuzz testing for PII redaction patterns — generate random strings containing email, CPF, phone, and credit card sub-patterns; assert no false negatives | Medium | ✅ |
@@ -172,7 +172,7 @@ These are the only officially open items from the 100-section BACKLOG.
 | Resilience & Reliability | 5 | 5 |
 | Security Hardening | 5 | 5 |
 | Developer Experience & Tooling | 7 | 7 |
-| Advanced Testing | 10 | 7 |
+| Advanced Testing | 10 | 10 |
 | Performance & Benchmarking | 4 | 4 |
 | Documentation Completeness | 5 | 4 |
-| **Total** | **70** | **64** |
+| **Total** | **70** | **67** |
