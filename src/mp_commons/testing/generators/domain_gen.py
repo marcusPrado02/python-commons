@@ -14,8 +14,8 @@ def email_gen(domain: str = "example.com") -> str:
 
 def money_gen(min_cents: int = 1, max_cents: int = 100000) -> object:
     """Generate a random ``Money`` value object."""
-    import random
     from decimal import Decimal
+    import random
 
     from mp_commons.kernel.types import Money
 
