@@ -63,6 +63,9 @@ dmypy.json
 # Linting / formatting
 .ruff_cache/
 
+# MkDocs built site
+site/
+
 # Jupyter
 .ipynb_checkpoints
 *.ipynb
