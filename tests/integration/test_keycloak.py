@@ -40,6 +40,7 @@ def keycloak_base_url() -> str:  # type: ignore[return]
         .with_command("start-dev")
         .with_env("KEYCLOAK_ADMIN", _ADMIN_USER)
         .with_env("KEYCLOAK_ADMIN_PASSWORD", _ADMIN_PASS)
+        .with_env("KC_HEALTH_ENABLED", "true")
         .with_exposed_ports(8080)
     )
     with container:
@@ -52,17 +53,17 @@ def keycloak_base_url() -> str:  # type: ignore[return]
         yield base
 
 
-def _wait_keycloak_ready(base_url: str, timeout: int = 90) -> None:
-    """Poll /health/ready until Keycloak accepts requests."""
+def _wait_keycloak_ready(base_url: str, timeout: int = 120) -> None:
+    """Poll /realms/master until Keycloak's realm API accepts requests."""
     deadline = time.time() + timeout
     while time.time() < deadline:
         try:
-            resp = requests.get(f"{base_url}/health/ready", timeout=3)
+            resp = requests.get(f"{base_url}/realms/master", timeout=5)
             if resp.status_code == 200:
                 return
         except Exception:
             pass
-        time.sleep(2)
+        time.sleep(3)
     raise TimeoutError("Keycloak did not become ready in time")
 
 
