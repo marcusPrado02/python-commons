@@ -158,7 +158,12 @@ class ElasticsearchClient:
 
     async def delete(self, doc_id: str, *, index: str) -> None:
         """Delete a document by ID."""
-        await self._client.delete(index=self._index(index), id=doc_id, ignore_status=404)
+        from elasticsearch import NotFoundError  # type: ignore[import-untyped]
+
+        try:
+            await self._client.delete(index=self._index(index), id=doc_id)
+        except NotFoundError:
+            pass
 
     async def search(self, query_dsl: dict[str, Any], *, index: str) -> list[dict[str, Any]]:
         """Execute a Query DSL search and return raw ``_source`` dicts."""
