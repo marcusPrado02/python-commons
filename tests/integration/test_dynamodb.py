@@ -29,7 +29,7 @@ _REGION = "us-east-1"
 
 @pytest.fixture(scope="module")
 def dynamo_endpoint() -> str:  # type: ignore[return]
-    with LocalStackContainer(services=["dynamodb"]) as ls:
+    with LocalStackContainer().with_services("dynamodb") as ls:
         endpoint = ls.get_url()
 
         # Create the table via boto3 (synchronous setup)
