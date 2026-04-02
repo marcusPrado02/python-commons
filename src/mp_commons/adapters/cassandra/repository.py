@@ -94,7 +94,7 @@ class CassandraRepository(Generic[T]):
     model:
         Callable accepting ``**kwargs`` to construct a *T* instance.
     pk_field:
-        Primary key field name (default ``"id"``).
+        Primary key column name (default ``"id"``).  Alias: ``pk_column``.
     """
 
     def __init__(
@@ -103,11 +103,12 @@ class CassandraRepository(Generic[T]):
         table: str,
         model: Any,
         pk_field: str = "id",
+        pk_column: str | None = None,
     ) -> None:
         self._session = session
         self._table = table
         self._model = model
-        self._pk_field = pk_field
+        self._pk_field = pk_column if pk_column is not None else pk_field
         self._prepared: dict[str, Any] = {}
 
     def _prepare(self, cql: str) -> Any:
