@@ -1,4 +1,5 @@
 """Kernel messaging – scheduled / delayed message ports."""
+
 from __future__ import annotations
 
 import abc

@@ -1,12 +1,12 @@
 """Unit tests for §91 – Snapshot Testing."""
+
 from __future__ import annotations
 
-import tempfile
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 from enum import Enum
-from pathlib import Path
+import tempfile
 from uuid import UUID
 
 import pytest
@@ -44,7 +44,7 @@ class TestSnapshotSerializer:
 
     def test_datetime_serialised(self):
         s = SnapshotSerializer()
-        dt = datetime(2026, 1, 15, 12, 0, 0, tzinfo=timezone.utc)
+        dt = datetime(2026, 1, 15, 12, 0, 0, tzinfo=UTC)
         result = s.serialize({"ts": dt})
         assert "2026-01-15" in result
 

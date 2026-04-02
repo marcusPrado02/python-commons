@@ -1,9 +1,11 @@
 """Application pagination – Page, CursorPage, Cursor."""
+
 from __future__ import annotations
 
+from collections.abc import Callable
 import dataclasses
 import math
-from typing import Any, Callable, Generic, TypeVar
+from typing import Any, Generic, TypeVar
 
 from mp_commons.application.pagination.page_request import PageRequest
 
@@ -13,6 +15,7 @@ T = TypeVar("T")
 @dataclasses.dataclass(frozen=True, slots=True)
 class Cursor:
     """Cursor-based pagination token (opaque encoded string)."""
+
     value: str
 
     def __str__(self) -> str:
@@ -42,7 +45,7 @@ class Page(Generic[T]):
     def has_previous(self) -> bool:
         return self.page > 1
 
-    def map(self, fn: Callable[[T], Any]) -> "Page[Any]":
+    def map(self, fn: Callable[[T], Any]) -> Page[Any]:
         """Return a new :class:`Page` with each item transformed by *fn*."""
         return Page(
             items=[fn(item) for item in self.items],
@@ -52,7 +55,7 @@ class Page(Generic[T]):
         )
 
     @classmethod
-    def of(cls, all_items: list[T], request: PageRequest) -> "Page[T]":
+    def of(cls, all_items: list[T], request: PageRequest) -> Page[T]:
         """Build a :class:`Page` by slicing *all_items* with *request*."""
         total = len(all_items)
         start = request.offset

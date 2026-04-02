@@ -1,4 +1,5 @@
 """Testing chaos – LatencyInjector."""
+
 from __future__ import annotations
 
 import asyncio
@@ -13,10 +14,10 @@ class LatencyInjector:
         self._max = max_ms / 1000
 
     async def call(self, coro: object) -> object:
-        delay = random.uniform(self._min, self._max)  # noqa: S311
+        delay = random.uniform(self._min, self._max)
         await asyncio.sleep(delay)
-        import asyncio as _asyncio
         import inspect
+
         if inspect.isawaitable(coro):
             return await coro  # type: ignore[misc]
         return coro

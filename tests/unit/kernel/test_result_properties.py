@@ -1,13 +1,12 @@
 """Hypothesis property tests for Result[T, E] monad laws (T-05)."""
+
 from __future__ import annotations
 
-from typing import Callable
-
-import pytest
-from hypothesis import given, assume, settings
+from hypothesis import given
 from hypothesis import strategies as st
+import pytest
 
-from mp_commons.kernel.types.result import Ok, Err, Result
+from mp_commons.kernel.types.result import Err, Ok, Result
 
 # ---------------------------------------------------------------------------
 # Strategies
@@ -75,6 +74,7 @@ def test_map_err_is_noop(r: Err, n: int) -> None:
 @given(VALUES)
 def test_left_identity(a) -> None:
     """Ok(a).flat_map(f) == f(a) — Monad left identity."""
+
     def f(x):
         if x is None or (isinstance(x, float) and x != x):
             return Ok(0)
@@ -104,6 +104,7 @@ def test_right_identity_err(e: ValueError) -> None:
 @given(VALUES)
 def test_associativity(a) -> None:
     """(Ok(a).flat_map(f)).flat_map(g) == Ok(a).flat_map(lambda x: f(x).flat_map(g))."""
+
     def f(x):
         if isinstance(x, (int, float)) and not (isinstance(x, float) and (x != x)):
             return Ok(abs(int(x)) % 1000)

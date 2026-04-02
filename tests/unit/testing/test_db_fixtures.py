@@ -1,11 +1,12 @@
 """Unit tests for §94 – Database Fixtures."""
+
 from __future__ import annotations
 
 import asyncio
 
 import pytest
 
-from mp_commons.testing.fixtures.database import DatabaseFixture, TransactionalTestSession
+from mp_commons.testing.fixtures.database import DatabaseFixture
 
 
 class TestDatabaseFixture:
@@ -49,9 +50,12 @@ class TestDatabaseFixture:
         class _Base:
             class metadata:
                 @staticmethod
-                def create_all(conn): pass
+                def create_all(conn):
+                    pass
+
                 @staticmethod
-                def drop_all(conn): pass
+                def drop_all(conn):
+                    pass
 
         fixture = DatabaseFixture(_Base)
         assert fixture._base is _Base
@@ -74,9 +78,9 @@ class TestDbFixtureIntegration:
 
     def test_sqlite_async_setup_teardown(self):
         try:
+            from sqlalchemy import Column, Integer, String
             from sqlalchemy.ext.asyncio import create_async_engine
             from sqlalchemy.orm import DeclarativeBase
-            from sqlalchemy import Column, Integer, String
         except ImportError:
             pytest.skip("sqlalchemy not available")
 
@@ -94,6 +98,7 @@ class TestDbFixtureIntegration:
             await fixture.setup(engine)
             # Verify table exists by inserting
             from sqlalchemy.ext.asyncio import AsyncSession
+
             async with AsyncSession(engine) as session:
                 session.add(_Item(id=1, name="hello"))
                 await session.commit()

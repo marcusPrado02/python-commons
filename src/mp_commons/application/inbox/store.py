@@ -1,21 +1,22 @@
 """Application inbox – InboxRecord, InboxStore port, and in-memory implementation."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from enum import Enum
+from datetime import UTC, datetime
+from enum import StrEnum
 from typing import Any, Protocol
 import uuid
 
 __all__ = [
+    "InMemoryInboxStore",
     "InboxRecord",
     "InboxStatus",
     "InboxStore",
-    "InMemoryInboxStore",
 ]
 
 
-class InboxStatus(str, Enum):
+class InboxStatus(StrEnum):
     """Lifecycle states of an :class:`InboxRecord`."""
 
     PENDING = "PENDING"
@@ -32,7 +33,7 @@ class InboxRecord:
     event_type: str
     payload: Any
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
-    received_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    received_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     processed_at: datetime | None = None
     status: InboxStatus = InboxStatus.PENDING
     error: str | None = None

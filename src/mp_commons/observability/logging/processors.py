@@ -3,6 +3,7 @@
 §20.3  CorrelationProcessor — injects correlation_id/tenant_id into log events.
 §20.5  get_logger(name) — returns a bound structlog logger.
 """
+
 from __future__ import annotations
 
 import logging
@@ -29,8 +30,8 @@ class CorrelationProcessor:
 
     def __call__(
         self,
-        logger: Any,           # noqa: ARG002
-        method_name: str,      # noqa: ARG002
+        logger: Any,
+        method_name: str,
         event_dict: dict[str, Any],
     ) -> dict[str, Any]:
         try:
@@ -45,7 +46,7 @@ class CorrelationProcessor:
                     event_dict.setdefault("user_id", ctx.user_id)
                 if ctx.trace_id is not None:
                     event_dict.setdefault("trace_id", ctx.trace_id)
-        except Exception:  # noqa: BLE001
+        except Exception:
             pass
         return event_dict
 

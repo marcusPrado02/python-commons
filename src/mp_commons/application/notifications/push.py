@@ -1,4 +1,5 @@
 """Application notifications – push notification models and protocol."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field

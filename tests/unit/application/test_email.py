@@ -1,9 +1,11 @@
 """Unit tests for §63 Application — Email."""
+
 from __future__ import annotations
 
 import asyncio
 
 import pytest
+
 from mp_commons.application.email import (
     Attachment,
     EmailMessage,
@@ -72,7 +74,9 @@ class TestInMemoryEmailSender:
             assert sender.last() is msg
             assert isinstance(msg_id, str)
             assert len(msg_id) > 0
+
         asyncio.run(_run())
+
     def test_send_bulk(self):
         async def _run():
             sender = InMemoryEmailSender()
@@ -84,7 +88,9 @@ class TestInMemoryEmailSender:
             assert sender.count == 3
             assert len(ids) == 3
             assert len(set(ids)) == 3  # all unique
+
         asyncio.run(_run())
+
     def test_reset_clears_outbox(self):
         async def _run():
             sender = InMemoryEmailSender()
@@ -92,7 +98,9 @@ class TestInMemoryEmailSender:
             sender.reset()
             assert sender.count == 0
             assert sender.last() is None
+
         asyncio.run(_run())
+
     def test_is_protocol_compatible(self):
         sender = InMemoryEmailSender()
         assert isinstance(sender, EmailSender)  # runtime_checkable
@@ -104,4 +112,5 @@ class TestInMemoryEmailSender:
                 await sender.send(EmailMessage(to=[f"u{i}@x.com"], subject="s", html_body="h"))
             assert sender.count == 5
             assert sender.last().to == ["u4@x.com"]
+
         asyncio.run(_run())

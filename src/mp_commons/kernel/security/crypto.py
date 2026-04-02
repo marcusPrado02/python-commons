@@ -1,4 +1,5 @@
 """Kernel security – PasswordHasher, CryptoProvider ports."""
+
 from __future__ import annotations
 
 import abc

@@ -9,7 +9,7 @@ Activation::
 
     from mp_commons.adapters.sqlalchemy.tenant_filter import TenantFilter
 
-    TenantFilter.install()          # once, at application start-up
+    TenantFilter.install()  # once, at application start-up
 
 Deactivation (useful in tests)::
 
@@ -21,6 +21,7 @@ background tasks can still access cross-tenant data.
 
 Requires SQLAlchemy ≥ 2.0.
 """
+
 from __future__ import annotations
 
 from typing import Any
@@ -53,7 +54,6 @@ def _before_compile_handler(query: Any) -> None:  # pragma: no branch
 
     try:
         from sqlalchemy import inspect, literal  # type: ignore[import-untyped]
-        from sqlalchemy.orm import Query  # type: ignore[import-untyped]
     except ImportError:
         return
 
@@ -77,9 +77,7 @@ def _before_compile_handler(query: Any) -> None:  # pragma: no branch
     except Exception:
         return
 
-    query = query.enable_assertions(False).filter(
-        entity.tenant_id == literal(str(tenant_id))
-    )
+    query = query.enable_assertions(False).filter(entity.tenant_id == literal(str(tenant_id)))
 
 
 # ---------------------------------------------------------------------------
@@ -92,7 +90,7 @@ class TenantFilter:
 
     Usage::
 
-        TenantFilter.install()    # registers the event once
+        TenantFilter.install()  # registers the event once
         TenantFilter.uninstall()  # removes the event
     """
 
@@ -106,8 +104,8 @@ class TenantFilter:
         if _installed:
             return
         _require_sqlalchemy()
-        from sqlalchemy.orm import Query  # type: ignore[import-untyped]
         from sqlalchemy import event  # type: ignore[import-untyped]
+        from sqlalchemy.orm import Query  # type: ignore[import-untyped]
 
         event.listen(Query, "before_compile", _before_compile_handler, retval=False)
         _installed = True
@@ -122,8 +120,8 @@ class TenantFilter:
         if not _installed:
             return
         try:
-            from sqlalchemy.orm import Query  # type: ignore[import-untyped]
             from sqlalchemy import event  # type: ignore[import-untyped]
+            from sqlalchemy.orm import Query  # type: ignore[import-untyped]
 
             event.remove(Query, "before_compile", _before_compile_handler)
         except Exception:

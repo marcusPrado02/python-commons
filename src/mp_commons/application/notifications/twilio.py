@@ -1,4 +1,5 @@
 """Application notifications – TwilioSmsSender (requires httpx)."""
+
 from __future__ import annotations
 
 from base64 import b64encode
@@ -12,12 +13,12 @@ __all__ = ["TwilioConfig", "TwilioSmsSender"]
 
 def _require_httpx() -> Any:  # pragma: no cover
     try:
-        import httpx  # noqa: PLC0415
+        import httpx
+
         return httpx
     except ImportError as exc:
         raise ImportError(
-            "httpx is required for Twilio SMS sender. "
-            "Install it with: pip install httpx"
+            "httpx is required for Twilio SMS sender. Install it with: pip install httpx"
         ) from exc
 
 
@@ -40,9 +41,7 @@ class TwilioSmsSender:
     async def send(self, message: SmsMessage) -> str:  # pragma: no cover
         httpx = _require_httpx()
         url = self._config.api_url.format(account_sid=self._config.account_sid)
-        creds = b64encode(
-            f"{self._config.account_sid}:{self._config.auth_token}".encode()
-        ).decode()
+        creds = b64encode(f"{self._config.account_sid}:{self._config.auth_token}".encode()).decode()
         headers = {"Authorization": f"Basic {creds}"}
         data = {
             "To": message.to,
@@ -53,8 +52,9 @@ class TwilioSmsSender:
             async with httpx.AsyncClient(timeout=self._config.timeout) as client:
                 resp = await client.post(url, data=data, headers=headers)
                 if resp.status_code == 429:
-                    import asyncio  # noqa: PLC0415
-                    await asyncio.sleep(2 ** attempt)
+                    import asyncio
+
+                    await asyncio.sleep(2**attempt)
                     continue
                 resp.raise_for_status()
                 return resp.json().get("sid", "")

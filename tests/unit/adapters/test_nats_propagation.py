@@ -1,14 +1,15 @@
 """Unit tests for NATS traceparent propagation (O-03)."""
+
 from __future__ import annotations
 
 import sys
 import types
 from unittest.mock import MagicMock, patch
 
-
 # ---------------------------------------------------------------------------
 # Build minimal OpenTelemetry stubs (same pattern as kafka propagation tests)
 # ---------------------------------------------------------------------------
+
 
 def _build_otel_stub() -> None:
     if "opentelemetry" in sys.modules:
@@ -61,12 +62,7 @@ def _build_otel_stub() -> None:
 
 _build_otel_stub()
 
-import mp_commons.adapters.opentelemetry.nats_propagation as _mod  # noqa: E402
-from mp_commons.adapters.opentelemetry.nats_propagation import (  # noqa: E402
-    inject_trace_headers,
-    extract_trace_context,
-)
-
+import mp_commons.adapters.opentelemetry.nats_propagation as _mod
 
 # ---------------------------------------------------------------------------
 # inject_trace_headers
@@ -149,6 +145,7 @@ class TestExtractTraceContext:
 class TestNatsHeaderCarrier:
     def _make(self, data: dict) -> object:
         from mp_commons.adapters.opentelemetry.nats_propagation import _NatsHeaderCarrier
+
         return _NatsHeaderCarrier(data)
 
     def test_get_existing_key(self):

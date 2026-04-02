@@ -1,11 +1,10 @@
 """Redis Streams adapter — producer, consumer group, outbox dispatcher, and entry type."""
+
 from __future__ import annotations
 
 import dataclasses
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
-
-from mp_commons.kernel.messaging.outbox import OutboxRepository, OutboxStatus
 
 
 @dataclasses.dataclass
@@ -14,7 +13,7 @@ class RedisStreamEntry:
 
     id: str
     fields: dict[str, bytes]
-    parsed_at: datetime = dataclasses.field(default_factory=lambda: datetime.now(timezone.utc))
+    parsed_at: datetime = dataclasses.field(default_factory=lambda: datetime.now(UTC))
 
     def field_str(self, key: str, default: str = "") -> str:
         """Decode a bytes field value to str."""

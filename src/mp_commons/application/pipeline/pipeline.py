@@ -1,4 +1,5 @@
 """Application pipeline – Pipeline class."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -12,7 +13,7 @@ class Pipeline:
     def __init__(self) -> None:
         self._middlewares: list[Middleware] = []
 
-    def add(self, middleware: Middleware) -> "Pipeline":
+    def add(self, middleware: Middleware) -> Pipeline:
         """Append a middleware (fluent API)."""
         self._middlewares.append(middleware)
         return self

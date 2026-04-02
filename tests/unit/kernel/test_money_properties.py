@@ -1,14 +1,15 @@
 """Hypothesis property tests for Money (T-06)."""
+
 from __future__ import annotations
 
 from decimal import Decimal
 
-import pytest
-from hypothesis import given, assume, settings
+from hypothesis import assume, given
 from hypothesis import strategies as st
+import pytest
 
-from mp_commons.kernel.types.money import Money
 from mp_commons.kernel.errors.domain import ValidationError
+from mp_commons.kernel.types.money import Money
 
 # ---------------------------------------------------------------------------
 # Strategies
@@ -88,13 +89,25 @@ def test_sub_different_currencies_raises(a: Money, b: Money) -> None:
 # ---------------------------------------------------------------------------
 
 
-@given(money(AMOUNTS), st.decimals(min_value=0, max_value=100, allow_nan=False, allow_infinity=False, places=2))
+@given(
+    money(AMOUNTS),
+    st.decimals(min_value=0, max_value=100, allow_nan=False, allow_infinity=False, places=2),
+)
 def test_multiply_non_negative_factor_gives_non_negative(m: Money, factor: Decimal) -> None:
     result = m.multiply(factor)
     assert result.amount >= Decimal("0")
 
 
-@given(money(POSITIVE_AMOUNTS), st.decimals(min_value=Decimal("-100"), max_value=Decimal("-0.01"), allow_nan=False, allow_infinity=False, places=2))
+@given(
+    money(POSITIVE_AMOUNTS),
+    st.decimals(
+        min_value=Decimal("-100"),
+        max_value=Decimal("-0.01"),
+        allow_nan=False,
+        allow_infinity=False,
+        places=2,
+    ),
+)
 def test_multiply_negative_factor_raises(m: Money, factor: Decimal) -> None:
     with pytest.raises(ValidationError, match="negative"):
         m.multiply(factor)
@@ -105,7 +118,16 @@ def test_multiply_by_one_is_identity(m: Money) -> None:
     assert m.multiply(Decimal("1")) == m
 
 
-@given(money(POSITIVE_AMOUNTS), st.decimals(min_value=Decimal("0.01"), max_value=Decimal("100"), allow_nan=False, allow_infinity=False, places=2))
+@given(
+    money(POSITIVE_AMOUNTS),
+    st.decimals(
+        min_value=Decimal("0.01"),
+        max_value=Decimal("100"),
+        allow_nan=False,
+        allow_infinity=False,
+        places=2,
+    ),
+)
 def test_multiply_preserves_currency(m: Money, factor: Decimal) -> None:
     result = m.multiply(factor)
     assert result.currency == m.currency
@@ -129,7 +151,15 @@ def test_invalid_currency_rejected(code: str) -> None:
         Money(Decimal("1.00"), code)
 
 
-@given(st.decimals(min_value=Decimal("-10000"), max_value=Decimal("-0.01"), allow_nan=False, allow_infinity=False, places=2))
+@given(
+    st.decimals(
+        min_value=Decimal("-10000"),
+        max_value=Decimal("-0.01"),
+        allow_nan=False,
+        allow_infinity=False,
+        places=2,
+    )
+)
 def test_negative_amount_rejected(amount: Decimal) -> None:
     with pytest.raises(ValidationError, match="non-negative"):
         Money(amount, "USD")

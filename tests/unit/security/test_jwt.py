@@ -1,6 +1,6 @@
 """Unit tests for §86 – JWT Utilities."""
-import asyncio
-from datetime import timedelta
+
+from datetime import UTC, timedelta
 
 import pytest
 
@@ -52,9 +52,7 @@ class TestJwtValidation:
 
     def test_expired_token_raises(self):
         issuer = JwtIssuer(issuer="svc")
-        token = issuer.issue(
-            {"sub": "u1"}, secret_or_key=SECRET, expires_in=timedelta(seconds=-1)
-        )
+        token = issuer.issue({"sub": "u1"}, secret_or_key=SECRET, expires_in=timedelta(seconds=-1))
         with pytest.raises(JwtValidationError):
             DECODER.decode(token, secret_or_key=SECRET)
 
@@ -92,7 +90,8 @@ class TestJwtClaims:
     def test_is_expired_false_without_exp(self):
         # When no exp in payload, from_payload sets exp=now; claims default is not-expired
         # Test the is_expired logic directly with a future exp
-        from datetime import datetime, timedelta, timezone
-        future = datetime.now(timezone.utc) + timedelta(hours=1)
+        from datetime import datetime, timedelta
+
+        future = datetime.now(UTC) + timedelta(hours=1)
         claims = JwtClaims(sub="u1", exp=future)
         assert not claims.is_expired()

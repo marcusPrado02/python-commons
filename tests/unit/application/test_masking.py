@@ -1,9 +1,7 @@
 """Unit tests for §73 – Data Masking / PII."""
-import hashlib
+
 import logging
 import uuid
-
-import pytest
 
 from mp_commons.application.masking import DataMasker, MaskingRule, PiiLogFilter
 
@@ -95,9 +93,13 @@ class TestPiiLogFilter:
     def test_masks_dict_msg(self):
         masker_filter = PiiLogFilter([MaskingRule("email", "redact")])
         record = logging.LogRecord(
-            name="test", level=logging.INFO, pathname="", lineno=0,
+            name="test",
+            level=logging.INFO,
+            pathname="",
+            lineno=0,
             msg={"email": "user@example.com", "text": "hello"},
-            args=(), exc_info=None,
+            args=(),
+            exc_info=None,
         )
         masker_filter.filter(record)
         assert record.msg["email"] == "***"
@@ -106,7 +108,12 @@ class TestPiiLogFilter:
     def test_filter_returns_true(self):
         f = PiiLogFilter([MaskingRule("ssn", "redact")])
         record = logging.LogRecord(
-            name="test", level=logging.INFO, pathname="", lineno=0,
-            msg="plain text", args=(), exc_info=None,
+            name="test",
+            level=logging.INFO,
+            pathname="",
+            lineno=0,
+            msg="plain text",
+            args=(),
+            exc_info=None,
         )
         assert f.filter(record) is True

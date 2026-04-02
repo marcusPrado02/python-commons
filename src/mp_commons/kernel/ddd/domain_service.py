@@ -25,9 +25,10 @@ class ServiceRegistry:
 
         registry = ServiceRegistry()
 
+
         @domain_service
-        class PricingService(DomainService):
-            ...
+        class PricingService(DomainService): ...
+
 
         # Later:
         svc = registry.get("PricingService")
@@ -40,9 +41,7 @@ class ServiceRegistry:
         """Register *service* under *name* (idempotent for identical objects)."""
         existing = self._store.get(name)
         if existing is not None and existing is not service:
-            raise ValueError(
-                f"A different service is already registered under {name!r}"
-            )
+            raise ValueError(f"A different service is already registered under {name!r}")
         self._store[name] = service
 
     def get(self, name: str) -> Any:
@@ -63,8 +62,7 @@ class ServiceRegistry:
         service = self.get(name)
         if not isinstance(service, cls):
             raise TypeError(
-                f"Service {name!r} is {type(service).__name__!r}, "
-                f"expected {cls.__name__!r}"
+                f"Service {name!r} is {type(service).__name__!r}, expected {cls.__name__!r}"
             )
         return service  # type: ignore[return-value]
 
@@ -83,7 +81,7 @@ class ServiceRegistry:
 _default_registry: ServiceRegistry = ServiceRegistry()
 
 
-def domain_service(cls: type[T]) -> type[T]:
+def domain_service[T](cls: type[T]) -> type[T]:
     """Class decorator — registers *cls* in the module-level ``ServiceRegistry``.
 
     The class is stored under its ``__name__`` and returned unchanged, so it
@@ -93,8 +91,7 @@ def domain_service(cls: type[T]) -> type[T]:
 
         @domain_service
         class OrderPricingService(DomainService):
-            def calculate(self, order: Order) -> Money:
-                ...
+            def calculate(self, order: Order) -> Money: ...
     """
     _default_registry.register(cls.__name__, cls)
     return cls

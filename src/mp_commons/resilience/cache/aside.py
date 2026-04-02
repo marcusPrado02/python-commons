@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Awaitable, Callable
 import functools
-from typing import Any, Awaitable, Callable, Generic, Protocol, TypeVar
+from typing import Any, Generic, Protocol, TypeVar
 
 __all__ = [
     "CacheAsidePolicy",

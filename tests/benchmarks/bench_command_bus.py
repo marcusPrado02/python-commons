@@ -9,7 +9,6 @@ Target: sustain ≥10 000 dispatches/s (median < 100 µs per dispatch).
 
 from __future__ import annotations
 
-import asyncio
 from typing import Any
 
 from mp_commons.application.cqrs.commands import (
@@ -19,7 +18,6 @@ from mp_commons.application.cqrs.commands import (
 )
 from mp_commons.application.pipeline.middleware import Middleware, Next
 from mp_commons.application.pipeline.pipeline import Pipeline
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -31,7 +29,7 @@ class _PlaceOrder(Command):
 
 
 class _PlaceOrderHandler(CommandHandler["_PlaceOrder"]):
-    async def handle(self, command: "_PlaceOrder") -> str:
+    async def handle(self, command: _PlaceOrder) -> str:
         return "ok"
 
 
@@ -79,9 +77,7 @@ def test_bus_dispatch_5_middleware_pipeline(benchmark, event_loop):
     cmd = _PlaceOrder()
 
     def run():
-        return event_loop.run_until_complete(
-            pipeline.execute(cmd, bus.dispatch)
-        )
+        return event_loop.run_until_complete(pipeline.execute(cmd, bus.dispatch))
 
     result = benchmark(run)
     assert result == "ok"
@@ -94,9 +90,7 @@ def test_bus_dispatch_pipeline_overhead(benchmark, event_loop):
     cmd = _PlaceOrder()
 
     def run():
-        return event_loop.run_until_complete(
-            pipeline.execute(cmd, bus.dispatch)
-        )
+        return event_loop.run_until_complete(pipeline.execute(cmd, bus.dispatch))
 
     result = benchmark(run)
     assert result == "ok"
@@ -112,9 +106,7 @@ def test_bus_dispatch_9_middleware_pipeline(benchmark, event_loop):
     cmd = _PlaceOrder()
 
     def run():
-        return event_loop.run_until_complete(
-            pipeline.execute(cmd, bus.dispatch)
-        )
+        return event_loop.run_until_complete(pipeline.execute(cmd, bus.dispatch))
 
     result = benchmark(run)
     assert result == "ok"

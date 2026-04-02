@@ -3,6 +3,7 @@
 Requires ``aioboto3>=13.0``.  All classes raise :class:`ImportError` when the
 library is absent.  Use mocking in unit tests.
 """
+
 from __future__ import annotations
 
 import dataclasses
@@ -175,6 +176,7 @@ class DynamoDBOutboxStore:
 
     async def get_pending(self, limit: int = 100) -> list[Any]:
         from boto3.dynamodb.conditions import Key  # type: ignore[import-untyped]
+
         from mp_commons.kernel.messaging.outbox import OutboxRecord, OutboxStatus
 
         async with self._resource_context() as dynamodb:
@@ -249,7 +251,7 @@ class DynamoDBIdempotencyStore:
         return self._session.resource("dynamodb", **kwargs)
 
     async def get(self, key: Any) -> Any | None:
-        from mp_commons.kernel.messaging.idempotency import IdempotencyKey, IdempotencyRecord
+        from mp_commons.kernel.messaging.idempotency import IdempotencyRecord
 
         async with self._resource_context() as dynamodb:
             table = await dynamodb.Table(self._table_name)
@@ -264,7 +266,6 @@ class DynamoDBIdempotencyStore:
             )
 
     async def save(self, key: Any, record: Any) -> None:
-        from mp_commons.kernel.messaging.idempotency import IdempotencyKey
 
         async with self._resource_context() as dynamodb:
             table = await dynamodb.Table(self._table_name)
@@ -285,7 +286,9 @@ class DynamoDBIdempotencyStore:
                     ExpressionAttributeNames={"#k": "key"},
                 )
             except Exception as exc:
-                if "ConditionalCheckFailed" in type(exc).__name__ or "ConditionalCheckFailed" in str(exc):
+                if "ConditionalCheckFailed" in type(
+                    exc
+                ).__name__ or "ConditionalCheckFailed" in str(exc):
                     from mp_commons.kernel.errors.domain import ConflictError
 
                     raise ConflictError(f"Idempotency key {key} already exists") from exc

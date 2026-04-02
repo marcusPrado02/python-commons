@@ -13,12 +13,13 @@ Key additions:
 
 from __future__ import annotations
 
+from collections.abc import Callable
 import dataclasses
 import functools
 import inspect
-from typing import Any, Callable, TypeVar
+from typing import Any, TypeVar
 
-from mp_commons.kernel.errors.application import ForbiddenError, UnauthorizedError
+from mp_commons.kernel.errors.application import ForbiddenError
 from mp_commons.kernel.security.principal import Permission, Principal
 from mp_commons.kernel.security.security_context import SecurityContext
 
@@ -66,25 +67,23 @@ class RBACRole:
 
         editor = RBACRole(
             name="editor",
-            permissions=frozenset({
-                Permission("articles:read"),
-                Permission("articles:write"),
-                Permission("articles:delete"),
-            }),
+            permissions=frozenset(
+                {
+                    Permission("articles:read"),
+                    Permission("articles:write"),
+                    Permission("articles:delete"),
+                }
+            ),
         )
     """
 
     name: str
-    permissions: frozenset[Permission] = dataclasses.field(
-        default_factory=frozenset
-    )
+    permissions: frozenset[Permission] = dataclasses.field(default_factory=frozenset)
 
     def has_permission(self, perm: Permission | str) -> bool:
         """Return ``True`` if this role grants *perm* (supports wildcard)."""
         required = perm.value if isinstance(perm, Permission) else perm
-        return any(
-            _permission_matches(p.value, required) for p in self.permissions
-        )
+        return any(_permission_matches(p.value, required) for p in self.permissions)
 
 
 # ---------------------------------------------------------------------------
@@ -154,19 +153,15 @@ class RBACPolicy:
         *,
         role_store: InMemoryRoleStore | None = None,
     ) -> None:
-        self._required = (
-            required if isinstance(required, Permission) else Permission(required)
-        )
+        self._required = required if isinstance(required, Permission) else Permission(required)
         self._role_store = role_store
 
-    def evaluate(self, principal: Principal) -> "RBACResult":
+    def evaluate(self, principal: Principal) -> RBACResult:
         """Evaluate *principal* against the required permission."""
         req = self._required.value
 
         # 1. Direct permission on the Principal
-        if any(
-            _permission_matches(p.value, req) for p in principal.permissions
-        ):
+        if any(_permission_matches(p.value, req) for p in principal.permissions):
             return RBACResult(allowed=True, principal=principal)
 
         # 2. Via role store (if provided)
@@ -221,8 +216,7 @@ def require_permission(
     Example::
 
         @require_permission("orders:cancel")
-        async def cancel_order(cmd: CancelOrderCommand) -> None:
-            ...
+        async def cancel_order(cmd: CancelOrderCommand) -> None: ...
     """
     policy = RBACPolicy(perm, role_store=role_store)
 

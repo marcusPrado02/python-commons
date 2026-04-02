@@ -1,8 +1,9 @@
 """HTTP stub server built on top of respx.MockRouter."""
+
 from __future__ import annotations
 
-from typing import Any, Callable
-from unittest.mock import AsyncMock
+from collections.abc import Callable
+from typing import Any
 
 __all__ = [
     "HttpStubServer",
@@ -35,17 +36,18 @@ class HttpStubServer:
 
     def __enter__(self) -> HttpStubServer:
         import respx
+
         self._router = respx.mock(assert_all_called=False).__enter__()
         return self
 
     def __exit__(self, *args: Any) -> None:
         if self._router is not None:
-            import respx
             self._router.__exit__(*args)
 
     # async context manager support
     async def __aenter__(self) -> HttpStubServer:
         import respx
+
         self._router = await respx.mock(assert_all_called=False).__aenter__()
         return self
 
@@ -61,7 +63,7 @@ class HttpStubServer:
         headers: dict[str, str] | None = None,
     ) -> None:
         """Register a GET stub for *url*."""
-        import httpx, respx
+        import httpx
 
         _url = url
         _call_counts = self._call_counts
@@ -116,9 +118,7 @@ class HttpStubServer:
         """Assert that *url* was called exactly *times* times."""
         actual = self._call_counts.get(url, 0)
         if actual != times:
-            raise StubCallCountError(
-                f"{url!r} was called {actual} time(s), expected {times}"
-            )
+            raise StubCallCountError(f"{url!r} was called {actual} time(s), expected {times}")
 
     def call_count(self, url: str) -> int:
         return self._call_counts.get(url, 0)

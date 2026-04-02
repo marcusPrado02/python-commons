@@ -1,15 +1,15 @@
 """Unit tests for §96 Load Testing — LoadReport and LoadTestRunner."""
+
 import asyncio
-import time
 
 import pytest
 
 from mp_commons.testing.load import LoadReport, LoadTestError, LoadTestRunner
 
-
 # ---------------------------------------------------------------------------
 # LoadReport percentile & assertion tests
 # ---------------------------------------------------------------------------
+
 
 def _make_report(latencies, failures=0, duration=1.0):
     return LoadReport(
@@ -109,14 +109,25 @@ def test_loadreport_assert_rps_above_raises():
 def test_loadreport_summary_keys():
     r = _make_report([10.0, 20.0, 30.0])
     s = r.summary()
-    for key in ("total_requests", "failures", "error_rate", "rps",
-                "p50_ms", "p95_ms", "p99_ms", "max_ms", "min_ms", "mean_ms"):
+    for key in (
+        "total_requests",
+        "failures",
+        "error_rate",
+        "rps",
+        "p50_ms",
+        "p95_ms",
+        "p99_ms",
+        "max_ms",
+        "min_ms",
+        "mean_ms",
+    ):
         assert key in s, f"Missing key: {key}"
 
 
 # ---------------------------------------------------------------------------
 # LoadTestRunner tests
 # ---------------------------------------------------------------------------
+
 
 def test_load_runner_collects_latencies():
     call_count = 0
@@ -265,7 +276,9 @@ class TestLocustHelpers:
 
     def test_is_approve_mode_is_false_by_default(self):
         """is_approve_mode returns False in a normal test environment."""
-        from mp_commons.testing.approval.plugin import is_approve_mode
         import os
+
+        from mp_commons.testing.approval.plugin import is_approve_mode
+
         os.environ.pop("MP_APPROVE", None)
         assert is_approve_mode() is False

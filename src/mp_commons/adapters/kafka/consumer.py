@@ -1,15 +1,17 @@
 """Kafka adapter – KafkaConsumer."""
+
 from __future__ import annotations
 
 from typing import Any
 
-from mp_commons.kernel.messaging import MessageSerializer
 from mp_commons.adapters.kafka.serializer import KafkaMessageSerializer
+from mp_commons.kernel.messaging import MessageSerializer
 
 
 def _require_aiokafka() -> Any:
     try:
         import aiokafka  # type: ignore[import-untyped]
+
         return aiokafka
     except ImportError as exc:
         raise ImportError("Install 'mp-commons[kafka]' to use the Kafka adapter") from exc
@@ -45,7 +47,7 @@ class KafkaConsumer:
         async for msg in self._consumer:
             yield msg
 
-    async def __aenter__(self) -> "KafkaConsumer":
+    async def __aenter__(self) -> KafkaConsumer:
         await self.start()
         return self
 

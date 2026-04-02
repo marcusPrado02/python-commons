@@ -1,17 +1,18 @@
 """Application GDPR – DataSubjectRequest, ErasureService, DataPortabilityExporter."""
+
 from __future__ import annotations
 
-import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Literal, Protocol, runtime_checkable
+import uuid
 
 __all__ = [
     "ConsentRecord",
     "ConsentStore",
     "DataErasedEvent",
-    "DataSubjectRequest",
     "DataPortabilityExporter",
+    "DataSubjectRequest",
     "Erasable",
     "ErasureResult",
     "ErasureService",
@@ -23,12 +24,13 @@ __all__ = [
 # Value objects
 # ---------------------------------------------------------------------------
 
+
 @dataclass(frozen=True)
 class DataSubjectRequest:
     subject_id: str
     type: Literal["erasure", "portability", "rectification"]
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
-    requested_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    requested_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     completed_at: datetime | None = None
 
 
@@ -43,12 +45,13 @@ class ErasureResult:
 class DataErasedEvent:
     subject_id: str
     results: tuple[ErasureResult, ...]
-    erased_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    erased_at: datetime = field(default_factory=lambda: datetime.now(UTC))
 
 
 # ---------------------------------------------------------------------------
 # Protocols
 # ---------------------------------------------------------------------------
+
 
 @runtime_checkable
 class Erasable(Protocol):
@@ -68,6 +71,7 @@ class Exportable(Protocol):
 # Services
 # ---------------------------------------------------------------------------
 
+
 class ErasureService:
     """Orchestrates erasure across all registered Erasable handlers."""
 
@@ -83,7 +87,7 @@ class ErasureService:
         for handler in self._handlers:
             try:
                 result = await handler.erase(subject_id)
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 result = ErasureResult(scope=handler.scope, success=False, detail=str(exc))
             results.append(result)
         event = DataErasedEvent(subject_id=subject_id, results=tuple(results))
@@ -106,7 +110,7 @@ class DataPortabilityExporter:
             try:
                 data = await handler.export(subject_id)
                 merged[handler.scope] = data
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 merged[handler.scope] = {"error": str(exc)}
         return merged
 
@@ -115,18 +119,19 @@ class DataPortabilityExporter:
 # Consent
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class ConsentRecord:
     subject_id: str
     purpose: str
     granted: bool
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
-    granted_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    granted_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     withdrawn_at: datetime | None = None
 
     def withdraw(self) -> None:
         self.granted = False
-        self.withdrawn_at = datetime.now(timezone.utc)
+        self.withdrawn_at = datetime.now(UTC)
 
 
 @runtime_checkable

@@ -1,11 +1,13 @@
 """Load test runner and report."""
+
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Awaitable, Callable
+from dataclasses import dataclass, field
 import statistics
 import time
-from dataclasses import dataclass, field
-from typing import Any, Awaitable, Callable
+from typing import Any
 
 __all__ = [
     "LoadReport",
@@ -79,22 +81,16 @@ class LoadReport:
     def assert_p99_below(self, ms: float) -> None:
         """Assert that the 99th percentile latency is below *ms* milliseconds."""
         if self.p99_ms > ms:
-            raise LoadTestError(
-                f"p99 latency {self.p99_ms:.1f} ms exceeds threshold {ms} ms"
-            )
+            raise LoadTestError(f"p99 latency {self.p99_ms:.1f} ms exceeds threshold {ms} ms")
 
     def assert_error_rate_below(self, rate: float) -> None:
         """Assert that the error rate is below *rate* (0.0–1.0)."""
         if self.error_rate > rate:
-            raise LoadTestError(
-                f"error rate {self.error_rate:.2%} exceeds threshold {rate:.2%}"
-            )
+            raise LoadTestError(f"error rate {self.error_rate:.2%} exceeds threshold {rate:.2%}")
 
     def assert_rps_above(self, min_rps: float) -> None:
         if self.rps < min_rps:
-            raise LoadTestError(
-                f"rps {self.rps:.1f} is below minimum {min_rps}"
-            )
+            raise LoadTestError(f"rps {self.rps:.1f} is below minimum {min_rps}")
 
     def summary(self) -> dict[str, Any]:
         return {
@@ -144,7 +140,7 @@ class LoadTestRunner:
                 t0 = time.perf_counter()
                 try:
                     await scenario_fn()
-                except Exception:  # noqa: BLE001
+                except Exception:
                     self._failures += 1
                 finally:
                     elapsed_ms = (time.perf_counter() - t0) * 1000
@@ -152,10 +148,7 @@ class LoadTestRunner:
                     self._total += 1
 
         ramp_step = ramp_up_sec / max(users, 1)
-        tasks = [
-            asyncio.create_task(_user_loop(i * ramp_step))
-            for i in range(users)
-        ]
+        tasks = [asyncio.create_task(_user_loop(i * ramp_step)) for i in range(users)]
         await asyncio.gather(*tasks, return_exceptions=True)
 
         actual_duration = time.perf_counter() - start_wall

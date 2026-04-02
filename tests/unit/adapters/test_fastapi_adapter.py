@@ -1,22 +1,22 @@
 """Unit / integration tests for §26 – FastAPI adapter."""
+
 from __future__ import annotations
 
-import asyncio
 from typing import Any
 
-import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+import pytest
 
 # Imported at module level so FastAPI can resolve string-form annotations
 # (from __future__ import annotations makes all hints lazy strings, and
 # FastAPI resolves them against the defining module's globals).
-from mp_commons.adapters.fastapi.deps import FastAPIPaginationDep  # noqa: E402
-
+from mp_commons.adapters.fastapi.deps import FastAPIPaginationDep
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def make_app() -> FastAPI:
     return FastAPI()
@@ -25,6 +25,7 @@ def make_app() -> FastAPI:
 # ---------------------------------------------------------------------------
 # §26.1  FastAPICorrelationIdMiddleware
 # ---------------------------------------------------------------------------
+
 
 class TestFastAPICorrelationIdMiddleware:
     """§26.1 – Correlation ID injection."""
@@ -88,6 +89,7 @@ class TestFastAPICorrelationIdMiddleware:
 # §26.2  FastAPITenantMiddleware
 # ---------------------------------------------------------------------------
 
+
 class TestFastAPITenantMiddleware:
     """§26.2 – Tenant context from header."""
 
@@ -106,7 +108,8 @@ class TestFastAPITenantMiddleware:
 
         client = TestClient(app)
         client.get("/t", headers={"X-Tenant-ID": "tenant-abc"})
-        assert captured and str(captured[0]) == "tenant-abc"
+        assert captured
+        assert str(captured[0]) == "tenant-abc"
 
     def test_missing_header_no_tenant(self) -> None:
         from mp_commons.adapters.fastapi import FastAPITenantMiddleware
@@ -127,6 +130,7 @@ class TestFastAPITenantMiddleware:
 # §26.3  FastAPISecurityMiddleware
 # ---------------------------------------------------------------------------
 
+
 class TestFastAPISecurityMiddleware:
     """§26.3 – Bearer token extraction + optional auth."""
 
@@ -135,6 +139,7 @@ class TestFastAPISecurityMiddleware:
             if token == "good-token":
                 return principal
             return None
+
         return verify
 
     def test_no_verifier_passes_through(self) -> None:
@@ -189,7 +194,8 @@ class TestFastAPISecurityMiddleware:
         client = TestClient(app)
         resp = client.get("/sec", headers={"Authorization": "Bearer good-token"})
         assert resp.status_code == 200
-        assert captured and captured[0] is principal
+        assert captured
+        assert captured[0] is principal
 
     def test_invalid_token_with_require_auth_returns_401(self) -> None:
         from mp_commons.adapters.fastapi import FastAPISecurityMiddleware
@@ -214,14 +220,25 @@ class TestFastAPISecurityMiddleware:
 # §26.4  FastAPIExceptionMapper
 # ---------------------------------------------------------------------------
 
+
 class TestFastAPIExceptionMapper:
     """§26.4 – Error → HTTP status code and body shape."""
 
     def _app_with_errors(self) -> FastAPI:
-        from mp_commons.adapters.fastapi import FastAPICorrelationIdMiddleware, FastAPIExceptionMapper
+        from mp_commons.adapters.fastapi import (
+            FastAPICorrelationIdMiddleware,
+            FastAPIExceptionMapper,
+        )
         from mp_commons.kernel.errors import (
-            ConflictError, DomainError, ForbiddenError, InfrastructureError,
-            NotFoundError, RateLimitError, TimeoutError, UnauthorizedError, ValidationError,
+            ConflictError,
+            DomainError,
+            ForbiddenError,
+            InfrastructureError,
+            NotFoundError,
+            RateLimitError,
+            TimeoutError,
+            UnauthorizedError,
+            ValidationError,
         )
 
         app = FastAPI()
@@ -245,17 +262,20 @@ class TestFastAPIExceptionMapper:
 
         return app
 
-    @pytest.mark.parametrize("kind,expected_status", [
-        ("validation", 400),
-        ("notfound", 404),
-        ("conflict", 409),
-        ("unauthorized", 401),
-        ("forbidden", 403),
-        ("ratelimit", 429),
-        ("timeout", 504),
-        ("domain", 422),
-        ("infrastructure", 503),
-    ])
+    @pytest.mark.parametrize(
+        ("kind", "expected_status"),
+        [
+            ("validation", 400),
+            ("notfound", 404),
+            ("conflict", 409),
+            ("unauthorized", 401),
+            ("forbidden", 403),
+            ("ratelimit", 429),
+            ("timeout", 504),
+            ("domain", 422),
+            ("infrastructure", 503),
+        ],
+    )
     def test_error_status_codes(self, kind: str, expected_status: int) -> None:
         client = TestClient(self._app_with_errors(), raise_server_exceptions=False)
         resp = client.get(f"/raise/{kind}")
@@ -278,6 +298,7 @@ class TestFastAPIExceptionMapper:
 # ---------------------------------------------------------------------------
 # §26.5  FastAPIHealthRouter
 # ---------------------------------------------------------------------------
+
 
 class TestFastAPIHealthRouter:
     """§26.5 – Health endpoints."""
@@ -342,11 +363,11 @@ class TestFastAPIHealthRouter:
 # §26.8  FastAPIPaginationDep
 # ---------------------------------------------------------------------------
 
+
 class TestFastAPIPaginationDep:
     """§26.8 – Pagination dependency injection."""
 
     def _app(self) -> FastAPI:
-        from mp_commons.adapters.fastapi.deps import FastAPIPaginationDep
 
         app = FastAPI()
 
@@ -409,6 +430,7 @@ class TestFastAPIPaginationDep:
 # §26.9  FastAPIRateLimitMiddleware
 # ---------------------------------------------------------------------------
 
+
 class TestFastAPIRateLimitMiddleware:
     """§26.9 – Rate-limit middleware."""
 
@@ -446,12 +468,16 @@ class TestFastAPIRateLimitMiddleware:
         assert resp.status_code == 200
 
     def test_denied_request_returns_429(self) -> None:
-        client = TestClient(self._app(allowed=False, retry_after=10.0), raise_server_exceptions=False)
+        client = TestClient(
+            self._app(allowed=False, retry_after=10.0), raise_server_exceptions=False
+        )
         resp = client.get("/data")
         assert resp.status_code == 429
 
     def test_retry_after_header_present(self) -> None:
-        client = TestClient(self._app(allowed=False, retry_after=10.0), raise_server_exceptions=False)
+        client = TestClient(
+            self._app(allowed=False, retry_after=10.0), raise_server_exceptions=False
+        )
         resp = client.get("/data")
         assert "retry-after" in resp.headers
         assert int(resp.headers["retry-after"]) >= 10
@@ -467,16 +493,19 @@ class TestFastAPIRateLimitMiddleware:
 # §26.10  error_responses helper
 # ---------------------------------------------------------------------------
 
+
 class TestErrorResponses:
     """§26.10 – OpenAPI extra helpers."""
 
     def test_returns_dict_with_requested_codes(self) -> None:
         from mp_commons.adapters.fastapi.deps import error_responses
+
         result = error_responses(400, 404, 422)
         assert set(result.keys()) == {"400", "404", "422"}
 
     def test_each_entry_has_description_and_content(self) -> None:
         from mp_commons.adapters.fastapi.deps import error_responses
+
         result = error_responses(404)
         entry = result["404"]
         assert "description" in entry
@@ -484,6 +513,7 @@ class TestErrorResponses:
 
     def test_schema_contains_code_and_message(self) -> None:
         from mp_commons.adapters.fastapi.deps import error_responses
+
         result = error_responses(400)
         schema = result["400"]["content"]["application/json"]["schema"]  # type: ignore[index]
         assert "code" in schema["properties"]
@@ -491,12 +521,14 @@ class TestErrorResponses:
 
     def test_example_has_correlation_id(self) -> None:
         from mp_commons.adapters.fastapi.deps import error_responses
+
         result = error_responses(422)
         example = result["422"]["content"]["application/json"]["example"]  # type: ignore[index]
         assert "correlation_id" in example
 
     def test_unknown_code_handled_gracefully(self) -> None:
         from mp_commons.adapters.fastapi.deps import error_responses
+
         result = error_responses(418)
         assert "418" in result
 
@@ -539,7 +571,8 @@ class TestFastAPITenantMiddlewareRequireTenant:
         client = TestClient(app)
         resp = client.get("/t", headers={"X-Tenant-ID": "acme"})
         assert resp.status_code == 200
-        assert captured and str(captured[0]) == "acme"
+        assert captured
+        assert str(captured[0]) == "acme"
 
     def test_require_tenant_false_allows_missing_header(self) -> None:
         """require_tenant=False (default) does not block missing header."""

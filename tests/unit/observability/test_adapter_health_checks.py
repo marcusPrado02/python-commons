@@ -1,11 +1,9 @@
 """Unit tests for adapter health checks (R-05)."""
+
 from __future__ import annotations
 
 import sys
-import types
 from unittest.mock import AsyncMock, MagicMock, patch
-
-import pytest
 
 from mp_commons.observability.health.adapters import (
     ElasticsearchHealthCheck,
@@ -13,7 +11,6 @@ from mp_commons.observability.health.adapters import (
     NatsHealthCheck,
     RabbitMQHealthCheck,
 )
-
 
 # ---------------------------------------------------------------------------
 # KafkaHealthCheck
@@ -135,9 +132,9 @@ class TestRabbitMQHealthCheck:
         http_client.__aexit__ = AsyncMock(return_value=None)
         http_client.get = AsyncMock(return_value=response)
 
-        import mp_commons.observability.health.adapters as _mod
-
-        with patch.dict(sys.modules, {"httpx": MagicMock(AsyncClient=MagicMock(return_value=http_client))}):
+        with patch.dict(
+            sys.modules, {"httpx": MagicMock(AsyncClient=MagicMock(return_value=http_client))}
+        ):
             status = await check.check()
 
         assert status.healthy
@@ -151,7 +148,9 @@ class TestRabbitMQHealthCheck:
         http_client.__aexit__ = AsyncMock(return_value=None)
         http_client.get = AsyncMock(return_value=response)
 
-        with patch.dict(sys.modules, {"httpx": MagicMock(AsyncClient=MagicMock(return_value=http_client))}):
+        with patch.dict(
+            sys.modules, {"httpx": MagicMock(AsyncClient=MagicMock(return_value=http_client))}
+        ):
             status = await check.check()
 
         assert not status.healthy
@@ -180,7 +179,9 @@ class TestElasticsearchHealthCheck:
         http_client.__aexit__ = AsyncMock(return_value=None)
         http_client.get = AsyncMock(return_value=response)
 
-        with patch.dict(sys.modules, {"httpx": MagicMock(AsyncClient=MagicMock(return_value=http_client))}):
+        with patch.dict(
+            sys.modules, {"httpx": MagicMock(AsyncClient=MagicMock(return_value=http_client))}
+        ):
             status = await check.check()
 
         assert status.healthy
@@ -196,7 +197,9 @@ class TestElasticsearchHealthCheck:
         http_client.__aexit__ = AsyncMock(return_value=None)
         http_client.get = AsyncMock(return_value=response)
 
-        with patch.dict(sys.modules, {"httpx": MagicMock(AsyncClient=MagicMock(return_value=http_client))}):
+        with patch.dict(
+            sys.modules, {"httpx": MagicMock(AsyncClient=MagicMock(return_value=http_client))}
+        ):
             status = await check.check()
 
         assert not status.healthy

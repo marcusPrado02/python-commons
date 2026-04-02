@@ -1,16 +1,16 @@
 """FastAPI adapter – health / metrics routers (§26.5)."""
+
 from __future__ import annotations
 
-from typing import Any, Awaitable, Callable
+from collections.abc import Awaitable, Callable
+from typing import Any
 
 
 def _require_fastapi() -> None:
     try:
         import fastapi  # noqa: F401
     except ImportError as exc:
-        raise ImportError(
-            "Install 'mp-commons[fastapi]' to use the FastAPI adapter"
-        ) from exc
+        raise ImportError("Install 'mp-commons[fastapi]' to use the FastAPI adapter") from exc
 
 
 ReadinessCheck = Callable[[], Awaitable[bool]]
@@ -56,7 +56,7 @@ def FastAPIHealthRouter(
             name = getattr(check, "__name__", repr(check))
             try:
                 ok = await check()
-            except Exception:  # noqa: BLE001
+            except Exception:
                 ok = False
             results[name] = ok
             if not ok:
@@ -83,6 +83,7 @@ def FastAPIMetricsRouter(path: str = "/metrics") -> Any:
     async def metrics() -> str:
         try:
             from prometheus_client import generate_latest  # type: ignore[import-untyped]
+
             return generate_latest().decode()
         except ImportError:
             return "# prometheus_client not installed\n"

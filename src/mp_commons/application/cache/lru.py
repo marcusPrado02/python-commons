@@ -9,6 +9,7 @@ Usage::
 
     cache = AsyncLRUCache(maxsize=512, ttl=60.0)
 
+
     async def get_permissions(user_id: str) -> list[str]:
         cached = await cache.get(user_id)
         if cached is not None:
@@ -17,15 +18,18 @@ Usage::
         await cache.set(user_id, perms)
         return perms
 
+
     # Or with the get_or_load helper:
     perms = await cache.get_or_load(user_id, loader=db.fetch_permissions)
 """
+
 from __future__ import annotations
 
 import asyncio
-import time
 from collections import OrderedDict
-from typing import Any, Callable, Coroutine, TypeVar
+from collections.abc import Callable, Coroutine
+import time
+from typing import Any, TypeVar
 
 _T = TypeVar("_T")
 

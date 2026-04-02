@@ -1,4 +1,5 @@
 """Application GDPR – data subject rights."""
+
 from mp_commons.application.gdpr.erasure import (
     ConsentRecord,
     ConsentStore,

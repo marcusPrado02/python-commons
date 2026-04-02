@@ -1,7 +1,9 @@
 """Tests for §9.10 – @command_handler / @query_handler auto-registration decorators."""
+
 from __future__ import annotations
 
 import dataclasses
+
 import pytest
 
 from mp_commons.application.cqrs import (
@@ -19,10 +21,10 @@ from mp_commons.application.cqrs import (
 )
 from mp_commons.application.cqrs.decorators import _COMMAND_REGISTRY, _QUERY_REGISTRY
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 @dataclasses.dataclass
 class _AddCmd(Command):
@@ -94,6 +96,7 @@ class TestCommandHandlerDecorator:
         bus = make_command_bus()
 
         import asyncio
+
         asyncio.run(bus.dispatch(_AddCmd(value=42)))
         assert received == [42]
 
@@ -160,6 +163,7 @@ class TestQueryHandlerDecorator:
 
         bus = make_query_bus()
         import asyncio
+
         result = asyncio.run(bus.ask(_FindQuery(key="x")))
         assert isinstance(result, _Result)
         assert result.value == 99

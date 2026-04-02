@@ -1,10 +1,8 @@
 """Unit tests for GracefulShutdown (R-02)."""
+
 from __future__ import annotations
 
 import asyncio
-import signal
-
-import pytest
 
 from mp_commons.resilience.graceful_shutdown import GracefulShutdown
 

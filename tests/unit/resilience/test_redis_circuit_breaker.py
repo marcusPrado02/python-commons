@@ -4,6 +4,7 @@ Uses a FakeRedis implementation to avoid requiring a real Redis server.
 Covers: state transitions, failure threshold, probe lock, reset, and
 excluded exceptions.
 """
+
 from __future__ import annotations
 
 import time
@@ -16,7 +17,6 @@ from mp_commons.resilience.circuit_breaker.errors import CircuitOpenError
 from mp_commons.resilience.circuit_breaker.policy import CircuitBreakerPolicy
 from mp_commons.resilience.circuit_breaker.redis_breaker import RedisCircuitBreaker
 from mp_commons.resilience.circuit_breaker.state import CircuitBreakerState
-
 
 # ---------------------------------------------------------------------------
 # Minimal in-memory Redis stub
@@ -34,7 +34,9 @@ class FakeRedis:
         val = self._data.get(key)
         return val.encode() if val is not None else None
 
-    async def set(self, key: str, value: str, *, nx: bool = False, xx: bool = False, px: int | None = None) -> bool | None:
+    async def set(
+        self, key: str, value: str, *, nx: bool = False, xx: bool = False, px: int | None = None
+    ) -> bool | None:
         if nx and key in self._data:
             return None  # NX = only set if Not eXists
         if xx and key not in self._data:
@@ -97,7 +99,8 @@ def _make_breaker(
     b = RedisCircuitBreaker(
         name="test-svc",
         redis=r,
-        policy=policy or CircuitBreakerPolicy(
+        policy=policy
+        or CircuitBreakerPolicy(
             failure_threshold=3,
             success_threshold=2,
             timeout_seconds=30.0,
@@ -215,9 +218,7 @@ class TestHalfOpenRecovery:
 
     @pytest.mark.asyncio
     async def test_half_open_probe_succeeds_then_closes(self):
-        policy = CircuitBreakerPolicy(
-            failure_threshold=2, timeout_seconds=0.0, success_threshold=1
-        )
+        policy = CircuitBreakerPolicy(failure_threshold=2, timeout_seconds=0.0, success_threshold=1)
         b, r = _make_breaker(policy)
 
         # Manually set HALF_OPEN state
@@ -248,7 +249,7 @@ class TestHalfOpenRecovery:
 class TestReset:
     @pytest.mark.asyncio
     async def test_reset_clears_state(self):
-        b, r = _make_breaker(CircuitBreakerPolicy(failure_threshold=2))
+        b, _r = _make_breaker(CircuitBreakerPolicy(failure_threshold=2))
 
         async def fail():
             raise RuntimeError("err")

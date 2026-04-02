@@ -3,6 +3,7 @@
 For Strawberry-GraphQL integration install ``strawberry-graphql>=0.220``.
 The cursor utilities and error handler work without Strawberry.
 """
+
 from __future__ import annotations
 
 from mp_commons.adapters.graphql.pagination import (

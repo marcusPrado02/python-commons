@@ -1,11 +1,10 @@
 """Unit tests for the Elasticsearch adapter (§48)."""
+
 from __future__ import annotations
 
 import sys
 import types
-from unittest.mock import AsyncMock, MagicMock, patch
-
-import pytest
+from unittest.mock import AsyncMock, MagicMock
 
 # ---------------------------------------------------------------------------
 # Stub the elasticsearch package so tests run without the real library
@@ -24,12 +23,11 @@ _async_es_class = MagicMock(name="AsyncElasticsearch")
 _es_module.AsyncElasticsearch = _async_es_class  # type: ignore[attr-defined]
 sys.modules.setdefault("elasticsearch", _es_module)
 
-from mp_commons.adapters.elasticsearch.client import (  # noqa: E402
+from mp_commons.adapters.elasticsearch.client import (
     ElasticsearchClient,
     ElasticsearchRepository,
     ElasticsearchSearchQuery,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -41,7 +39,9 @@ def _make_client() -> tuple[ElasticsearchClient, MagicMock]:
     mock_inner.index = AsyncMock()
     mock_inner.get = AsyncMock(return_value={"_source": {"id": "1", "name": "Alice"}})
     mock_inner.delete = AsyncMock()
-    mock_inner.search = AsyncMock(return_value={"hits": {"hits": [{"_source": {"id": "1", "name": "Alice"}}]}})
+    mock_inner.search = AsyncMock(
+        return_value={"hits": {"hits": [{"_source": {"id": "1", "name": "Alice"}}]}}
+    )
     mock_inner.close = AsyncMock()
     _async_es_class.return_value = mock_inner
     client = ElasticsearchClient("http://localhost:9200", index_prefix="test_")
@@ -118,12 +118,13 @@ def test_client_index_calls_inner():
         await client.index("1", {"name": "Alice"}, index="users")
 
     import asyncio
+
     asyncio.run(run())
     mock_inner.index.assert_called_once_with(index="test_users", id="1", document={"name": "Alice"})
 
 
 def test_client_get_returns_source():
-    client, mock_inner = _make_client()
+    client, _mock_inner = _make_client()
 
     async def run():
         return await client.get("1", index="users")
@@ -154,7 +155,7 @@ def test_client_delete_calls_inner():
 
 
 def test_client_search_returns_sources():
-    client, mock_inner = _make_client()
+    client, _mock_inner = _make_client()
 
     async def run():
         return await client.search({"query": {"match_all": {}}}, index="users")
@@ -184,7 +185,7 @@ class _User:
 
 
 def test_repository_find_by_id():
-    client, mock_inner = _make_client()
+    client, _mock_inner = _make_client()
     repo = ElasticsearchRepository(client, "users", _User)
 
     result = __import__("asyncio").run(repo.find_by_id("1"))
@@ -209,9 +210,7 @@ def test_repository_save():
     user = _User(id="42", name="Bob")
 
     __import__("asyncio").run(repo.save(user))
-    mock_inner.index.assert_called_once_with(
-        index="test_users", id="42", document={"name": "Bob"}
-    )
+    mock_inner.index.assert_called_once_with(index="test_users", id="42", document={"name": "Bob"})
 
 
 def test_repository_search():

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 
@@ -28,7 +28,6 @@ from mp_commons.kernel.ddd import (
 )
 from mp_commons.kernel.errors import InvariantViolationError, ValidationError
 from mp_commons.kernel.types import EntityId, TenantId
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -123,7 +122,7 @@ class TestDomainEvent:
         evt = UserCreated(user_id="u1")
         assert evt.event_id
         assert isinstance(evt.occurred_at, datetime)
-        assert evt.occurred_at.tzinfo == timezone.utc
+        assert evt.occurred_at.tzinfo == UTC
 
     def test_frozen(self) -> None:
         evt = UserCreated(user_id="u1")
@@ -641,7 +640,7 @@ class TestNoneOfPolicy:
 
 class TestExpiryPolicy:
     def test_within_window(self) -> None:
-        from datetime import datetime, timezone
+        from datetime import datetime
 
         from mp_commons.kernel.ddd.policies import ExpiryPolicy
 
@@ -649,15 +648,15 @@ class TestExpiryPolicy:
         class Ctx:
             timestamp: datetime
 
-        now = datetime(2026, 6, 1, tzinfo=timezone.utc)
+        now = datetime(2026, 6, 1, tzinfo=UTC)
         policy = ExpiryPolicy(
-            not_before=datetime(2026, 1, 1, tzinfo=timezone.utc),
-            not_after=datetime(2026, 12, 31, tzinfo=timezone.utc),
+            not_before=datetime(2026, 1, 1, tzinfo=UTC),
+            not_after=datetime(2026, 12, 31, tzinfo=UTC),
         )
         assert policy.evaluate(Ctx(timestamp=now)).allowed
 
     def test_before_not_before(self) -> None:
-        from datetime import datetime, timezone
+        from datetime import datetime
 
         from mp_commons.kernel.ddd.policies import ExpiryPolicy
 
@@ -665,12 +664,12 @@ class TestExpiryPolicy:
         class Ctx:
             timestamp: datetime
 
-        policy = ExpiryPolicy(not_before=datetime(2026, 6, 1, tzinfo=timezone.utc))
-        result = policy.evaluate(Ctx(timestamp=datetime(2026, 1, 1, tzinfo=timezone.utc)))
+        policy = ExpiryPolicy(not_before=datetime(2026, 6, 1, tzinfo=UTC))
+        result = policy.evaluate(Ctx(timestamp=datetime(2026, 1, 1, tzinfo=UTC)))
         assert not result.allowed
 
     def test_after_not_after(self) -> None:
-        from datetime import datetime, timezone
+        from datetime import datetime
 
         from mp_commons.kernel.ddd.policies import ExpiryPolicy
 
@@ -678,12 +677,12 @@ class TestExpiryPolicy:
         class Ctx:
             timestamp: datetime
 
-        policy = ExpiryPolicy(not_after=datetime(2026, 3, 1, tzinfo=timezone.utc))
-        result = policy.evaluate(Ctx(timestamp=datetime(2026, 12, 1, tzinfo=timezone.utc)))
+        policy = ExpiryPolicy(not_after=datetime(2026, 3, 1, tzinfo=UTC))
+        result = policy.evaluate(Ctx(timestamp=datetime(2026, 12, 1, tzinfo=UTC)))
         assert not result.allowed
 
     def test_no_bounds_always_allows(self) -> None:
-        from datetime import datetime, timezone
+        from datetime import datetime
 
         from mp_commons.kernel.ddd.policies import ExpiryPolicy
 
@@ -692,7 +691,7 @@ class TestExpiryPolicy:
             timestamp: datetime
 
         policy = ExpiryPolicy()
-        assert policy.evaluate(Ctx(timestamp=datetime.now(timezone.utc))).allowed
+        assert policy.evaluate(Ctx(timestamp=datetime.now(UTC))).allowed
 
 
 # ===========================================================================
@@ -769,7 +768,7 @@ class TestServiceRegistry:
         assert "a" not in r
 
     def test_domain_service_decorator_registers(self) -> None:
-        from mp_commons.kernel.ddd import domain_service, get_default_registry, DomainService
+        from mp_commons.kernel.ddd import DomainService, domain_service, get_default_registry
 
         registry = get_default_registry()
         registry.clear()
@@ -781,7 +780,7 @@ class TestServiceRegistry:
         assert registry.get("MySvc") is MySvc
 
     def test_domain_service_decorator_idempotent(self) -> None:
-        from mp_commons.kernel.ddd import domain_service, get_default_registry, DomainService
+        from mp_commons.kernel.ddd import DomainService, domain_service, get_default_registry
 
         registry = get_default_registry()
         registry.clear()
@@ -913,13 +912,19 @@ class TestQuotaPolicy:
 
     def _make_result(self, allowed: bool, remaining: int = 0, retry_after: float = 0.0):
         from datetime import UTC, datetime, timedelta
+
         from mp_commons.application.rate_limit.rate_limiter import (
-            Quota, RateLimitDecision, RateLimitResult
+            Quota,
+            RateLimitDecision,
+            RateLimitResult,
         )
+
         quota = Quota(key="test", limit=10, window_seconds=60)
         decision = RateLimitDecision.ALLOWED if allowed else RateLimitDecision.DENIED
         reset_at = datetime.now(UTC) + timedelta(seconds=retry_after)
-        return RateLimitResult(decision=decision, remaining=remaining, reset_at=reset_at, quota=quota)
+        return RateLimitResult(
+            decision=decision, remaining=remaining, reset_at=reset_at, quota=quota
+        )
 
     def test_allows_when_quota_not_exceeded(self) -> None:
         from mp_commons.kernel.ddd.policies import QuotaPolicy
@@ -949,8 +954,7 @@ class TestQuotaPolicy:
         assert "test" in (outcome.reason or "")
 
     def test_policy_composes_with_allaof(self) -> None:
-        from mp_commons.kernel.ddd.policies import QuotaPolicy, AllOf, PolicyResult
-        from mp_commons.kernel.ddd.policies import Policy
+        from mp_commons.kernel.ddd.policies import AllOf, Policy, PolicyResult, QuotaPolicy
 
         class AlwaysAllow(Policy):
             def evaluate(self, ctx) -> PolicyResult:

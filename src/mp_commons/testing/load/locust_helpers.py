@@ -12,6 +12,7 @@ Example::
     from locust import task
     from mp_commons.testing.load.locust_helpers import LocustKernelUser, task_with_metrics
 
+
     class MyUser(LocustKernelUser):
         host = "http://localhost:8000"
 
@@ -20,11 +21,13 @@ Example::
         def hit_endpoint(self) -> None:
             self.client.get("/api/health")
 """
+
 from __future__ import annotations
 
+from collections.abc import Callable
 import functools
 import time
-from typing import Any, Callable, TypeVar
+from typing import Any, TypeVar
 
 F = TypeVar("F", bound=Callable[..., Any])
 
@@ -36,8 +39,7 @@ def _require_locust() -> Any:
         return locust
     except ImportError as exc:
         raise ImportError(
-            "locust is required for LocustKernelUser. "
-            "Install it with: pip install 'locust>=2.20'"
+            "locust is required for LocustKernelUser. Install it with: pip install 'locust>=2.20'"
         ) from exc
 
 
@@ -78,8 +80,9 @@ class LocustKernelUser:
                 issubclass(b, HttpUser) for b in cls.__mro__[1:] if b is not cls
             ):
                 # Patch the MRO to include HttpUser if not already present
-                cls.__bases__ = (HttpUser,) + tuple(
-                    b for b in cls.__bases__ if b is not LocustKernelUser
+                cls.__bases__ = (
+                    HttpUser,
+                    *tuple(b for b in cls.__bases__ if b is not LocustKernelUser),
                 )
         except ImportError:
             pass  # Locust not installed — allow class definition to succeed for testing
@@ -155,7 +158,7 @@ def task_with_metrics(
                 pass
 
             start = time.perf_counter()
-            start_ts = int(time.time() * 1000)
+            int(time.time() * 1000)
             exc: Exception | None = None
             try:
                 return func(self, *args, **kwargs)
@@ -166,7 +169,7 @@ def task_with_metrics(
                 elapsed_ms = int((time.perf_counter() - start) * 1000)
                 # Fire Locust request event if available
                 try:
-                    from locust import events  # type: ignore[import-untyped]
+                    import locust  # type: ignore[import-untyped]  # noqa: F401
 
                     environment = getattr(self, "environment", None)
                     if environment is not None:

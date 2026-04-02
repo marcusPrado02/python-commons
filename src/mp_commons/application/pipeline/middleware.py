@@ -1,8 +1,10 @@
 """Application pipeline – Middleware base."""
+
 from __future__ import annotations
 
 import abc
-from typing import Any, Awaitable, Callable
+from collections.abc import Awaitable, Callable
+from typing import Any
 
 Handler = Callable[[Any], Awaitable[Any]]
 Next = Callable[[Any], Awaitable[Any]]

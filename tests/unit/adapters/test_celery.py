@@ -1,20 +1,16 @@
 """Unit tests for the Celery task-bus adapter (§50)."""
+
 from __future__ import annotations
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
-
-import pytest
+from unittest.mock import MagicMock
 
 from mp_commons.adapters.celery.task_bus import (
     CeleryResultBackend,
     CeleryTaskBus,
-    DispatchedTask,
     InMemoryTaskBus,
-    TaskResult,
     TaskStatus,
 )
-
 
 # ---------------------------------------------------------------------------
 # InMemoryTaskBus

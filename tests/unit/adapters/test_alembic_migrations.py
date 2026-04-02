@@ -1,4 +1,5 @@
 """Unit tests for Alembic env boilerplate generator (§27.6)."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -11,7 +12,6 @@ from mp_commons.adapters.sqlalchemy.migrations import (
     ALEMBIC_SCRIPT_MAKO,
     generate_alembic_files,
 )
-
 
 # ---------------------------------------------------------------------------
 # Template content sanity checks

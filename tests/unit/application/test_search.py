@@ -1,13 +1,11 @@
 """Unit tests for §70 – Search Abstraction."""
-import asyncio
 
-import pytest
+import asyncio
 
 from mp_commons.application.search import (
     Filter,
     InMemorySearchEngine,
     SearchQuery,
-    SearchResult,
     SortField,
 )
 

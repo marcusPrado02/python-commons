@@ -1,14 +1,13 @@
 """Approval test asserters."""
+
 from __future__ import annotations
 
 import difflib
-import html as _html_module
+from html.parser import HTMLParser
 import json
 import os
-import re
-from html.parser import HTMLParser
 from pathlib import Path
-from typing import Any
+import re
 
 __all__ = [
     "ApprovalAsserter",
@@ -86,9 +85,7 @@ class ApprovalAsserter:
                 lineterm="",
             )
         )
-        raise ApprovalError(
-            f"Approval mismatch for {test_name!r}:\n{diff}"
-        )
+        raise ApprovalError(f"Approval mismatch for {test_name!r}:\n{diff}")
 
     def approved_file_exists(self, test_name: str) -> bool:
         return self._approved_path(test_name).exists()
@@ -117,7 +114,6 @@ _TIMESTAMP_RE = re.compile(
 
 def _pretty_html(raw: str) -> str:
     """Re-indent HTML using stdlib html.parser for deterministic comparison."""
-    import html as _html
 
     # Unescape entities then re-format with consistent indentation via minidom
     try:

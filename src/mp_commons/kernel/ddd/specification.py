@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import abc
-from typing import Callable, Generic, TypeVar
+from collections.abc import Callable
+from typing import Generic, TypeVar
 
 T = TypeVar("T")
 
@@ -19,6 +20,7 @@ class BaseSpecification(abc.ABC, Generic[T]):
             def is_satisfied_by(self, candidate: User) -> bool:
                 return candidate.is_active
 
+
         spec = ActiveUser() & HasVerifiedEmail()
     """
 
@@ -26,28 +28,28 @@ class BaseSpecification(abc.ABC, Generic[T]):
     def is_satisfied_by(self, candidate: T) -> bool: ...
 
     # Named combinators ------------------------------------------------
-    def and_(self, other: "BaseSpecification[T]") -> "AndSpecification[T]":
+    def and_(self, other: BaseSpecification[T]) -> AndSpecification[T]:
         """Return a spec that requires both ``self`` and *other* to be satisfied."""
         return AndSpecification(self, other)
 
-    def or_(self, other: "BaseSpecification[T]") -> "OrSpecification[T]":
+    def or_(self, other: BaseSpecification[T]) -> OrSpecification[T]:
         """Return a spec satisfied when either ``self`` or *other* is satisfied."""
         return OrSpecification(self, other)
 
-    def not_(self) -> "NotSpecification[T]":
+    def not_(self) -> NotSpecification[T]:
         """Return the logical negation of this specification."""
         return NotSpecification(self)
 
     # Operator overloads -----------------------------------------------
-    def __and__(self, other: "BaseSpecification[T]") -> "AndSpecification[T]":
+    def __and__(self, other: BaseSpecification[T]) -> AndSpecification[T]:
         """Support ``spec_a & spec_b`` syntax for conjunction."""
         return AndSpecification(self, other)
 
-    def __or__(self, other: "BaseSpecification[T]") -> "OrSpecification[T]":
+    def __or__(self, other: BaseSpecification[T]) -> OrSpecification[T]:
         """Support ``spec_a | spec_b`` syntax for disjunction."""
         return OrSpecification(self, other)
 
-    def __invert__(self) -> "NotSpecification[T]":
+    def __invert__(self) -> NotSpecification[T]:
         """Support ``~spec`` syntax for negation."""
         return NotSpecification(self)
 

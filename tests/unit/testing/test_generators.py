@@ -5,6 +5,8 @@ from __future__ import annotations
 import re
 import uuid
 
+from mp_commons.kernel.ddd import DomainEvent
+from mp_commons.kernel.types import Money
 from mp_commons.testing.generators import (
     correlation_id_gen,
     domain_event_gen,
@@ -13,9 +15,6 @@ from mp_commons.testing.generators import (
     slug_gen,
     ulid_gen,
 )
-from mp_commons.kernel.ddd import DomainEvent
-from mp_commons.kernel.types import Money
-
 
 # ---------------------------------------------------------------------------
 # §38.1  ulid_gen / correlation_id_gen

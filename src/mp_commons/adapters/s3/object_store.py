@@ -1,7 +1,7 @@
 """Object-store port, S3 implementation, and in-memory fake."""
+
 from __future__ import annotations
 
-import io
 from typing import Any, Protocol, runtime_checkable
 
 
@@ -26,7 +26,9 @@ def _require_aiobotocore() -> Any:
 class ObjectStore(Protocol):
     """Kernel port for binary object storage."""
 
-    async def put(self, key: str, data: bytes, content_type: str = "application/octet-stream") -> None:
+    async def put(
+        self, key: str, data: bytes, content_type: str = "application/octet-stream"
+    ) -> None:
         """Store *data* under *key*."""
         ...
 
@@ -59,7 +61,9 @@ class InMemoryObjectStore:
         self._store: dict[str, bytes] = {}
         self._metadata: dict[str, str] = {}
 
-    async def put(self, key: str, data: bytes, content_type: str = "application/octet-stream") -> None:
+    async def put(
+        self, key: str, data: bytes, content_type: str = "application/octet-stream"
+    ) -> None:
         self._store[key] = data
         self._metadata[key] = content_type
 
@@ -123,7 +127,9 @@ class S3ObjectStore:
         kwargs.update(self._session_kwargs)
         return session.create_client("s3", **kwargs)
 
-    async def put(self, key: str, data: bytes, content_type: str = "application/octet-stream") -> None:
+    async def put(
+        self, key: str, data: bytes, content_type: str = "application/octet-stream"
+    ) -> None:
         async with self._client_context() as s3:
             await s3.put_object(Bucket=self._bucket, Key=key, Body=data, ContentType=content_type)
 
@@ -196,7 +202,9 @@ class S3PresignedUrlGenerator:
                 ExpiresIn=expires_in,
             )
 
-    async def presign_put(self, key: str, expires_in: int = 3600, content_type: str = "application/octet-stream") -> str:
+    async def presign_put(
+        self, key: str, expires_in: int = 3600, content_type: str = "application/octet-stream"
+    ) -> str:
         """Return a pre-signed PUT URL valid for *expires_in* seconds."""
         async with self._client_context() as s3:
             return await s3.generate_presigned_url(

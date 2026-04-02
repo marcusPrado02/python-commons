@@ -1,15 +1,14 @@
 """Unit tests for DeadLetterReplayScheduler (R-04)."""
+
 from __future__ import annotations
 
-import asyncio
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 from unittest.mock import AsyncMock, patch
 
 import pytest
 
 from mp_commons.resilience.dead_letter_scheduler import DeadLetterReplayScheduler
-
 
 # ---------------------------------------------------------------------------
 # Minimal in-memory DeadLetterStore stub

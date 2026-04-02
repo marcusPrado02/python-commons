@@ -72,9 +72,7 @@ class SagaOrchestrator:
             except Exception as action_exc:
                 # Switch to compensation
                 await self._persist(saga_id, SagaState.COMPENSATING, idx, ctx)
-                compensation_exc = await self._compensate(
-                    saga_id, ctx, completed
-                )
+                compensation_exc = await self._compensate(saga_id, ctx, completed)
                 if compensation_exc is not None:
                     final_state = SagaState.COMPENSATION_FAILED
                     await self._persist(saga_id, final_state, idx, ctx)
@@ -112,7 +110,7 @@ class SagaOrchestrator:
             step = self._steps[idx]
             try:
                 await step.compensate(ctx)
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 if first_error is None:
                     first_error = exc
         return first_error

@@ -6,15 +6,15 @@ validated in integration tests (test_redis.py).
 
 Measures per-check() overhead with varying concurrency levels.
 """
+
 from __future__ import annotations
 
 import asyncio
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock
 
-from mp_commons.application.rate_limit import Quota, RateLimitDecision
 from mp_commons.adapters.redis import RedisRateLimiter
-
+from mp_commons.application.rate_limit import Quota, RateLimitDecision
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -70,9 +70,7 @@ def test_rate_limiter_10_concurrent_checks(benchmark: Any, event_loop: Any) -> N
     quota = _make_quota()
 
     async def _batch() -> list[Any]:
-        return await asyncio.gather(
-            *[limiter.check(quota, "user:burst") for _ in range(10)]
-        )
+        return await asyncio.gather(*[limiter.check(quota, "user:burst") for _ in range(10)])
 
     def run() -> list[Any]:
         return event_loop.run_until_complete(_batch())
@@ -88,9 +86,7 @@ def test_rate_limiter_100_concurrent_checks(benchmark: Any, event_loop: Any) -> 
     quota = _make_quota()
 
     async def _batch() -> list[Any]:
-        return await asyncio.gather(
-            *[limiter.check(quota, "user:heavy") for _ in range(100)]
-        )
+        return await asyncio.gather(*[limiter.check(quota, "user:heavy") for _ in range(100)])
 
     def run() -> list[Any]:
         return event_loop.run_until_complete(_batch())

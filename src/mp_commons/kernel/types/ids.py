@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import dataclasses
-import uuid
 from typing import Any
+import uuid
 
 from mp_commons.kernel.errors.domain import ValidationError
 
@@ -39,18 +39,18 @@ class EntityId(_StrId):
 
     Examples::
 
-        eid = EntityId.generate()           # new random id
+        eid = EntityId.generate()  # new random id
         eid = EntityId.from_str("abc-123")  # from existing string
-        eid = EntityId("abc-123")           # direct construction
+        eid = EntityId("abc-123")  # direct construction
     """
 
     @classmethod
-    def generate(cls) -> "EntityId":
+    def generate(cls) -> EntityId:
         """Return a new random ``EntityId``."""
         return cls(_uuid7_str())
 
     @classmethod
-    def from_str(cls, value: str) -> "EntityId":
+    def from_str(cls, value: str) -> EntityId:
         """Construct from an existing string identifier."""
         return cls(value)
 
@@ -81,7 +81,7 @@ class CorrelationId(_StrId):
     """Request correlation / trace identifier."""
 
     @classmethod
-    def generate(cls) -> "CorrelationId":
+    def generate(cls) -> CorrelationId:
         """Return a new random ``CorrelationId``."""
         return cls(_uuid7_str())
 

@@ -1,12 +1,8 @@
 # Application API
 
-## Lifecycle
-
-::: mp_commons.application.lifecycle
-
 ## Middleware
 
-::: mp_commons.application.middleware
+::: mp_commons.application.pipeline.middleware
 
 ## i18n
 

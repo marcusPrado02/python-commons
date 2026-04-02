@@ -10,4 +10,4 @@
 
 ## Feature Flags
 
-::: mp_commons.config.feature_flags
+::: mp_commons.config.flags

@@ -11,6 +11,7 @@ Usage::
     bus.register(CreateOrder, CreateOrderHandler())
     result = await bus.dispatch(CreateOrder(item="widget"))
 """
+
 from __future__ import annotations
 
 from typing import Any

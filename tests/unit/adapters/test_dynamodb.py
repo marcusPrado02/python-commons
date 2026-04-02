@@ -1,22 +1,19 @@
 """Unit tests for the DynamoDB adapter (§54)."""
+
 from __future__ import annotations
 
 import asyncio
-import dataclasses
-import sys
-import types
 from contextlib import asynccontextmanager
-from unittest.mock import AsyncMock, MagicMock, patch
+import dataclasses
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 from mp_commons.adapters.dynamodb.repository import (
     DynamoDBIdempotencyStore,
-    DynamoDBOutboxStore,
     DynamoDBRepository,
     DynamoDBTable,
 )
-
 
 # ---------------------------------------------------------------------------
 # Mock helpers
@@ -45,7 +42,6 @@ def _make_session(table_mock: MagicMock) -> MagicMock:
 
 
 from typing import Any
-
 
 # ---------------------------------------------------------------------------
 # DynamoDBTable config
@@ -161,7 +157,9 @@ def _make_idem_store(table_mock: MagicMock) -> DynamoDBIdempotencyStore:
 
 
 def test_idem_store_get_returns_record():
-    table = _make_table_mock(get_item={"Item": {"key": "op:k1", "status": "COMPLETED", "response": b"ok"}})
+    table = _make_table_mock(
+        get_item={"Item": {"key": "op:k1", "status": "COMPLETED", "response": b"ok"}}
+    )
     from mp_commons.kernel.messaging.idempotency import IdempotencyKey
 
     store = _make_idem_store(table)
@@ -205,8 +203,8 @@ def test_idem_conditional_check_failed_raises_conflict():
     table.put_item = AsyncMock(side_effect=_CondErr("ConditionalCheckFailed"))
     table.update_item = AsyncMock()
 
-    from mp_commons.kernel.messaging.idempotency import IdempotencyKey, IdempotencyRecord
     from mp_commons.kernel.errors.domain import ConflictError
+    from mp_commons.kernel.messaging.idempotency import IdempotencyKey, IdempotencyRecord
 
     store = _make_idem_store(table)
     key = IdempotencyKey(client_key="dup", operation="op")

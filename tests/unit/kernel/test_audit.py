@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from typing import Any
 from unittest.mock import AsyncMock
 
@@ -11,7 +11,6 @@ import pytest
 
 from mp_commons.kernel.security.audit import AuditEvent, AuditStore, InMemoryAuditStore
 from mp_commons.kernel.types.ids import EntityId
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -221,7 +220,6 @@ class TestInMemoryAuditStore:
 class TestSQLAlchemyAuditStore:
     def _make_store(self) -> tuple[Any, Any]:
         """Return (engine, session_factory) using async in-memory SQLite."""
-        import sqlalchemy as sa
         from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
         from sqlalchemy.orm import sessionmaker
 

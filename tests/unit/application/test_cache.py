@@ -1,20 +1,18 @@
 """Unit tests for §69 – Application Cache Invalidation."""
+
 import asyncio
 
-import pytest
-
 from mp_commons.application.cache import (
-    CacheInvalidationEvent,
     CacheKey,
     CacheWarmupService,
     InMemoryTaggedCacheStore,
     cached,
 )
 
-
 # ---------------------------------------------------------------------------
 # CacheKey
 # ---------------------------------------------------------------------------
+
 
 class TestCacheKey:
     def test_for_resource_format(self):
@@ -39,6 +37,7 @@ class TestCacheKey:
 # ---------------------------------------------------------------------------
 # InMemoryTaggedCacheStore
 # ---------------------------------------------------------------------------
+
 
 class TestTaggedCacheStore:
     def test_set_and_get(self):
@@ -79,6 +78,7 @@ class TestTaggedCacheStore:
 # @cached decorator
 # ---------------------------------------------------------------------------
 
+
 class TestCachedDecorator:
     def test_result_cached_second_call(self):
         calls = []
@@ -109,14 +109,19 @@ class TestCachedDecorator:
 # CacheWarmupService
 # ---------------------------------------------------------------------------
 
+
 class TestCacheWarmupService:
     def test_warm_loads_and_stores(self):
         store = InMemoryTaggedCacheStore()
         warmer = CacheWarmupService(store)
-        warmer.register("top_products", lambda: asyncio.coroutine(lambda: ["p1", "p2"])())
+
+        async def _stub() -> list[str]:
+            return ["p1", "p2"]
+
+        warmer.register("top_products", _stub)
 
         async def run():
-            warmer.register("top_products", lambda: _coro())
+            warmer.register("top_products", _coro)
             return await warmer.warm("top_products")
 
         async def _coro():

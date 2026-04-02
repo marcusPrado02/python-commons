@@ -3,6 +3,7 @@
 Requires ``cassandra-driver>=3.29``.  All classes raise :class:`ImportError`
 when the library is absent.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -127,7 +128,7 @@ class CassandraRepository(Generic[T]):
         if rows is not None:
             row_list = list(rows)
             if row_list:
-                return self._model(**dict(zip(row_list[0]._fields, row_list[0])))
+                return self._model(**dict(zip(row_list[0]._fields, row_list[0], strict=False)))
         return None
 
     async def save(self, entity: T) -> None:
@@ -147,7 +148,7 @@ class CassandraRepository(Generic[T]):
         results: list[T] = []
         if rows:
             for row in rows:
-                results.append(self._model(**dict(zip(row._fields, row))))
+                results.append(self._model(**dict(zip(row._fields, row, strict=False))))
         return results
 
 
@@ -182,13 +183,14 @@ class CassandraOutboxStore:
         await loop.run_in_executor(None, self._session.execute, stmt, tuple(body.values()))
 
     async def get_pending(self, topic: str, limit: int = 100) -> list[Any]:
-        from mp_commons.kernel.messaging.outbox import OutboxRecord, OutboxStatus
+        from mp_commons.kernel.messaging.outbox import OutboxStatus
 
         loop = asyncio.get_event_loop()
         now = datetime.now(UTC)
         buckets = [self._bucket_hour(now)]
         # Also check previous hour
         from datetime import timedelta
+
         prev = now - timedelta(hours=1)
         buckets.append(self._bucket_hour(prev))
 

@@ -1,9 +1,10 @@
 """Application scheduler – Scheduler Protocol and JobExecutionContext."""
+
 from __future__ import annotations
 
-import time
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+import time
 from typing import Protocol, runtime_checkable
 
 from mp_commons.application.scheduler.job import Job
@@ -34,12 +35,12 @@ class JobExecutionContext:
     events: list[JobExecutedEvent] = field(default_factory=list)
 
     async def run(self) -> JobExecutedEvent:
-        started_at = datetime.now(tz=timezone.utc)
+        started_at = datetime.now(tz=UTC)
         t0 = time.monotonic()
         error: str | None = None
         try:
             await self.job.handler()
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             error = str(exc)
         duration_ms = (time.monotonic() - t0) * 1000
         event = JobExecutedEvent(

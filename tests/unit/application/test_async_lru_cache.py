@@ -1,8 +1,8 @@
 """Unit tests for AsyncLRUCache (P-04)."""
+
 from __future__ import annotations
 
 import asyncio
-import time
 
 import pytest
 

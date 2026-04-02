@@ -1,17 +1,17 @@
 # Security API
 
-## Authentication
+## API Keys
 
-::: mp_commons.security.auth
+::: mp_commons.security.apikeys.generator
 
-## Authorisation
+## JWT
 
-::: mp_commons.security.authz
+::: mp_commons.security.jwt.decoder
 
-## Tokens
+## Encryption
 
-::: mp_commons.security.tokens
+::: mp_commons.security.encryption.fernet
 
-## Audit
+## TLS
 
-::: mp_commons.security.audit
+::: mp_commons.security.tls.certificates

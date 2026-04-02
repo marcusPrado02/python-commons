@@ -2,22 +2,22 @@
 
 Uses an in-memory SQLite database via *aiosqlite* — no running server needed.
 """
+
 from __future__ import annotations
 
 import asyncio
 import dataclasses
 import datetime
-import uuid
 from typing import Any
+import uuid
 
 import pytest
-from sqlalchemy import Column, DateTime, Integer, LargeBinary, String, Text
+from sqlalchemy import DateTime, Integer, LargeBinary, String, Text
+from sqlalchemy.dialects.sqlite import JSON as SQLiteJSON
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy.dialects.sqlite import JSON as SQLiteJSON
 
 from mp_commons.adapters.sqlalchemy.event_store import SQLAlchemyEventStore
-from mp_commons.adapters.sqlalchemy.idempotency import SqlAlchemyIdempotencyStore
 from mp_commons.adapters.sqlalchemy.mixins import SoftDeleteMixin, TimestampMixin
 from mp_commons.adapters.sqlalchemy.outbox import SqlAlchemyOutboxRepository
 from mp_commons.adapters.sqlalchemy.repository import SqlAlchemyRepositoryBase
@@ -26,7 +26,6 @@ from mp_commons.adapters.sqlalchemy.uow import SqlAlchemyUnitOfWork
 from mp_commons.application.event_sourcing.store import OptimisticConcurrencyError
 from mp_commons.application.event_sourcing.stored_event import StoredEvent
 from mp_commons.kernel.errors import NotFoundError
-from mp_commons.kernel.messaging.idempotency import IdempotencyKey, IdempotencyRecord
 from mp_commons.kernel.messaging.outbox import OutboxRecord, OutboxStatus
 
 # ---------------------------------------------------------------------------
@@ -359,6 +358,7 @@ class TestOutboxRepository:
 
             async with sf() as s:
                 from sqlalchemy import select
+
                 result = await s.execute(
                     select(OutboxRecordModel).where(OutboxRecordModel.id == record.id)
                 )
@@ -589,6 +589,7 @@ class TestSoftDeleteMixin:
 
             async with sf() as s:
                 from sqlalchemy import select
+
                 stmt = select(ItemSoftDelete).where(ItemSoftDelete.not_deleted_filter())
                 result = await s.execute(stmt)
                 rows = result.scalars().all()
@@ -632,7 +633,8 @@ class TestSQLAlchemySpecification:
 
     def _make_spec_and_model(self):
         from sqlalchemy import Boolean
-        from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+        from sqlalchemy.orm import DeclarativeBase, mapped_column
+
         from mp_commons.adapters.sqlalchemy.specification import SQLAlchemySpecification
 
         class Spec58Base(DeclarativeBase):
@@ -650,6 +652,7 @@ class TestSQLAlchemySpecification:
 
             def to_expression(self):
                 from sqlalchemy import true
+
                 return ProductModel.active.is_(true())
 
         class PricedSpec(SQLAlchemySpecification):
@@ -666,12 +669,14 @@ class TestSQLAlchemySpecification:
 
     def test_to_expression_returns_column_element(self):
         from sqlalchemy.sql.elements import ClauseElement
+
         _, ActiveSpec, _ = self._make_spec_and_model()
         expr = ActiveSpec().to_expression()
         assert isinstance(expr, ClauseElement)
 
     def test_and_spec_produces_and_expression(self):
         from sqlalchemy.sql.elements import ClauseElement
+
         _, ActiveSpec, PricedSpec = self._make_spec_and_model()
         spec = ActiveSpec() & PricedSpec(100)
         expr = spec.to_expression()
@@ -680,6 +685,7 @@ class TestSQLAlchemySpecification:
 
     def test_or_spec_produces_or_expression(self):
         from sqlalchemy.sql.elements import ClauseElement
+
         _, ActiveSpec, PricedSpec = self._make_spec_and_model()
         spec = ActiveSpec() | PricedSpec(100)
         expr = spec.to_expression()
@@ -688,6 +694,7 @@ class TestSQLAlchemySpecification:
 
     def test_not_spec_produces_not_expression(self):
         from sqlalchemy.sql.elements import ClauseElement
+
         _, ActiveSpec, _ = self._make_spec_and_model()
         spec = ~ActiveSpec()
         expr = spec.to_expression()
@@ -708,16 +715,18 @@ class TestSQLAlchemySpecification:
 
     def test_chained_and_spec(self):
         from sqlalchemy.sql.elements import ClauseElement
+
         _, ActiveSpec, PricedSpec = self._make_spec_and_model()
         spec = ActiveSpec() & PricedSpec(10) & PricedSpec(50)
         expr = spec.to_expression()
         assert isinstance(expr, ClauseElement)
 
     def test_non_sql_spec_raises_type_error_on_and(self):
-        from mp_commons.kernel.ddd.specification import BaseSpecification
         from mp_commons.adapters.sqlalchemy.specification import (
-            SQLAlchemySpecification, SQLAlchemyAndSpecification, _get_expression
+            SQLAlchemyAndSpecification,
+            SQLAlchemySpecification,
         )
+        from mp_commons.kernel.ddd.specification import BaseSpecification
 
         class NonSqlSpec(BaseSpecification):
             def is_satisfied_by(self, candidate) -> bool:
@@ -726,8 +735,10 @@ class TestSQLAlchemySpecification:
         class SqlSpec(SQLAlchemySpecification):
             def is_satisfied_by(self, candidate) -> bool:
                 return True
+
             def to_expression(self):
                 from sqlalchemy import true
+
                 return true()
 
         with pytest.raises(TypeError, match="to_expression"):
@@ -745,11 +756,13 @@ class TestTenantFilter:
 
     def test_is_not_installed_by_default(self):
         from mp_commons.adapters.sqlalchemy.tenant_filter import TenantFilter
+
         TenantFilter.uninstall()  # ensure clean state
         assert TenantFilter.is_installed() is False
 
     def test_install_sets_installed_flag(self):
         from mp_commons.adapters.sqlalchemy.tenant_filter import TenantFilter
+
         try:
             TenantFilter.install()
             assert TenantFilter.is_installed() is True
@@ -758,6 +771,7 @@ class TestTenantFilter:
 
     def test_install_is_idempotent(self):
         from mp_commons.adapters.sqlalchemy.tenant_filter import TenantFilter
+
         try:
             TenantFilter.install()
             TenantFilter.install()  # second call is no-op
@@ -767,12 +781,14 @@ class TestTenantFilter:
 
     def test_uninstall_removes_flag(self):
         from mp_commons.adapters.sqlalchemy.tenant_filter import TenantFilter
+
         TenantFilter.install()
         TenantFilter.uninstall()
         assert TenantFilter.is_installed() is False
 
     def test_uninstall_is_safe_when_not_installed(self):
         from mp_commons.adapters.sqlalchemy.tenant_filter import TenantFilter
+
         TenantFilter.uninstall()
         TenantFilter.uninstall()  # safe no-op
         assert TenantFilter.is_installed() is False

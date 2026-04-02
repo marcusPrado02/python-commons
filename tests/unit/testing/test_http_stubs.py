@@ -1,4 +1,5 @@
 """Unit tests for §95 – HTTP Stubs."""
+
 from __future__ import annotations
 
 import asyncio
@@ -12,6 +13,7 @@ class TestHttpStubServer:
     def test_stub_get_returns_json(self):
         async def run():
             import httpx
+
             with HttpStubServer() as stub:
                 stub.stub_get("https://api.example.com/data", {"result": 42})
                 async with httpx.AsyncClient() as client:
@@ -24,6 +26,7 @@ class TestHttpStubServer:
     def test_stub_get_custom_status(self):
         async def run():
             import httpx
+
             with HttpStubServer() as stub:
                 stub.stub_get("https://api.example.com/miss", None, status=404)
                 async with httpx.AsyncClient() as client:
@@ -35,6 +38,7 @@ class TestHttpStubServer:
     def test_stub_post_returns_json(self):
         async def run():
             import httpx
+
             with HttpStubServer() as stub:
                 stub.stub_post("https://api.example.com/create", response_json={"id": 1})
                 async with httpx.AsyncClient() as client:
@@ -47,6 +51,7 @@ class TestHttpStubServer:
     def test_assert_called_exact_count(self):
         async def run():
             import httpx
+
             with HttpStubServer() as stub:
                 stub.stub_get("https://api.example.com/ping", {"ok": True})
                 async with httpx.AsyncClient() as client:
@@ -59,6 +64,7 @@ class TestHttpStubServer:
     def test_assert_called_wrong_count_raises(self):
         async def run():
             import httpx
+
             with HttpStubServer() as stub:
                 stub.stub_get("https://api.example.com/once", {})
                 async with httpx.AsyncClient() as client:
@@ -75,6 +81,7 @@ class TestHttpStubServer:
     def test_reset_clears_call_counts(self):
         async def run():
             import httpx
+
             with HttpStubServer() as stub:
                 stub.stub_get("https://api.example.com/r", {})
                 async with httpx.AsyncClient() as client:
@@ -88,6 +95,7 @@ class TestHttpStubServer:
     def test_stub_post_with_response_fn(self):
         async def run():
             import httpx
+
             with HttpStubServer() as stub:
                 stub.stub_post(
                     "https://api.example.com/echo",

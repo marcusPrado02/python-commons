@@ -9,12 +9,11 @@ Run with: pytest tests/integration/test_keycloak.py -m integration -v
 
 Requires Docker (~30 s startup for Keycloak dev mode).
 """
+
 from __future__ import annotations
 
 import asyncio
-import json
 import time
-from typing import Any
 
 import pytest
 import requests
@@ -23,7 +22,6 @@ from testcontainers.core.waiting_utils import wait_for_logs
 
 from mp_commons.adapters.keycloak import JWKSClient, OIDCTokenVerifier
 from mp_commons.kernel.errors import UnauthorizedError
-
 
 # ---------------------------------------------------------------------------
 # Keycloak dev-mode container

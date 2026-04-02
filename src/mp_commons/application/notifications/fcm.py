@@ -1,7 +1,8 @@
 """Application notifications – FCMPushSender (requires httpx)."""
+
 from __future__ import annotations
 
-import json
+from dataclasses import dataclass
 from typing import Any
 
 from mp_commons.application.notifications.push import PushNotification, SendResult
@@ -11,16 +12,13 @@ __all__ = ["FCMConfig", "FCMPushSender"]
 
 def _require_httpx() -> Any:  # pragma: no cover
     try:
-        import httpx  # noqa: PLC0415
+        import httpx
+
         return httpx
     except ImportError as exc:
         raise ImportError(
-            "httpx is required for FCM push sender. "
-            "Install it with: pip install httpx"
+            "httpx is required for FCM push sender. Install it with: pip install httpx"
         ) from exc
-
-
-from dataclasses import dataclass
 
 
 @dataclass
@@ -45,7 +43,9 @@ class FCMPushSender:
         if notification.data:
             msg["data"] = {k: str(v) for k, v in notification.data.items()}
         if notification.badge is not None:
-            msg.setdefault("apns", {}).setdefault("payload", {}).setdefault("aps", {})["badge"] = notification.badge
+            msg.setdefault("apns", {}).setdefault("payload", {}).setdefault("aps", {})["badge"] = (
+                notification.badge
+            )
         if notification.sound:
             msg.setdefault("android", {})["notification"] = {"sound": notification.sound}
         return {"message": msg}
@@ -69,6 +69,6 @@ class FCMPushSender:
                         body = resp.json() if resp.content else {}
                         error = body.get("error", {}).get("message", resp.text)
                         results.append(SendResult(token=token, success=False, error=error))
-                except Exception as exc:  # noqa: BLE001
+                except Exception as exc:
                     results.append(SendResult(token=token, success=False, error=str(exc)))
         return results

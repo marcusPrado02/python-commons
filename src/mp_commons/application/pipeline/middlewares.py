@@ -1,4 +1,5 @@
 """Application pipeline – built-in middleware implementations."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -11,6 +12,7 @@ class LoggingMiddleware(Middleware):
 
     async def __call__(self, request: Any, next_: Next) -> Any:
         import time
+
         name = type(request).__name__
         start = time.perf_counter()
         try:
@@ -18,7 +20,10 @@ class LoggingMiddleware(Middleware):
             duration = (time.perf_counter() - start) * 1000
             try:
                 import structlog
-                structlog.get_logger().info("use_case.completed", request=name, duration_ms=round(duration, 2))
+
+                structlog.get_logger().info(
+                    "use_case.completed", request=name, duration_ms=round(duration, 2)
+                )
             except ImportError:
                 pass
             return result
@@ -26,7 +31,10 @@ class LoggingMiddleware(Middleware):
             duration = (time.perf_counter() - start) * 1000
             try:
                 import structlog
-                structlog.get_logger().error("use_case.failed", request=name, duration_ms=round(duration, 2))
+
+                structlog.get_logger().error(
+                    "use_case.failed", request=name, duration_ms=round(duration, 2)
+                )
             except ImportError:
                 pass
             raise
@@ -61,6 +69,7 @@ class MetricsMiddleware(Middleware):
 
     async def __call__(self, request: Any, next_: Next) -> Any:
         import time
+
         name = type(request).__name__
         labels: dict[str, str] = {"use_case": name}
         start = time.perf_counter()
@@ -83,6 +92,7 @@ class RetryMiddleware(Middleware):
 
     async def __call__(self, request: Any, next_: Next) -> Any:
         from mp_commons.resilience.retry import RetryPolicy
+
         policy = RetryPolicy(max_attempts=self._max_attempts)
         return await policy.execute_async(lambda: next_(request))
 
@@ -95,6 +105,7 @@ class IdempotencyMiddleware(Middleware):
 
     async def __call__(self, request: Any, next_: Next) -> Any:
         import json
+
         from mp_commons.kernel.messaging import IdempotencyKey, IdempotencyRecord
 
         key_value = getattr(request, "idempotency_key", None)
@@ -172,7 +183,7 @@ class UnitOfWorkMiddleware(Middleware):
 
     async def __call__(self, request: Any, next_: Next) -> Any:
         async with self._factory() as uow:
-            request._uow = uow  # noqa: SLF001
+            request._uow = uow
             return await next_(request)
 
 
@@ -184,7 +195,9 @@ class TimeoutMiddleware(Middleware):
 
     async def __call__(self, request: Any, next_: Next) -> Any:
         import asyncio
+
         from mp_commons.kernel.errors import TimeoutError as AppTimeoutError
+
         try:
             return await asyncio.wait_for(next_(request), timeout=self._timeout)
         except TimeoutError as exc:
@@ -194,7 +207,9 @@ class TimeoutMiddleware(Middleware):
 class CachingMiddleware(Middleware):
     """Cache Query responses in an async key/value store; bypass for Commands."""
 
-    def __init__(self, cache: Any, default_ttl: int = 300, ttl_map: dict[type, int] | None = None) -> None:
+    def __init__(
+        self, cache: Any, default_ttl: int = 300, ttl_map: dict[type, int] | None = None
+    ) -> None:
         self._cache = cache
         self._default_ttl = default_ttl
         self._ttl_map: dict[type, int] = ttl_map or {}

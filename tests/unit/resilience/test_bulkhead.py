@@ -9,10 +9,8 @@ import pytest
 from mp_commons.resilience.bulkhead import (
     Bulkhead,
     BulkheadFullError,
-    ConcurrencyLimiter,
     QueueLimiter,
 )
-
 
 # ---------------------------------------------------------------------------
 # BulkheadFullError (17.2)
@@ -57,6 +55,7 @@ class TestQueueLimiter:
 
     def test_queue_capacity_overflow_with_concurrent_tasks(self) -> None:
         """With max_concurrent=1, max_queue=0: second concurrent request fails immediately."""
+
         async def run() -> None:
             lim = QueueLimiter(max_concurrent=1, max_queue=0)
             task_started = asyncio.Event()

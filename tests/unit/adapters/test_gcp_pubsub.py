@@ -1,4 +1,5 @@
 """Unit tests for PubSubProducer and PubSubSubscriber (A-02)."""
+
 from __future__ import annotations
 
 import json
@@ -26,7 +27,7 @@ class TestPubSubProducer:
 
     @pytest.mark.asyncio
     async def test_send_returns_message_id(self):
-        producer, publisher = self._make_producer()
+        producer, _publisher = self._make_producer()
         result = await producer.send({"event": "created"})
         assert result == "msg-id-1"
 
@@ -47,7 +48,7 @@ class TestPubSubProducer:
 
     @pytest.mark.asyncio
     async def test_send_batch_returns_all_ids(self):
-        producer, publisher = self._make_producer()
+        producer, _publisher = self._make_producer()
         counter = 0
 
         async def fake_send(payload, **kwargs):
@@ -72,9 +73,7 @@ class TestPubSubSubscriber:
         subscriber = PubSubSubscriber(project_id="my-proj", subscription_id="orders-sub")
 
         mock_sub_client = MagicMock()
-        mock_sub_client.subscription_path.return_value = (
-            "projects/my-proj/subscriptions/orders-sub"
-        )
+        mock_sub_client.subscription_path.return_value = "projects/my-proj/subscriptions/orders-sub"
         mock_sub_client.acknowledge = MagicMock()
 
         received_msgs = []

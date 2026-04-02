@@ -1,4 +1,5 @@
 """Unit tests for §67 Application — Scheduled Jobs."""
+
 from __future__ import annotations
 
 import asyncio
@@ -78,7 +79,9 @@ class TestJobExecutionContext:
             assert event.error is None
             assert event.success is True
             assert event.duration_ms >= 0
+
         asyncio.run(_run())
+
     def test_run_captures_exception(self):
         async def _run():
             async def handler():
@@ -90,7 +93,9 @@ class TestJobExecutionContext:
 
             assert event.error == "boom"
             assert event.success is False
+
         asyncio.run(_run())
+
     def test_run_accumulates_in_events_list(self):
         async def _run():
             async def handler():
@@ -101,7 +106,9 @@ class TestJobExecutionContext:
             await ctx.run()
             await ctx.run()
             assert len(ctx.events) == 2
+
         asyncio.run(_run())
+
     def test_duration_measured(self):
         async def _run():
             async def handler():
@@ -111,7 +118,10 @@ class TestJobExecutionContext:
             ctx = JobExecutionContext(job=job)
             event = await ctx.run()
             assert event.duration_ms >= 10  # at least 10ms
+
         asyncio.run(_run())
+
+
 # ---------------------------------------------------------------------------
 # InMemoryScheduler
 # ---------------------------------------------------------------------------
@@ -156,7 +166,9 @@ class TestInMemoryScheduler:
             assert scheduler.is_running
             await scheduler.stop()
             assert not scheduler.is_running
+
         asyncio.run(_run())
+
     def test_trigger_fires_handler(self):
         async def _run():
             calls: list[str] = []
@@ -167,7 +179,9 @@ class TestInMemoryScheduler:
             assert calls == ["j1"]
             assert event.job_id == "j1"
             assert event.success is True
+
         asyncio.run(_run())
+
     def test_trigger_captures_error(self):
         async def _run():
             async def bad_handler():
@@ -179,7 +193,9 @@ class TestInMemoryScheduler:
             event = await scheduler.trigger("bad")
             assert event.error == "scheduler error"
             assert event.success is False
+
         asyncio.run(_run())
+
     def test_execution_log_accumulates(self):
         async def _run():
             calls: list = []
@@ -189,7 +205,9 @@ class TestInMemoryScheduler:
             await scheduler.trigger("j1")
             await scheduler.trigger("j1")
             assert len(scheduler.execution_log) == 2
+
         asyncio.run(_run())
+
     def test_is_protocol_compatible(self):
         scheduler = InMemoryScheduler()
         assert isinstance(scheduler, Scheduler)

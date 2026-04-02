@@ -25,7 +25,7 @@ class MongoUnitOfWork(UnitOfWork):
         self._client = client
         self.session: Any = None
 
-    async def __aenter__(self) -> "MongoUnitOfWork":
+    async def __aenter__(self) -> MongoUnitOfWork:
         self.session = await self._client.start_session()
         self.session.start_transaction()
         return self

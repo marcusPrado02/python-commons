@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 import dataclasses
-import json
 
 import pytest
 
@@ -22,7 +21,6 @@ from mp_commons.application.event_sourcing import (
 )
 from mp_commons.kernel.ddd.domain_event import DomainEvent
 from mp_commons.kernel.types.ids import EntityId
-
 
 # ---------------------------------------------------------------------------
 # Shared test fixtures — Order aggregate
@@ -115,7 +113,10 @@ class TestStoredEvent:
 
     def test_with_metadata(self) -> None:
         ev = StoredEvent(
-            stream_id="s", version=1, event_type="E", payload=b"{}",
+            stream_id="s",
+            version=1,
+            event_type="E",
+            payload=b"{}",
             metadata={"correlation_id": "abc"},
         )
         assert ev.metadata["correlation_id"] == "abc"
@@ -131,6 +132,7 @@ class TestStoredEvent:
 
     def test_stored_events_with_same_data_are_equal(self) -> None:
         from datetime import UTC, datetime
+
         ts = datetime(2025, 1, 1, tzinfo=UTC)
         e1 = StoredEvent("s", 1, "E", b"{}", {}, ts)
         e2 = StoredEvent("s", 1, "E", b"{}", {}, ts)
@@ -178,10 +180,7 @@ class TestInMemoryEventStore:
 
     def test_append_multiple_events(self) -> None:
         store = InMemoryEventStore()
-        events = [
-            _event(stream_id="s", version=i + 1, event_type=f"E{i}")
-            for i in range(3)
-        ]
+        events = [_event(stream_id="s", version=i + 1, event_type=f"E{i}") for i in range(3)]
 
         async def run() -> list[StoredEvent]:
             await store.append("s", events, 0)
@@ -289,6 +288,7 @@ class TestEventSourcedAggregate:
 
     def test_is_subclass_of_aggregate_root(self) -> None:
         from mp_commons.kernel.ddd.aggregate import AggregateRoot
+
         assert issubclass(Order, AggregateRoot)
 
     def test_raise_event_increments_version(self) -> None:
@@ -546,6 +546,7 @@ class TestEventSourcingInit:
             SnapshotStore,
             StoredEvent,
         )
+
         for obj in (
             EventSourcedAggregate,
             EventSourcedRepository,

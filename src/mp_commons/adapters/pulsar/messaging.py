@@ -3,11 +3,12 @@
 Requires ``pulsar-client>=3.4``.  All classes raise :class:`ImportError` when
 the library is absent.
 """
+
 from __future__ import annotations
 
 import asyncio
 import json
-from typing import Any, AsyncIterator
+from typing import Any
 
 from mp_commons.kernel.messaging.message import Message
 
@@ -101,7 +102,7 @@ class PulsarProducer:
                 pass
             self._client = None
 
-    async def __aenter__(self) -> "PulsarProducer":
+    async def __aenter__(self) -> PulsarProducer:
         await self.connect()
         return self
 
@@ -170,7 +171,7 @@ class PulsarConsumer:
         loop = asyncio.get_event_loop()
         await loop.run_in_executor(None, self._consumer.acknowledge, msg)
 
-    def __aiter__(self) -> "PulsarConsumer":
+    def __aiter__(self) -> PulsarConsumer:
         return self
 
     async def __anext__(self) -> Any:
@@ -186,10 +187,10 @@ class PulsarConsumer:
             return msg
         except Exception as exc:
             if "Timeout" in type(exc).__name__ or "timeout" in str(exc).lower():
-                raise StopAsyncIteration
+                raise StopAsyncIteration from exc
             raise
 
-    async def __aenter__(self) -> "PulsarConsumer":
+    async def __aenter__(self) -> PulsarConsumer:
         if self._consumer is None:
             await self.connect()
         return self
@@ -220,7 +221,6 @@ class PulsarOutboxDispatcher:
 
     async def dispatch_pending(self) -> int:
         """Publish pending records and return the dispatch count."""
-        import pulsar  # type: ignore[import-untyped]
 
         if self._producer._client is None:
             await self._producer.connect()

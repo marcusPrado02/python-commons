@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-import asyncio
+from collections.abc import Awaitable, Callable
+from dataclasses import dataclass, field
+from datetime import UTC, datetime
 import functools
 import json
-import sys
 import time
-from dataclasses import asdict, dataclass, field
-from datetime import datetime, timezone
-from typing import Any, Awaitable, Callable, TypeVar
+from typing import Any, TypeVar
 
 __all__ = [
     "CURRENT_SCHEMA_VERSION",
@@ -40,7 +39,7 @@ def _default_serializer(obj: Any) -> Any:
 class StructuredEvent:
     name: str
     service: str
-    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
     trace_id: str | None = None
     duration_ms: float | None = None
     fields: dict[str, Any] = field(default_factory=dict)
@@ -64,7 +63,7 @@ class StructuredEvent:
         return json.dumps(self.to_dict(), default=_default_serializer)
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "StructuredEvent":
+    def from_dict(cls, data: dict[str, Any]) -> StructuredEvent:
         """Deserialize a :class:`StructuredEvent` from a plain dictionary.
 
         Raises :class:`SchemaVersionError` if ``data["schema_version"]``
@@ -82,7 +81,7 @@ class StructuredEvent:
         timestamp = (
             datetime.fromisoformat(ts_raw)
             if isinstance(ts_raw, str)
-            else (ts_raw or datetime.now(timezone.utc))
+            else (ts_raw or datetime.now(UTC))
         )
         return cls(
             name=data["name"],
@@ -119,7 +118,7 @@ class ConsoleEventEmitter(EventEmitter):
 
     def emit(self, event: StructuredEvent) -> None:
         super().emit(event)
-        print(event.to_json(), flush=True)  # noqa: T201
+        print(event.to_json(), flush=True)
 
 
 def instrument(

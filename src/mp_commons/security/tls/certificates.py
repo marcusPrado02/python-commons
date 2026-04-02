@@ -1,10 +1,10 @@
 """Certificate loading, expiry checking, and mTLS helpers."""
+
 from __future__ import annotations
 
-import hashlib
-import ssl
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
+import ssl
 from typing import Any
 
 __all__ = [
@@ -26,7 +26,11 @@ class CertificateLoader:
         purpose: ssl.Purpose = ssl.Purpose.SERVER_AUTH,
     ) -> ssl.SSLContext:
         """Load a PEM certificate (and optionally a key) into a new SSLContext."""
-        ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT if purpose == ssl.Purpose.SERVER_AUTH else ssl.PROTOCOL_TLS_SERVER)
+        ctx = ssl.SSLContext(
+            ssl.PROTOCOL_TLS_CLIENT
+            if purpose == ssl.Purpose.SERVER_AUTH
+            else ssl.PROTOCOL_TLS_SERVER
+        )
         ctx.load_cert_chain(certfile=str(certfile), keyfile=str(keyfile) if keyfile else None)
         if cafile:
             ctx.load_verify_locations(cafile=str(cafile))
@@ -43,13 +47,12 @@ class CertificateLoader:
     ) -> ssl.SSLContext:
         """Load a PKCS#12 bundle (.p12 / .pfx) into a new SSLContext."""
         try:
-            from cryptography.hazmat.primitives.serialization.pkcs12 import load_pkcs12
             from cryptography.hazmat.primitives.serialization import (
                 Encoding,
                 NoEncryption,
                 PrivateFormat,
-                PublicFormat,
             )
+            from cryptography.hazmat.primitives.serialization.pkcs12 import load_pkcs12
         except ImportError as exc:  # pragma: no cover
             raise ImportError("pip install cryptography") from exc
 
@@ -57,12 +60,19 @@ class CertificateLoader:
         pwd = password.encode() if isinstance(password, str) else password
         p12 = load_pkcs12(data, pwd)
 
-        import tempfile, os
+        import os
+        import tempfile
 
-        ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT if purpose == ssl.Purpose.SERVER_AUTH else ssl.PROTOCOL_TLS_SERVER)
+        ctx = ssl.SSLContext(
+            ssl.PROTOCOL_TLS_CLIENT
+            if purpose == ssl.Purpose.SERVER_AUTH
+            else ssl.PROTOCOL_TLS_SERVER
+        )
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pem") as cf:
             cert_pem = p12.cert.certificate.public_bytes(Encoding.PEM)
-            key_pem = p12.key.private_bytes(Encoding.PEM, PrivateFormat.TraditionalOpenSSL, NoEncryption())
+            key_pem = p12.key.private_bytes(
+                Encoding.PEM, PrivateFormat.TraditionalOpenSSL, NoEncryption()
+            )
             cf.write(cert_pem + key_pem)
             tmp_path = cf.name
         try:
@@ -121,14 +131,13 @@ class CertificateExpiryChecker:
         """
         try:
             from cryptography import x509
-            from cryptography.hazmat.primitives.serialization import Encoding
         except ImportError as exc:  # pragma: no cover
             raise ImportError("pip install cryptography") from exc
 
         pem_data = Path(pem_path).read_bytes()
         cert = x509.load_pem_x509_certificate(pem_data)
         expiry = cert.not_valid_after_utc
-        delta = expiry - datetime.now(timezone.utc)
+        delta = expiry - datetime.now(UTC)
         return delta.days
 
     @staticmethod

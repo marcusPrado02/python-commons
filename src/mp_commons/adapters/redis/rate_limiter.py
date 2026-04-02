@@ -1,10 +1,11 @@
 """Redis adapter – RedisRateLimiter."""
+
 from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from mp_commons.application.rate_limit import Quota, RateLimitDecision, RateLimitResult, RateLimiter
 from mp_commons.adapters.redis.cache import RedisCache
+from mp_commons.application.rate_limit import Quota, RateLimitDecision, RateLimiter, RateLimitResult
 
 
 class RedisRateLimiter(RateLimiter):
@@ -15,7 +16,7 @@ class RedisRateLimiter(RateLimiter):
 
     async def check(self, quota: Quota, identifier: str) -> RateLimitResult:
         key = f"rl:{quota.key}:{identifier}"
-        client = self._cache._client  # noqa: SLF001
+        client = self._cache._client
 
         async with client.pipeline(transaction=True) as pipe:
             await pipe.incr(key)

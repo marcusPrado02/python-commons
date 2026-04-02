@@ -17,6 +17,7 @@ from mp_commons.observability.logging.filters import SensitiveFieldsFilter
 
 try:
     import structlog  # type: ignore[import-untyped]
+
     _HAS_STRUCTLOG = True
 except ImportError:
     _HAS_STRUCTLOG = False
@@ -144,6 +145,7 @@ def test_structlog_bind_context(benchmark):
     """structlog.contextvars.bind_contextvars — binding overhead."""
     if not _HAS_STRUCTLOG:
         import pytest
+
         pytest.skip("structlog not installed")
 
     def bind():
@@ -156,6 +158,7 @@ def test_structlog_log_event(benchmark):
     """structlog.get_logger().info() with bound context."""
     if not _HAS_STRUCTLOG:
         import pytest
+
         pytest.skip("structlog not installed")
 
     structlog.configure(

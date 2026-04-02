@@ -3,6 +3,7 @@
 Requires ``aiobotocore>=2.7``.  The :class:`InMemoryObjectStore` is always
 available without any extra dependencies.
 """
+
 from __future__ import annotations
 
 from mp_commons.adapters.s3.object_store import (

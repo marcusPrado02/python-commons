@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import abc
-from typing import Any, Callable, Coroutine
+from collections.abc import Callable, Coroutine
+from typing import Any
 
 from mp_commons.kernel.ddd.domain_event import DomainEvent
 from mp_commons.kernel.types.ids import EntityId

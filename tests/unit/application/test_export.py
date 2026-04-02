@@ -1,12 +1,12 @@
 """Unit tests for §66 Application — Data Export."""
+
 from __future__ import annotations
 
 import asyncio
-
+from collections.abc import AsyncIterator
 import csv
 import io
 import json
-from typing import AsyncIterator
 
 import pytest
 
@@ -52,7 +52,9 @@ class TestCsvExporter:
             text = data.decode("utf-8")
             first_line = text.splitlines()[0]
             assert first_line == "ID,Name"
+
         asyncio.run(_run())
+
     def test_produces_data_rows(self):
         async def _run():
             exporter = CsvExporter()
@@ -67,7 +69,9 @@ class TestCsvExporter:
             assert rows[0] == ["ID", "Name"]
             assert rows[1] == ["1", "Alice"]
             assert rows[2] == ["2", "Bob"]
+
         asyncio.run(_run())
+
     def test_missing_key_produces_empty_cell(self):
         async def _run():
             exporter = CsvExporter()
@@ -80,7 +84,9 @@ class TestCsvExporter:
             reader = csv.reader(io.StringIO(data.decode("utf-8")))
             rows = list(reader)
             assert rows[1] == ["42", ""]
+
         asyncio.run(_run())
+
     def test_bom_prefix(self):
         async def _run():
             exporter = CsvExporter(bom=True)
@@ -91,7 +97,9 @@ class TestCsvExporter:
             )
             data = await exporter.export(req)
             assert data.startswith(b"\xef\xbb\xbf")  # UTF-8 BOM
+
         asyncio.run(_run())
+
     def test_custom_delimiter(self):
         async def _run():
             exporter = CsvExporter(delimiter=";")
@@ -104,7 +112,9 @@ class TestCsvExporter:
             lines = data.decode("utf-8").splitlines()
             assert lines[0] == "A;B"
             assert lines[1] == "1;2"
+
         asyncio.run(_run())
+
     def test_empty_rows(self):
         async def _run():
             exporter = CsvExporter()
@@ -116,7 +126,10 @@ class TestCsvExporter:
             data = await exporter.export(req)
             lines = [l for l in data.decode("utf-8").splitlines() if l]
             assert lines == ["ID"]
+
         asyncio.run(_run())
+
+
 # ---------------------------------------------------------------------------
 # ExportService
 # ---------------------------------------------------------------------------
@@ -132,7 +145,9 @@ class TestExportService:
             data = await svc.export(req)
             assert b"Name" in data
             assert b"Alice" in data
+
         asyncio.run(_run())
+
     def test_json_format(self):
         async def _run():
             svc = ExportService()
@@ -146,7 +161,9 @@ class TestExportService:
             assert isinstance(parsed, list)
             assert len(parsed) == 2
             assert parsed[0] == {"id": 1, "name": "Alice"}
+
         asyncio.run(_run())
+
     def test_unknown_format_raises_value_error(self):
         async def _run():
             svc = ExportService()
@@ -157,7 +174,9 @@ class TestExportService:
             )
             with pytest.raises(ValueError, match="pdf"):
                 await svc.export(req)
+
         asyncio.run(_run())
+
     def test_json_empty_rows(self):
         async def _run():
             svc = ExportService()
@@ -168,4 +187,5 @@ class TestExportService:
             )
             data = await svc.export(req)
             assert json.loads(data) == []
+
         asyncio.run(_run())

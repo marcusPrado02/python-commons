@@ -1,4 +1,5 @@
 """Unit tests for AzureKeyVaultSecretStore (A-08)."""
+
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -50,9 +51,7 @@ class TestAzureKeyVaultSecretStore:
             result = await store.get(ref)
 
         assert result == "super-secret-value"
-        mock_client.get_secret.assert_called_once_with(
-            "database-password", version=None
-        )
+        mock_client.get_secret.assert_called_once_with("database-password", version=None)
 
     @pytest.mark.asyncio
     async def test_get_with_version(self):

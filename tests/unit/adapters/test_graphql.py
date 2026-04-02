@@ -1,17 +1,15 @@
 """Unit tests for the GraphQL adapter (§52)."""
+
 from __future__ import annotations
 
 import pytest
 
 from mp_commons.adapters.graphql.pagination import (
     CursorConnection,
-    Edge,
-    PageInfo,
     decode_cursor,
     encode_cursor,
     graphql_error_handler,
 )
-
 
 # ---------------------------------------------------------------------------
 # Cursor encode / decode round-trip

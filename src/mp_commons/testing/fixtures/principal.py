@@ -1,4 +1,5 @@
 """Testing fixtures – fake_principal and security_context (§37.4)."""
+
 from __future__ import annotations
 
 try:
@@ -13,9 +14,11 @@ try:
 
             def test_something(fake_principal):
                 import dataclasses
+
                 p = dataclasses.replace(fake_principal, subject="admin", roles=frozenset(...))
         """
         from mp_commons.kernel.security import Principal
+
         return Principal(subject="test-user", tenant_id="test-tenant")
 
     @pytest.fixture
@@ -30,7 +33,8 @@ try:
                 ...
         """
         from mp_commons.kernel.security import SecurityContext
-        token = SecurityContext.set_current(fake_principal)
+
+        SecurityContext.set_current(fake_principal)
         yield fake_principal
         SecurityContext.clear()
 

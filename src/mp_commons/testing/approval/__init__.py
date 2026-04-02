@@ -1,4 +1,5 @@
 """§97 Testing — Approval Tests."""
+
 from __future__ import annotations
 
 from mp_commons.testing.approval.asserter import (

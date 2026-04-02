@@ -12,10 +12,12 @@ Provides three ``grpc.aio.ServerInterceptor`` implementations:
 
 Requires ``grpcio>=1.60``.
 """
+
 from __future__ import annotations
 
+from collections.abc import Callable
 import time
-from typing import Any, Callable
+from typing import Any
 
 
 def _require_grpc() -> Any:
@@ -25,8 +27,7 @@ def _require_grpc() -> Any:
         return grpc
     except ImportError as exc:
         raise ImportError(
-            "grpcio is required for the gRPC adapter. "
-            "Install it with: pip install 'grpcio>=1.60'"
+            "grpcio is required for the gRPC adapter. Install it with: pip install 'grpcio>=1.60'"
         ) from exc
 
 
@@ -89,15 +90,14 @@ class _CorrelationIdWrapper:
         self._handler = handler
 
     def _inject(self, servicer_context: Any) -> None:
+        from uuid import uuid4
+
         from mp_commons.observability.correlation.context import (
             CorrelationContext,
             RequestContext,
         )
-        from uuid import uuid4
 
-        correlation_id = _metadata_value(
-            servicer_context.invocation_metadata(), self._METADATA_KEY
-        )
+        correlation_id = _metadata_value(servicer_context.invocation_metadata(), self._METADATA_KEY)
         ctx = RequestContext(correlation_id=correlation_id or str(uuid4()))
         CorrelationContext.set(ctx)
 
@@ -217,7 +217,7 @@ class _AuthWrapper:
             context.set_code(grpc.StatusCode.UNAUTHENTICATED)
             context.set_details("Missing or malformed authorization header")
             return False
-        token = header[len("bearer "):].strip()
+        token = header[len("bearer ") :].strip()
         try:
             self._decoder.decode(
                 token,
@@ -311,9 +311,7 @@ class _MetricsWrapper:
         labels = {"method": self._method, "status": status}
         try:
             self._registry.increment(MetricsServerInterceptor._COUNTER, labels=labels)
-            self._registry.histogram(
-                MetricsServerInterceptor._HISTOGRAM, elapsed, labels=labels
-            )
+            self._registry.histogram(MetricsServerInterceptor._HISTOGRAM, elapsed, labels=labels)
         except Exception:
             pass  # never let metrics recording break the RPC
 

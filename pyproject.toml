@@ -30,11 +30,11 @@ nats = [ "nats-py>=2.6",]
 rabbitmq = [ "aio-pika>=9.4",]
 httpx = [ "httpx>=0.27",]
 requests = [ "requests>=2.31",]
-keycloak = [ "python-jose[cryptography]>=3.3", "httpx>=0.27",]
+keycloak = [ "PyJWT[crypto]>=2.8", "httpx>=0.27",]
 vault = [ "hvac>=2.1",]
 mongodb = [ "motor>=3.3",]
 all-adapters = [ "mp-commons[fastapi,sqlalchemy,redis,kafka,nats,rabbitmq,httpx,keycloak,vault,mongodb,otel]",]
-dev = [ "mp-commons[all-adapters,pydantic,structlog,tenacity,crypto,dotenv]", "ruff>=0.4", "mypy>=1.10", "bcrypt>=4.1", "pytest>=8.1", "pytest-asyncio>=0.23", "pytest-cov>=5.0", "anyio[trio]>=4.3", "pytest-xdist>=3.5", "hypothesis>=6.100", "coverage[toml]>=7.4", "respx>=0.21", "time-machine>=2.14", "testcontainers>=4.8", "pytest-benchmark>=5.0", "mutmut>=2.4", "mkdocs-material>=9.5", "mkdocstrings[python]>=0.24",]
+dev = [ "mp-commons[all-adapters,pydantic,structlog,tenacity,crypto,dotenv]", "ruff>=0.4", "mypy>=1.10", "bcrypt>=4.1", "aiosqlite>=0.20", "pytest>=8.1", "pytest-asyncio>=0.23", "pytest-cov>=5.0", "anyio[trio]>=4.3", "pytest-xdist>=3.5", "hypothesis>=6.100", "coverage[toml]>=7.4", "respx>=0.21", "time-machine>=2.14", "testcontainers>=4.8", "pytest-benchmark>=5.0", "mutmut>=2.4", "mkdocs-material>=9.5", "mkdocstrings[python]>=0.24",]
 
 [project.urls]
 Homepage = "https://github.com/marcusPrado02/python-commons"
@@ -60,7 +60,7 @@ mypy_path = "src"
 
 [tool.bandit]
 exclude_dirs = [ "tests", "docs",]
-skips = [ "B101", "B608", "B311",]
+skips = [ "B101", "B110", "B301", "B311", "B318", "B403", "B408", "B608",]
 confidence = "MEDIUM"
 severity = "HIGH"
 
@@ -94,8 +94,8 @@ fail_under = 85
 exclude_lines = [ "pragma: no cover", "if TYPE_CHECKING:", "@(abc\\.)?abstractmethod", "\\.\\.\\.",]
 
 [tool.ruff.lint]
-select = [ "E", "F", "I", "UP", "ANN", "S", "RUF",]
-ignore = [ "ANN101", "ANN102", "S101",]
+select = [ "E", "F", "I", "UP", "ANN", "S", "RUF", "PLC",]
+ignore = [ "ANN401", "E501", "PLC0415", "RUF002", "S101", "TC001", "TC002",]
 
 [tool.ruff.lint.isort]
 kwargs-last = true

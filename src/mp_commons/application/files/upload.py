@@ -1,9 +1,10 @@
 """Application files – UploadedFile value object."""
+
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
+from dataclasses import dataclass
 import hashlib
-from dataclasses import dataclass, field
-from typing import AsyncIterator
 
 __all__ = ["UploadedFile"]
 
@@ -23,7 +24,7 @@ class UploadedFile:
             self.checksum_sha256 = hashlib.sha256(self.data).hexdigest()
 
     @classmethod
-    def from_bytes(cls, filename: str, content_type: str, data: bytes) -> "UploadedFile":
+    def from_bytes(cls, filename: str, content_type: str, data: bytes) -> UploadedFile:
         return cls(
             filename=filename,
             content_type=content_type,

@@ -1,14 +1,15 @@
 """Kernel messaging – inbox pattern ports."""
+
 from __future__ import annotations
 
 import abc
 import dataclasses
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from uuid import uuid4
 
 
-class InboxStatus(str, Enum):
+class InboxStatus(StrEnum):
     """Lifecycle states of a kernel :class:`InboxRecord`."""
 
     RECEIVED = "RECEIVED"

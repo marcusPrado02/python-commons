@@ -1,10 +1,11 @@
 """Performance assertion helpers for unit and integration tests."""
+
 from __future__ import annotations
 
-import asyncio
+from collections.abc import Awaitable, Callable
 import time
 import tracemalloc
-from typing import Any, Awaitable, Callable
+from typing import Any
 
 __all__ = [
     "PerformanceAssertionError",
@@ -18,9 +19,7 @@ class PerformanceAssertionError(AssertionError):
     """Raised when a performance assertion is violated."""
 
 
-async def assert_completes_within(
-    coro: Awaitable[Any], max_ms: float
-) -> Any:
+async def assert_completes_within(coro: Awaitable[Any], max_ms: float) -> Any:
     """Run *coro* and assert it completes in at most *max_ms* milliseconds."""
     start = time.perf_counter()
     result = await coro
@@ -54,9 +53,7 @@ async def assert_throughput(
     return actual_rps
 
 
-def assert_memory_increase_below(
-    fn: Callable[[], Any], max_bytes: int
-) -> Any:
+def assert_memory_increase_below(fn: Callable[[], Any], max_bytes: int) -> Any:
     """Call *fn* synchronously; assert memory growth < *max_bytes*.
 
     Returns the return value of *fn*.

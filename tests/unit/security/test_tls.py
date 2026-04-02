@@ -1,11 +1,12 @@
 """Unit tests for §87 – TLS / Certificate Helpers."""
+
 from __future__ import annotations
 
 import hashlib
 
 import pytest
 
-from mp_commons.security.tls import CertPinningError, CertificatePinner
+from mp_commons.security.tls import CertificatePinner, CertPinningError
 
 
 class TestCertificatePinner:
@@ -21,7 +22,7 @@ class TestCertificatePinner:
         cert_der = b"fake-cert"
         raw = hashlib.sha256(cert_der).hexdigest()
         # Build XX:YY:ZZ format
-        coloned = ":".join(raw[i:i+2] for i in range(0, len(raw), 2))
+        coloned = ":".join(raw[i : i + 2] for i in range(0, len(raw), 2))
         pinner.pin("host.io", [coloned])
         assert pinner.verify("host.io", cert_der) is True
 

@@ -1,8 +1,6 @@
 """Testing fakes – FakeMetricsRegistry (§36.7)."""
-from __future__ import annotations
 
-from collections import defaultdict
-from typing import Any
+from __future__ import annotations
 
 from mp_commons.observability.metrics.ports import Counter, Gauge, Histogram, Metrics
 

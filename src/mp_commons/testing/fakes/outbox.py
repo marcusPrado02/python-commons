@@ -1,4 +1,5 @@
 """Testing fakes – InMemoryOutboxRepository."""
+
 from __future__ import annotations
 
 from mp_commons.kernel.messaging import OutboxRecord, OutboxRepository, OutboxStatus
@@ -21,18 +22,30 @@ class InMemoryOutboxRepository(OutboxRepository):
         if record_id in self._records:
             r = self._records[record_id]
             self._records[record_id] = OutboxRecord(
-                id=r.id, aggregate_id=r.aggregate_id, aggregate_type=r.aggregate_type,
-                event_type=r.event_type, topic=r.topic, payload=r.payload,
-                headers=r.headers, status=OutboxStatus.DISPATCHED, created_at=r.created_at,
+                id=r.id,
+                aggregate_id=r.aggregate_id,
+                aggregate_type=r.aggregate_type,
+                event_type=r.event_type,
+                topic=r.topic,
+                payload=r.payload,
+                headers=r.headers,
+                status=OutboxStatus.DISPATCHED,
+                created_at=r.created_at,
             )
 
     async def mark_failed(self, record_id: str, error: str) -> None:
         if record_id in self._records:
             r = self._records[record_id]
             self._records[record_id] = OutboxRecord(
-                id=r.id, aggregate_id=r.aggregate_id, aggregate_type=r.aggregate_type,
-                event_type=r.event_type, topic=r.topic, payload=r.payload,
-                headers=r.headers, status=OutboxStatus.FAILED, created_at=r.created_at,
+                id=r.id,
+                aggregate_id=r.aggregate_id,
+                aggregate_type=r.aggregate_type,
+                event_type=r.event_type,
+                topic=r.topic,
+                payload=r.payload,
+                headers=r.headers,
+                status=OutboxStatus.FAILED,
+                created_at=r.created_at,
             )
 
     def all_records(self) -> list[OutboxRecord]:

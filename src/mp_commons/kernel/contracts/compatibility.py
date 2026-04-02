@@ -1,10 +1,13 @@
 """Kernel contracts – compatibility modes."""
+
 from __future__ import annotations
-from enum import Enum
+
+from enum import StrEnum
 
 
-class CompatibilityMode(str, Enum):
+class CompatibilityMode(StrEnum):
     """Schema registry compatibility rules."""
+
     BACKWARD = "BACKWARD"
     FORWARD = "FORWARD"
     FULL = "FULL"

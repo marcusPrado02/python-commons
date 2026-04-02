@@ -14,12 +14,10 @@ Usage::
     registry.register(KafkaHealthCheck(bootstrap_servers="localhost:9092"))
     report = await registry.run_all()
 """
+
 from __future__ import annotations
 
-from typing import Any
-
 from mp_commons.observability.health.check import HealthCheck, HealthStatus
-
 
 # ---------------------------------------------------------------------------
 # Kafka health check
@@ -47,7 +45,6 @@ class KafkaHealthCheck(HealthCheck):
 
     async def check(self) -> HealthStatus:
         try:
-            import aiokafka  # type: ignore[import-untyped]
             from aiokafka.admin import AIOKafkaAdminClient  # type: ignore[import-untyped]
         except ImportError:
             return HealthStatus(healthy=False, detail="aiokafka not installed")
@@ -138,7 +135,9 @@ class RabbitMQHealthCheck(HealthCheck):
         HTTP request timeout in seconds. Default: ``5.0``.
     """
 
-    def __init__(self, url: str = "http://guest:guest@localhost:15672", timeout: float = 5.0) -> None:
+    def __init__(
+        self, url: str = "http://guest:guest@localhost:15672", timeout: float = 5.0
+    ) -> None:
         self._url = url.rstrip("/")
         self._timeout = timeout
 

@@ -1,11 +1,10 @@
 """Unit tests for the Redis Streams adapter (§56)."""
+
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime, timezone
+from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock
-
-import pytest
 
 from mp_commons.adapters.redis.streams import (
     RedisStreamConsumerGroup,
@@ -13,7 +12,6 @@ from mp_commons.adapters.redis.streams import (
     RedisStreamOutboxDispatcher,
     RedisStreamProducer,
 )
-
 
 # ---------------------------------------------------------------------------
 # RedisStreamEntry
@@ -86,7 +84,9 @@ def test_consumer_group_create():
 
 def test_consumer_group_create_noop_on_busygroup():
     redis = MagicMock()
-    redis.xgroup_create = AsyncMock(side_effect=Exception("BUSYGROUP Consumer Group already exists"))
+    redis.xgroup_create = AsyncMock(
+        side_effect=Exception("BUSYGROUP Consumer Group already exists")
+    )
     cg = RedisStreamConsumerGroup(redis)
 
     asyncio.run(cg.create_group("s", "g"))  # should not raise
@@ -99,9 +99,7 @@ def test_consumer_group_create_noop_on_busygroup():
 
 def test_consumer_group_read_returns_entries():
     redis = MagicMock()
-    fake_messages = [
-        (b"stream", [(b"1-0", {b"event": b"test", b"data": b"hello"})])
-    ]
+    fake_messages = [(b"stream", [(b"1-0", {b"event": b"test", b"data": b"hello"})])]
     redis.xreadgroup = AsyncMock(return_value=fake_messages)
     cg = RedisStreamConsumerGroup(redis)
 

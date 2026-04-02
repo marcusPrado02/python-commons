@@ -10,16 +10,15 @@ import pytest
 from mp_commons.application.cqrs import (
     Command,
     CommandHandler,
+    EventHandler,
     InProcessCommandBus,
     InProcessEventBus,
     InProcessQueryBus,
     Query,
     QueryHandler,
-    EventHandler,
 )
 from mp_commons.kernel.ddd import DomainEvent
 from mp_commons.kernel.types import EntityId
-
 
 # ---------------------------------------------------------------------------
 # Concrete commands / queries / events for tests
@@ -246,7 +245,7 @@ class TestMiddlewareAwareCommandBus:
             asyncio.run(bus.dispatch(CreateOrder("x")))
 
     def test_returns_handler_result(self) -> None:
-        from mp_commons.application.cqrs import MiddlewareAwareCommandBus, QueryHandler
+        from mp_commons.application.cqrs import MiddlewareAwareCommandBus
         from mp_commons.application.pipeline import Pipeline
 
         class EchoHandler(CommandHandler[CreateOrder]):

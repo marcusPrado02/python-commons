@@ -1,4 +1,5 @@
 """Unit tests for NATS adapter – §30.1–30.2 (mocked, no nats-py required)."""
+
 from __future__ import annotations
 
 import asyncio
@@ -10,10 +11,10 @@ import pytest
 from mp_commons.adapters.nats.bus import NatsMessageBus
 from mp_commons.kernel.messaging import Message
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _make_mock_nats():
     """Return (mock_module, mock_nc, mock_js)."""
@@ -33,19 +34,23 @@ def _make_mock_nats():
 # Import guard
 # ===========================================================================
 
+
 class TestNatsImportError:
     def test_raises_import_error_without_lib(self):
-        with patch(
-            "mp_commons.adapters.nats.bus._require_nats",
-            side_effect=ImportError("mp-commons[nats]"),
+        with (
+            patch(
+                "mp_commons.adapters.nats.bus._require_nats",
+                side_effect=ImportError("mp-commons[nats]"),
+            ),
+            pytest.raises(ImportError, match="nats"),
         ):
-            with pytest.raises(ImportError, match="nats"):
-                NatsMessageBus()
+            NatsMessageBus()
 
 
 # ===========================================================================
 # §30.1 – NatsMessageBus core
 # ===========================================================================
+
 
 class TestNatsMessageBusConnect:
     """Patch _require_nats for the full test so connect() can use the mock."""
@@ -115,6 +120,7 @@ class TestNatsMessageBusCustomServers:
 # §30.2 – JetStream publish (at-least-once via ack)
 # ===========================================================================
 
+
 class TestNatsMessageBusPublish:
     """Patch _require_nats for the full test so publish() can use the mock."""
 
@@ -171,4 +177,5 @@ class TestNatsMessageBusPublish:
 
     def test_implements_message_bus_interface(self):
         from mp_commons.kernel.messaging import MessageBus
+
         assert issubclass(NatsMessageBus, MessageBus)

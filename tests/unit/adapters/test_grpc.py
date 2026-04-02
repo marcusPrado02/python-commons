@@ -1,4 +1,5 @@
 """Unit tests for the gRPC adapter (§51)."""
+
 from __future__ import annotations
 
 import asyncio
@@ -32,14 +33,12 @@ _grpc_mod.StatusCode.UNAVAILABLE = "UNAVAILABLE"  # type: ignore[attr-defined]
 sys.modules.setdefault("grpc", _grpc_mod)
 sys.modules.setdefault("grpc.aio", _grpc_aio_mod)
 
-from mp_commons.adapters.grpc.channel import (  # noqa: E402
+from mp_commons.adapters.grpc.channel import (
     CorrelationIdClientInterceptor,
     GrpcChannelFactory,
-    GrpcHealthChecker,
     GrpcHealthStatus,
     RetryClientInterceptor,
 )
-
 
 # ---------------------------------------------------------------------------
 # GrpcChannelFactory
@@ -49,7 +48,7 @@ from mp_commons.adapters.grpc.channel import (  # noqa: E402
 def test_channel_factory_insecure():
     _grpc_aio_mod.insecure_channel.reset_mock()
     factory = GrpcChannelFactory()
-    ch = factory.create("localhost:50051")
+    factory.create("localhost:50051")
     _grpc_aio_mod.insecure_channel.assert_called_once_with(
         "localhost:50051", options=[], interceptors=[]
     )
@@ -58,7 +57,7 @@ def test_channel_factory_insecure():
 def test_channel_factory_tls():
     _grpc_aio_mod.secure_channel.reset_mock()
     factory = GrpcChannelFactory()
-    ch = factory.create("secure.host:443", tls=True)
+    factory.create("secure.host:443", tls=True)
     _grpc_aio_mod.secure_channel.assert_called_once()
     args = _grpc_aio_mod.secure_channel.call_args[0]
     assert args[0] == "secure.host:443"

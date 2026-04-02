@@ -13,7 +13,6 @@ from mp_commons.testing.contracts import (
     OpenAPIContractTest,
 )
 
-
 # ---------------------------------------------------------------------------
 # Helpers — subclasses that bypass HTTP calls
 # ---------------------------------------------------------------------------
@@ -82,6 +81,7 @@ class TestOpenAPIContractTest:
         from mp_commons.testing.contracts.openapi import (
             OpenAPIContractTest as _OAct,
         )
+
         assert _OAct is OpenAPIContractTest
 
 
@@ -122,6 +122,7 @@ class TestAsyncAPIContractTest:
         from mp_commons.testing.contracts.asyncapi import (
             AsyncAPIContractTest as _AAct,
         )
+
         assert _AAct is AsyncAPIContractTest
 
 
@@ -212,9 +213,14 @@ class TestContractsInit:
     def test_all_classes_importable(self) -> None:
         from mp_commons.testing.contracts import (
             AsyncAPIContractTest as A,
+        )
+        from mp_commons.testing.contracts import (
             CompatibilityAsserter as C,
+        )
+        from mp_commons.testing.contracts import (
             OpenAPIContractTest as O,
         )
+
         assert A is AsyncAPIContractTest
         assert C is CompatibilityAsserter
         assert O is OpenAPIContractTest
@@ -222,11 +228,13 @@ class TestContractsInit:
     def test_openapi_is_subclassable(self) -> None:
         class MyAPI(OpenAPIContractTest):
             openapi_url = "http://example.com/openapi.json"
+
         assert issubclass(MyAPI, OpenAPIContractTest)
 
     def test_asyncapi_is_subclassable(self) -> None:
         class MyAPI(AsyncAPIContractTest):
             asyncapi_url = "http://example.com/asyncapi.json"
+
         assert issubclass(MyAPI, AsyncAPIContractTest)
 
     def test_compatibility_asserter_is_instantiable(self) -> None:

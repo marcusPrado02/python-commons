@@ -1,12 +1,13 @@
 """Unit tests for MailgunEmailSender (A-06)."""
+
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from mp_commons.application.email.message import Attachment, EmailMessage
 from mp_commons.adapters.mailgun.sender import MailgunEmailSender
+from mp_commons.application.email.message import Attachment, EmailMessage
 
 
 def _make_sender(**kwargs) -> MailgunEmailSender:
@@ -62,6 +63,7 @@ class TestMailgunEmailSender:
         mock_client.post = AsyncMock(return_value=_mock_response("<mg-42>"))
 
         import mp_commons.adapters.mailgun.sender as mod
+
         with patch.object(mod, "_require_httpx") as mock_httpx:
             mock_httpx.return_value.AsyncClient.return_value = mock_client
             result = await sender.send(msg)
@@ -71,9 +73,7 @@ class TestMailgunEmailSender:
     @pytest.mark.asyncio
     async def test_send_with_text_body(self):
         sender = _make_sender()
-        msg = EmailMessage(
-            to=["a@b.com"], subject="S", html_body="H", text_body="plain"
-        )
+        msg = EmailMessage(to=["a@b.com"], subject="S", html_body="H", text_body="plain")
         posted_data: list = []
 
         mock_client = MagicMock()
@@ -87,6 +87,7 @@ class TestMailgunEmailSender:
         mock_client.post = capture_post
 
         import mp_commons.adapters.mailgun.sender as mod
+
         with patch.object(mod, "_require_httpx") as mock_httpx:
             mock_httpx.return_value.AsyncClient.return_value = mock_client
             await sender.send(msg)
@@ -96,10 +97,7 @@ class TestMailgunEmailSender:
     @pytest.mark.asyncio
     async def test_send_bulk_returns_list(self):
         sender = _make_sender()
-        messages = [
-            EmailMessage(to=[f"u{i}@b.com"], subject="S", html_body="H")
-            for i in range(2)
-        ]
+        messages = [EmailMessage(to=[f"u{i}@b.com"], subject="S", html_body="H") for i in range(2)]
         counter = 0
 
         async def fake_send(m):
@@ -117,6 +115,7 @@ class TestMailgunEmailSender:
         msg = EmailMessage(to=["a@b.com"], subject="S", html_body="H")
 
         import mp_commons.adapters.mailgun.sender as mod
+
         with patch.object(mod, "_require_httpx", side_effect=ImportError("no httpx")):
             with pytest.raises(ImportError):
                 await sender.send(msg)
@@ -125,9 +124,7 @@ class TestMailgunEmailSender:
     async def test_attachments_sent_as_files(self):
         sender = _make_sender()
         att = Attachment(filename="f.txt", content_type="text/plain", data=b"data")
-        msg = EmailMessage(
-            to=["a@b.com"], subject="S", html_body="H", attachments=[att]
-        )
+        msg = EmailMessage(to=["a@b.com"], subject="S", html_body="H", attachments=[att])
         call_kwargs: list = []
 
         mock_client = MagicMock()
@@ -141,6 +138,7 @@ class TestMailgunEmailSender:
         mock_client.post = capture
 
         import mp_commons.adapters.mailgun.sender as mod
+
         with patch.object(mod, "_require_httpx") as mock_httpx:
             mock_httpx.return_value.AsyncClient.return_value = mock_client
             await sender.send(msg)

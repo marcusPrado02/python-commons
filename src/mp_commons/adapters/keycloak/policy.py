@@ -1,8 +1,9 @@
 """Keycloak adapter – KeycloakPolicyEngineAdapter."""
+
 from __future__ import annotations
 
-from mp_commons.kernel.security import PolicyContext, PolicyDecision
 from mp_commons.adapters.keycloak.verifier import OIDCTokenVerifier
+from mp_commons.kernel.security import PolicyContext, PolicyDecision
 
 
 class KeycloakPolicyEngineAdapter:

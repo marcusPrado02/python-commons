@@ -1,4 +1,5 @@
 """Testing generators – StepClock (§38.4)."""
+
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
@@ -24,9 +25,9 @@ class StepClock:
     Example::
 
         clock = StepClock(step=timedelta(seconds=1))
-        t0 = clock.now()   # 2026-01-01 00:00:00
-        t1 = clock.now()   # 2026-01-01 00:00:01
-        t2 = clock.now()   # 2026-01-01 00:00:02
+        t0 = clock.now()  # 2026-01-01 00:00:00
+        t1 = clock.now()  # 2026-01-01 00:00:01
+        t2 = clock.now()  # 2026-01-01 00:00:02
     """
 
     def __init__(

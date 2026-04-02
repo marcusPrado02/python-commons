@@ -1,12 +1,12 @@
 """Unit tests for ApiKeyHashUpgrade — bcrypt→argon2 migration (S-05)."""
+
 from __future__ import annotations
 
-import pytest
 import bcrypt
+import pytest
 
-from mp_commons.security.apikeys.generator import ApiKey, InMemoryApiKeyStore, _PREFIX_LEN
-from mp_commons.security.apikeys.hash_upgrade import ApiKeyHashUpgrade, _is_bcrypt, _is_argon2
-
+from mp_commons.security.apikeys.generator import _PREFIX_LEN, ApiKey, InMemoryApiKeyStore
+from mp_commons.security.apikeys.hash_upgrade import ApiKeyHashUpgrade, _is_argon2, _is_bcrypt
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -16,6 +16,7 @@ from mp_commons.security.apikeys.hash_upgrade import ApiKeyHashUpgrade, _is_bcry
 def _make_raw_key() -> str:
     import secrets
     import string
+
     chars = string.ascii_letters + string.digits
     prefix = "".join(secrets.choice(chars) for _ in range(_PREFIX_LEN))
     suffix = "".join(secrets.choice(chars) for _ in range(24))
@@ -35,6 +36,7 @@ def _bcrypt_record(raw_key: str, principal: str = "user-1") -> ApiKey:
 async def _argon2_record(raw_key: str) -> ApiKey:
     try:
         import argon2 as argon2_module
+
         hasher = argon2_module.PasswordHasher(time_cost=1, memory_cost=8192, parallelism=1)
         h = hasher.hash(raw_key)
         return ApiKey(
@@ -96,7 +98,7 @@ class TestBcryptUpgrade:
         await store.save(record)
         upgrader = ApiKeyHashUpgrade(store=store)
 
-        other = _make_raw_key()[:_PREFIX_LEN] + raw[_PREFIX_LEN:]
+        _make_raw_key()[:_PREFIX_LEN] + raw[_PREFIX_LEN:]
         # Replace prefix so key_id matches but password is wrong
         bad_key = raw[:_PREFIX_LEN] + "WRONGWRONG0000000000000"
         result = await upgrader.verify_and_upgrade(bad_key)

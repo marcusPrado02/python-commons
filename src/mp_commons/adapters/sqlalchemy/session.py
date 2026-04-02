@@ -1,4 +1,5 @@
 """SQLAlchemy adapter – SqlAlchemySessionFactory."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -16,9 +17,16 @@ class SqlAlchemySessionFactory:
 
     def __init__(self, database_url: str, **engine_kwargs: Any) -> None:
         _require_sqlalchemy()
-        from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine  # type: ignore[import-untyped]
+        from sqlalchemy.ext.asyncio import (  # type: ignore[import-untyped]
+            AsyncSession,
+            async_sessionmaker,
+            create_async_engine,
+        )
+
         self._engine = create_async_engine(database_url, **engine_kwargs)
-        self._session_factory = async_sessionmaker(self._engine, class_=AsyncSession, expire_on_commit=False)
+        self._session_factory = async_sessionmaker(
+            self._engine, class_=AsyncSession, expire_on_commit=False
+        )
 
     def __call__(self) -> Any:
         return self._session_factory()

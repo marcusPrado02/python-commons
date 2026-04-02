@@ -1,4 +1,5 @@
 """Apache Pulsar adapter."""
+
 from __future__ import annotations
 
 from mp_commons.adapters.pulsar.messaging import (

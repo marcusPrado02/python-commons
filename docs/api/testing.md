@@ -1,8 +1,8 @@
 # Testing API
 
-## Builders
+## Generators
 
-::: mp_commons.testing.builders
+::: mp_commons.testing.generators.builder
 
 ## Fakes
 

@@ -1,16 +1,17 @@
 """Feature flag providers — OpenFeature-compatible interface."""
+
 from __future__ import annotations
 
-import hashlib
 from dataclasses import dataclass, field
+import hashlib
 from pathlib import Path
 from typing import Any, Protocol, runtime_checkable
 
 __all__ = [
     "EvaluationContext",
     "FeatureFlagClient",
-    "FlatFileProvider",
     "FlagProvider",
+    "FlatFileProvider",
 ]
 
 
@@ -28,23 +29,19 @@ class FlagProvider(Protocol):
 
     async def get_boolean(
         self, flag_key: str, default: bool, context: EvaluationContext | None = None
-    ) -> bool:
-        ...
+    ) -> bool: ...
 
     async def get_string(
         self, flag_key: str, default: str, context: EvaluationContext | None = None
-    ) -> str:
-        ...
+    ) -> str: ...
 
     async def get_number(
         self, flag_key: str, default: float, context: EvaluationContext | None = None
-    ) -> float:
-        ...
+    ) -> float: ...
 
     async def get_object(
         self, flag_key: str, default: Any, context: EvaluationContext | None = None
-    ) -> Any:
-        ...
+    ) -> Any: ...
 
 
 class FeatureFlagClient:
@@ -61,7 +58,7 @@ class FeatureFlagClient:
     ) -> bool:
         try:
             return await self._provider.get_boolean(flag_key, default, context)
-        except Exception:  # noqa: BLE001
+        except Exception:
             return default
 
     async def get_string(
@@ -69,7 +66,7 @@ class FeatureFlagClient:
     ) -> str:
         try:
             return await self._provider.get_string(flag_key, default, context)
-        except Exception:  # noqa: BLE001
+        except Exception:
             return default
 
     async def get_number(
@@ -77,7 +74,7 @@ class FeatureFlagClient:
     ) -> float:
         try:
             return await self._provider.get_number(flag_key, default, context)
-        except Exception:  # noqa: BLE001
+        except Exception:
             return default
 
     async def get_object(
@@ -85,13 +82,14 @@ class FeatureFlagClient:
     ) -> Any:
         try:
             return await self._provider.get_object(flag_key, default, context)
-        except Exception:  # noqa: BLE001
+        except Exception:
             return default
 
 
 # ---------------------------------------------------------------------------
 # FlatFileProvider
 # ---------------------------------------------------------------------------
+
 
 def _percentage_bucket(targeting_key: str, flag_key: str) -> float:
     """Deterministic 0-100 bucket for a given user+flag combination."""
@@ -122,6 +120,7 @@ class FlatFileProvider:
 
     def _load(self) -> dict[str, Any]:
         import yaml
+
         raw = self._path.read_text()
         return yaml.safe_load(raw) or {}
 

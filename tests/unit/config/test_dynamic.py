@@ -1,11 +1,12 @@
 """Unit tests for §89 – Dynamic Config."""
+
 from __future__ import annotations
 
 import asyncio
 import json
 import os
-import tempfile
 from pathlib import Path
+import tempfile
 
 import pytest
 
@@ -41,6 +42,7 @@ class TestEnvConfigSource:
     def test_watch_raises(self):
         async def _run():
             await EnvConfigSource().watch(lambda x: None)  # type: ignore
+
         with pytest.raises(NotImplementedError):
             asyncio.run(_run())
 
@@ -129,8 +131,12 @@ class TestDynamicConfigRegistry:
             async def load(self):
                 calls[0] += 1
                 return {"val": "x"}
-            def supports_watch(self): return False
-            async def watch(self, cb): pass
+
+            def supports_watch(self):
+                return False
+
+            async def watch(self, cb):
+                pass
 
         registry = DynamicConfigRegistry(ttl_seconds=60)
         registry.register("val", _CountingSource())
@@ -145,8 +151,12 @@ class TestDynamicConfigRegistry:
             async def load(self):
                 calls[0] += 1
                 return {"val": f"v{calls[0]}"}
-            def supports_watch(self): return False
-            async def watch(self, cb): pass
+
+            def supports_watch(self):
+                return False
+
+            async def watch(self, cb):
+                pass
 
         registry = DynamicConfigRegistry(ttl_seconds=60)
         registry.register("val", _CountingSource())

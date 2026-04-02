@@ -2,19 +2,18 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import pytest
 
+from mp_commons.kernel.security import DEFAULT_SENSITIVE_FIELDS
 from mp_commons.observability.logging import (
     JsonLoggerFactory,
     LogEvent,
     Logger,
     SensitiveFieldsFilter,
 )
-from mp_commons.kernel.security import DEFAULT_SENSITIVE_FIELDS
-
 
 # ---------------------------------------------------------------------------
 # LogEvent dataclass
@@ -40,7 +39,7 @@ class TestLogEvent:
         assert event.timestamp.tzinfo is not None
 
     def test_with_all_fields(self) -> None:
-        ts = datetime.now(timezone.utc)
+        ts = datetime.now(UTC)
         event = LogEvent(
             level="ERROR",
             message="boom",
@@ -74,7 +73,7 @@ class TestSensitiveFieldsFilter:
 
     def test_redacts_all_default_sensitive_fields(self) -> None:
         f = SensitiveFieldsFilter()
-        data = {field: "value" for field in DEFAULT_SENSITIVE_FIELDS}
+        data = dict.fromkeys(DEFAULT_SENSITIVE_FIELDS, "value")
         result = f.redact(data)
         for field in DEFAULT_SENSITIVE_FIELDS:
             assert result[field] == SensitiveFieldsFilter.REDACTED
@@ -182,10 +181,12 @@ class TestJsonLoggerFactory:
     def test_configure_does_not_raise(self) -> None:
         """configure() should work with or without structlog installed."""
         import logging
+
         JsonLoggerFactory.configure(level=logging.WARNING)
 
     def test_configure_with_sensitive_fields(self) -> None:
         import logging
+
         JsonLoggerFactory.configure(
             level=logging.DEBUG,
             sensitive_fields=frozenset({"my_secret"}),

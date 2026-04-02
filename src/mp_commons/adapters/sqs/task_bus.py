@@ -21,12 +21,13 @@ Usage::
         message_group_id="invoices",
     )
 """
+
 from __future__ import annotations
 
 import json
 import logging
-import uuid
 from typing import Any
+import uuid
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +35,7 @@ logger = logging.getLogger(__name__)
 def _require_aiobotocore() -> Any:
     try:
         import aiobotocore.session  # type: ignore[import-untyped]
+
         return aiobotocore.session
     except ImportError as exc:
         raise ImportError(
@@ -141,9 +143,7 @@ class SQSTaskBus:
 
         if self._is_fifo:
             kwargs["MessageGroupId"] = message_group_id or self._default_message_group_id
-            kwargs["MessageDeduplicationId"] = (
-                message_deduplication_id or str(uuid.uuid4())
-            )
+            kwargs["MessageDeduplicationId"] = message_deduplication_id or str(uuid.uuid4())
 
         client_kwargs: dict[str, Any] = {"region_name": self._region_name}
         if self._aws_access_key_id:

@@ -1,4 +1,5 @@
 """Unit tests for §84 – Security Encryption."""
+
 import pytest
 
 from mp_commons.security.encryption import (

@@ -1,4 +1,5 @@
 """Unit tests for §76 – Fallback Policy."""
+
 import asyncio
 
 import pytest
@@ -11,7 +12,11 @@ class TestFallbackPolicy:
         async def fn():
             return 42
 
-        policy = FallbackPolicy(fallback=lambda: asyncio.coroutine(lambda: -1)())
+        async def _stub_fallback() -> int:
+            return -1
+
+        FallbackPolicy(fallback=_stub_fallback)
+
         # Override with proper coro factory
         async def fallback_fn():
             return -1
@@ -72,7 +77,7 @@ class TestCachedFallbackPolicy:
 
         async def maybe_bad():
             if fail[0]:
-                raise IOError("gone")
+                raise OSError("gone")
             return "fresh"
 
         async def fallback():
@@ -86,7 +91,7 @@ class TestCachedFallbackPolicy:
 
     def test_no_cached_falls_to_fallback(self):
         async def bad():
-            raise IOError("x")
+            raise OSError("x")
 
         async def fallback():
             return "fallback"

@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Awaitable
 import contextlib
-from asyncio import TimeoutError as AsyncTimeoutError
 from contextvars import ContextVar, Token
-from typing import Any, Awaitable
+from typing import Any
 
 from mp_commons.resilience.timeouts.deadline import Deadline
 
@@ -71,5 +71,5 @@ async def deadline_aware(coro: Awaitable[Any], deadline: Deadline | None = None)
         raise DeadlineExceededError("Deadline already exceeded")
     try:
         return await asyncio.wait_for(asyncio.ensure_future(coro), timeout=remaining)
-    except AsyncTimeoutError:
+    except TimeoutError:
         raise DeadlineExceededError("Deadline exceeded during execution") from None

@@ -1,14 +1,15 @@
 """Kernel messaging – outbox pattern ports."""
+
 from __future__ import annotations
 
 import abc
 import dataclasses
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from uuid import uuid4
 
 
-class OutboxStatus(str, Enum):
+class OutboxStatus(StrEnum):
     """Lifecycle states of an :class:`OutboxRecord`."""
 
     PENDING = "PENDING"

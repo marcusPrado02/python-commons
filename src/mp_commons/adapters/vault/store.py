@@ -1,4 +1,5 @@
 """HashiCorp Vault adapter – VaultSecretStore and VaultTokenRenewer."""
+
 from __future__ import annotations
 
 import asyncio
@@ -13,6 +14,7 @@ logger = logging.getLogger(__name__)
 def _require_hvac() -> Any:
     try:
         import hvac  # type: ignore[import-untyped]
+
         return hvac
     except ImportError as exc:
         raise ImportError("Install 'mp-commons[vault]' (hvac) to use the Vault adapter") from exc
@@ -21,17 +23,26 @@ def _require_hvac() -> Any:
 class VaultSecretStore(SecretStore):
     """HashiCorp Vault KV v2 secret backend."""
 
-    def __init__(self, url: str = "http://127.0.0.1:8200", token: str | None = None, mount_point: str = "secret", **kwargs: Any) -> None:
+    def __init__(
+        self,
+        url: str = "http://127.0.0.1:8200",
+        token: str | None = None,
+        mount_point: str = "secret",
+        **kwargs: Any,
+    ) -> None:
         hvac = _require_hvac()
         self._client = hvac.Client(url=url, token=token, **kwargs)
         self._mount = mount_point
 
     async def get(self, ref: SecretRef) -> str:
         import asyncio
+
         return await asyncio.get_event_loop().run_in_executor(None, self._sync_get, ref)
 
     def _sync_get(self, ref: SecretRef) -> str:
-        response = self._client.secrets.kv.v2.read_secret_version(path=ref.path, mount_point=self._mount)
+        response = self._client.secrets.kv.v2.read_secret_version(
+            path=ref.path, mount_point=self._mount
+        )
         data: dict[str, str] = response["data"]["data"]
         if ref.key not in data:
             raise KeyError(f"Key '{ref.key}' not found at path '{ref.path}'")
@@ -39,10 +50,13 @@ class VaultSecretStore(SecretStore):
 
     async def get_all(self, path: str) -> dict[str, str]:
         import asyncio
+
         return await asyncio.get_event_loop().run_in_executor(None, self._sync_get_all, path)
 
     def _sync_get_all(self, path: str) -> dict[str, str]:
-        response = self._client.secrets.kv.v2.read_secret_version(path=path, mount_point=self._mount)
+        response = self._client.secrets.kv.v2.read_secret_version(
+            path=path, mount_point=self._mount
+        )
         return response["data"]["data"]
 
 
@@ -83,7 +97,7 @@ class VaultTokenRenewer:
             except asyncio.CancelledError:
                 pass
 
-    async def __aenter__(self) -> "VaultTokenRenewer":
+    async def __aenter__(self) -> VaultTokenRenewer:
         await self.start()
         return self
 

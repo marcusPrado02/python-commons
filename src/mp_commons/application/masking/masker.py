@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import fnmatch
 import hashlib
-import uuid
 from typing import Any
+import uuid
 
 from mp_commons.application.masking.rules import MaskingRule
 

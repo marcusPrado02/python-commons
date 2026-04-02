@@ -22,6 +22,7 @@ Usage::
     )
     message_id = await sender.send(msg)
 """
+
 from __future__ import annotations
 
 import logging
@@ -40,11 +41,11 @@ _BASE_URLS = {
 def _require_httpx() -> Any:
     try:
         import httpx  # type: ignore[import-untyped]
+
         return httpx
     except ImportError as exc:
         raise ImportError(
-            "httpx is required for MailgunEmailSender. "
-            "Install it with: pip install 'httpx>=0.27'"
+            "httpx is required for MailgunEmailSender. Install it with: pip install 'httpx>=0.27'"
         ) from exc
 
 

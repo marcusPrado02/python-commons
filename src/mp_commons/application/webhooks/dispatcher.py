@@ -1,4 +1,5 @@
 """Application webhooks – WebhookDispatcher sends event payloads to endpoints."""
+
 from __future__ import annotations
 
 import json
@@ -14,12 +15,12 @@ __all__ = ["WebhookDispatcher"]
 
 def _require_httpx() -> Any:  # pragma: no cover
     try:
-        import httpx  # noqa: PLC0415
+        import httpx
+
         return httpx
     except ImportError as exc:
         raise ImportError(
-            "httpx is required for WebhookDispatcher. "
-            "Install it with: pip install httpx"
+            "httpx is required for WebhookDispatcher. Install it with: pip install httpx"
         ) from exc
 
 
@@ -57,7 +58,9 @@ class WebhookDispatcher:
         payload: dict,
     ) -> WebhookDeliveryRecord:  # pragma: no cover
         httpx = _require_httpx()
-        body = json.dumps({"event": event_type, "data": payload}, separators=(",", ":")).encode("utf-8")
+        body = json.dumps({"event": event_type, "data": payload}, separators=(",", ":")).encode(
+            "utf-8"
+        )
         signature = WebhookSigner.sign(body, endpoint.secret)
         headers = {
             "Content-Type": "application/json",
@@ -80,7 +83,7 @@ class WebhookDispatcher:
                     record.last_error = None
                     return record
                 last_error = f"HTTP {resp.status_code}"
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 record.duration_ms = (time.monotonic() - t0) * 1000
                 last_error = str(exc)
 

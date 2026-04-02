@@ -3,10 +3,11 @@
 Requires ``elasticsearch[async]>=8.0``.  Import guarded — raises ``ImportError``
 with a clear message when the extra is absent.
 """
+
 from __future__ import annotations
 
 import dataclasses
-from typing import Any, Generic, Protocol, TypeVar, runtime_checkable
+from typing import Any, Generic, TypeVar
 
 
 def _require_elasticsearch() -> Any:
@@ -52,12 +53,12 @@ class ElasticsearchSearchQuery:
     # Clauses
     # ------------------------------------------------------------------
 
-    def must(self, field: str, value: Any) -> "ElasticsearchSearchQuery":
+    def must(self, field: str, value: Any) -> ElasticsearchSearchQuery:
         """Add a *must* (AND) term clause."""
         self._must.append({"term": {field: value}})
         return self
 
-    def should(self, field: str, value: Any) -> "ElasticsearchSearchQuery":
+    def should(self, field: str, value: Any) -> ElasticsearchSearchQuery:
         """Add a *should* (OR) term clause."""
         self._should.append({"term": {field: value}})
         return self
@@ -68,7 +69,7 @@ class ElasticsearchSearchQuery:
         *,
         gte: Any = None,
         lte: Any = None,
-    ) -> "ElasticsearchSearchQuery":
+    ) -> ElasticsearchSearchQuery:
         """Add a range clause."""
         conditions: dict[str, Any] = {}
         if gte is not None:
@@ -78,12 +79,12 @@ class ElasticsearchSearchQuery:
         self._must.append({"range": {field: conditions}})
         return self
 
-    def sort(self, field: str, order: str = "asc") -> "ElasticsearchSearchQuery":
+    def sort(self, field: str, order: str = "asc") -> ElasticsearchSearchQuery:
         """Add a sort field."""
         self._sort.append({field: {"order": order}})
         return self
 
-    def paginate(self, page: int, size: int) -> "ElasticsearchSearchQuery":
+    def paginate(self, page: int, size: int) -> ElasticsearchSearchQuery:
         """Set pagination (1-based page)."""
         self._from = (page - 1) * size
         self._size = size
@@ -168,7 +169,7 @@ class ElasticsearchClient:
         """Close the underlying HTTP transport."""
         await self._client.close()
 
-    async def __aenter__(self) -> "ElasticsearchClient":
+    async def __aenter__(self) -> ElasticsearchClient:
         return self
 
     async def __aexit__(self, *_: Any) -> None:
@@ -229,6 +230,7 @@ class ElasticsearchRepository(Generic[T]):
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _to_dict(obj: Any) -> dict[str, Any]:
     if hasattr(obj, "model_dump"):

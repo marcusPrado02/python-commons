@@ -1,12 +1,14 @@
 """Locale value object, context, translator, middleware, and TranslatedError mixin."""
+
 from __future__ import annotations
 
-import contextvars
-import re
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+import contextvars
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, AsyncGenerator
+import re
+from typing import Any
 
 __all__ = [
     "Locale",
@@ -67,7 +69,8 @@ class Locale:
 # ---------------------------------------------------------------------------
 
 _locale_var: contextvars.ContextVar[Locale] = contextvars.ContextVar(
-    "locale", default=Locale.default()
+    "locale",
+    default=Locale.default(),  # noqa: B039 — Locale is effectively immutable
 )
 
 
@@ -101,10 +104,12 @@ class LocaleContext:
 # Translator — Babel-backed .po/.mo loader
 # ---------------------------------------------------------------------------
 
+
 def _require_babel() -> Any:
     try:
         import babel  # noqa: F401
         from babel.support import Translations
+
         return Translations
     except ImportError as exc:
         raise ImportError("pip install babel") from exc
@@ -126,7 +131,7 @@ class Translator:
     ) -> None:
         self._locale_dir = Path(locale_dir) if locale_dir else None
         self._domain = domain
-        self._supported = [Locale.parse(l) for l in (supported_locales or [])]
+        self._supported = [Locale.parse(lc) for lc in (supported_locales or [])]
         self._cache: dict[str, Any] = {}
 
     def _get_translations(self, locale: Locale) -> Any:
@@ -136,10 +141,14 @@ class Translator:
         if self._locale_dir is None:
             return None
         Translations = _require_babel()
-        translation_path = self._locale_dir / locale.babel_str() / "LC_MESSAGES" / f"{self._domain}.mo"
+        translation_path = (
+            self._locale_dir / locale.babel_str() / "LC_MESSAGES" / f"{self._domain}.mo"
+        )
         if not translation_path.exists():
             # Try language only
-            translation_path = self._locale_dir / locale.language / "LC_MESSAGES" / f"{self._domain}.mo"
+            translation_path = (
+                self._locale_dir / locale.language / "LC_MESSAGES" / f"{self._domain}.mo"
+            )
         if not translation_path.exists():
             self._cache[key] = None
             return None
@@ -176,8 +185,8 @@ class Translator:
             return LocaleContext.get()
         # Parse Accept-Language header: "pt-BR,pt;q=0.9,en;q=0.8"
         candidates: list[tuple[float, str]] = []
-        for part in accept_language.split(","):
-            part = part.strip()
+        for raw_part in accept_language.split(","):
+            part = raw_part.strip()
             if ";q=" in part:
                 lang, q_str = part.split(";q=", 1)
                 try:
@@ -209,6 +218,7 @@ class Translator:
 # LocaleMiddleware — FastAPI / Starlette
 # ---------------------------------------------------------------------------
 
+
 class LocaleMiddleware:
     """ASGI middleware that reads Accept-Language and sets LocaleContext."""
 
@@ -220,10 +230,7 @@ class LocaleMiddleware:
         if scope["type"] == "http":
             headers = dict(scope.get("headers", []))
             accept = headers.get(b"accept-language", b"").decode("latin-1")
-            if accept:
-                locale = self._translator.negotiate(accept)
-            else:
-                locale = Locale.default()
+            locale = self._translator.negotiate(accept) if accept else Locale.default()
             token = LocaleContext.set(locale)
             try:
                 await self._app(scope, receive, send)
@@ -236,6 +243,7 @@ class LocaleMiddleware:
 # ---------------------------------------------------------------------------
 # TranslatedError mixin
 # ---------------------------------------------------------------------------
+
 
 class TranslatedError(Exception):
     """Exception mixin whose message can be localised on demand."""

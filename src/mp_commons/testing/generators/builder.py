@@ -1,8 +1,8 @@
 """Testing generators – Builder[T] generic fluent builder base."""
+
 from __future__ import annotations
 
 import copy
-import dataclasses
 from typing import Any, Generic, TypeVar
 
 T = TypeVar("T")
@@ -29,7 +29,7 @@ class Builder(Generic[T]):
     remains unchanged (immutable builder pattern)::
 
         base = OrderBuilder()
-        paid   = base.with_(status="paid")
+        paid = base.with_(status="paid")
         failed = base.with_(status="failed")
     """
 
@@ -40,13 +40,13 @@ class Builder(Generic[T]):
     # Fluent API
     # ------------------------------------------------------------------
 
-    def with_(self, **kwargs: Any) -> "Builder[T]":
+    def with_(self, **kwargs: Any) -> Builder[T]:
         """Return a shallow copy of this builder with *kwargs* applied."""
         clone = copy.copy(self)
-        clone._attrs = {**self._attrs, **kwargs}  # noqa: SLF001
+        clone._attrs = {**self._attrs, **kwargs}
         return clone
 
-    def override(self, key: str, value: Any) -> "Builder[T]":
+    def override(self, key: str, value: Any) -> Builder[T]:
         """Single-key variant of :meth:`with_`."""
         return self.with_(**{key: value})
 
@@ -89,6 +89,7 @@ class DataclassBuilder(Builder[T]):
         class Point:
             x: float
             y: float
+
 
         class PointBuilder(DataclassBuilder[Point]):
             _cls = Point

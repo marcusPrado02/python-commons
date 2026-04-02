@@ -29,11 +29,13 @@ Usage::
         # fast-fail while circuit is open
         ...
 """
+
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
 import logging
 import time
-from typing import Any, Awaitable, Callable, TypeVar
+from typing import Any, TypeVar
 
 from mp_commons.resilience.circuit_breaker.errors import CircuitOpenError
 from mp_commons.resilience.circuit_breaker.policy import CircuitBreakerPolicy

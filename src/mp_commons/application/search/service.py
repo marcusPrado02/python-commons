@@ -1,10 +1,12 @@
 """Application search – SearchEngine Protocol and InMemorySearchEngine."""
+
 from __future__ import annotations
 
+from collections.abc import Callable
 import time
-from typing import Any, Callable, Generic, Protocol, TypeVar, runtime_checkable
+from typing import Any, Generic, Protocol, TypeVar, runtime_checkable
 
-from mp_commons.application.search.query import Filter, SearchQuery, SortField
+from mp_commons.application.search.query import Filter, SearchQuery
 from mp_commons.application.search.result import SearchResult
 
 T = TypeVar("T")
@@ -23,20 +25,31 @@ class InMemorySearchEngine(Generic[T]):
 
     def __init__(self, items: list[T], key_fn: Callable[[T], dict[str, Any]] | None = None) -> None:
         self._items = items
-        self._key_fn: Callable[[T], dict[str, Any]] = key_fn or (lambda x: x if isinstance(x, dict) else x.__dict__)
+        self._key_fn: Callable[[T], dict[str, Any]] = key_fn or (
+            lambda x: x if isinstance(x, dict) else x.__dict__
+        )
 
     def _matches_filter(self, item_dict: dict[str, Any], f: Filter) -> bool:
         val = item_dict.get(f.field)
         match f.op:
-            case "eq":    return val == f.value
-            case "neq":   return val != f.value
-            case "gt":    return val is not None and val > f.value
-            case "gte":   return val is not None and val >= f.value
-            case "lt":    return val is not None and val < f.value
-            case "lte":   return val is not None and val <= f.value
-            case "in":    return val in f.value
-            case "contains": return f.value in str(val or "")
-            case _:       return True
+            case "eq":
+                return val == f.value
+            case "neq":
+                return val != f.value
+            case "gt":
+                return val is not None and val > f.value
+            case "gte":
+                return val is not None and val >= f.value
+            case "lt":
+                return val is not None and val < f.value
+            case "lte":
+                return val is not None and val <= f.value
+            case "in":
+                return val in f.value
+            case "contains":
+                return f.value in str(val or "")
+            case _:
+                return True
 
     async def search(self, query: SearchQuery) -> SearchResult[T]:
         t0 = time.monotonic()
@@ -45,10 +58,7 @@ class InMemorySearchEngine(Generic[T]):
             d = self._key_fn(item)
             # text search
             if query.terms:
-                text_match = any(
-                    query.terms.lower() in str(v).lower()
-                    for v in d.values()
-                )
+                text_match = any(query.terms.lower() in str(v).lower() for v in d.values())
                 if not text_match:
                     continue
             # filter
@@ -65,7 +75,7 @@ class InMemorySearchEngine(Generic[T]):
 
         total = len(results)
         start = (query.page - 1) * query.page_size
-        page_items = results[start: start + query.page_size]
+        page_items = results[start : start + query.page_size]
         took_ms = int((time.monotonic() - t0) * 1000)
         return SearchResult(
             items=page_items,

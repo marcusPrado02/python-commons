@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 
 from mp_commons.observability.health.check import HealthCheck, HealthStatus
 
-__all__ = ["HealthReport", "HealthRegistry"]
+__all__ = ["HealthRegistry", "HealthReport"]
 
 
 @dataclass
@@ -48,7 +48,7 @@ class HealthRegistry:
         for check in self._checks:
             try:
                 status = await check.timed_check()
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 status = HealthStatus(healthy=False, detail=f"exception: {exc}")
             report.results[check.name] = status
         return report

@@ -8,7 +8,7 @@ from mp_commons.kernel.types.ids import EntityId
 class Entity:
     """Base entity – equality is identity-based (by ``id``)."""
 
-    def __init__(self, id: EntityId) -> None:  # noqa: A002
+    def __init__(self, id: EntityId) -> None:
         self._id = id
 
     @property

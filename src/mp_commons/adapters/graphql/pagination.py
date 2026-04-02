@@ -3,11 +3,12 @@
 Cursor encoding uses opaque base64-encoded integers (offset-based).
 All utilities are pure Python with no Strawberry dependency.
 """
+
 from __future__ import annotations
 
 import base64
 import dataclasses
-from typing import Any, Callable, Generic, TypeVar
+from typing import Any, Generic, TypeVar
 
 T = TypeVar("T")
 
@@ -33,7 +34,7 @@ def decode_cursor(cursor: str) -> int:
         raw = base64.urlsafe_b64decode(cursor.encode("ascii")).decode()
         if not raw.startswith(_PREFIX):
             raise ValueError(f"Invalid cursor: {cursor!r}")
-        return int(raw[len(_PREFIX):])
+        return int(raw[len(_PREFIX) :])
     except Exception as exc:
         raise ValueError(f"Invalid cursor: {cursor!r}") from exc
 
@@ -80,7 +81,7 @@ class CursorConnection(Generic[T]):
         *,
         offset: int = 0,
         limit: int = 10,
-    ) -> "CursorConnection[T]":
+    ) -> CursorConnection[T]:
         """Create a connection from a pre-sliced *items* list.
 
         Parameters
@@ -94,10 +95,7 @@ class CursorConnection(Generic[T]):
         limit:
             Page size requested.
         """
-        edges = [
-            Edge(node=node, cursor=encode_cursor(offset + i))
-            for i, node in enumerate(items)
-        ]
+        edges = [Edge(node=node, cursor=encode_cursor(offset + i)) for i, node in enumerate(items)]
         start_cursor = edges[0].cursor if edges else None
         end_cursor = edges[-1].cursor if edges else None
         has_next_page = (offset + len(items)) < total_count

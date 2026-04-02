@@ -1,21 +1,20 @@
 """Unit tests for §100 i18n — Locale, LocaleContext, Translator, TranslatedError."""
+
 import asyncio
-import pathlib
-import tempfile
 
 import pytest
 
 from mp_commons.application.i18n import (
     Locale,
     LocaleContext,
-    Translator,
     TranslatedError,
+    Translator,
 )
-
 
 # ---------------------------------------------------------------------------
 # Locale.parse
 # ---------------------------------------------------------------------------
+
 
 def test_locale_parse_language_and_territory():
     loc = Locale.parse("pt-BR")
@@ -55,6 +54,7 @@ def test_locale_parse_empty_raises():
 # Locale str / babel_str
 # ---------------------------------------------------------------------------
 
+
 def test_locale_str_with_territory():
     loc = Locale("pt", "BR")
     assert str(loc) == "pt-BR"
@@ -84,6 +84,7 @@ def test_locale_default():
 # ---------------------------------------------------------------------------
 # LocaleContext — sync
 # ---------------------------------------------------------------------------
+
 
 def test_locale_context_default_is_en():
     # Each call to get() should return a sensible default (en)
@@ -129,6 +130,7 @@ def test_locale_context_scoped_restores_on_exception():
 # Translator — identity fallback (no locale dir)
 # ---------------------------------------------------------------------------
 
+
 def test_translator_returns_key_when_no_translations(tmp_path):
     t = Translator(
         locale_dir=str(tmp_path),
@@ -153,6 +155,7 @@ def test_translator_interpolates_kwargs(tmp_path):
 # ---------------------------------------------------------------------------
 # Translator.negotiate
 # ---------------------------------------------------------------------------
+
 
 def test_translator_negotiate_exact_match(tmp_path):
     t = Translator(
@@ -198,6 +201,7 @@ def test_translator_negotiate_empty_header(tmp_path):
 # ---------------------------------------------------------------------------
 # TranslatedError
 # ---------------------------------------------------------------------------
+
 
 def test_translated_error_localise_returns_key_without_translations(tmp_path):
     class MyError(TranslatedError):

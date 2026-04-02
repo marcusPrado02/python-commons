@@ -1,4 +1,5 @@
 """Unit tests for §68 Application — Webhooks."""
+
 from __future__ import annotations
 
 import asyncio
@@ -117,7 +118,9 @@ class TestInMemoryWebhookEndpointStore:
             found = await store.find_by_event("order.created")
             assert len(found) == 1
             assert found[0].id == "ep1"
+
         asyncio.run(_run())
+
     def test_find_by_event_excludes_non_matching(self):
         async def _run():
             store = InMemoryWebhookEndpointStore()
@@ -130,7 +133,9 @@ class TestInMemoryWebhookEndpointStore:
             await store.save(ep)
             found = await store.find_by_event("payment.failed")
             assert found == []
+
         asyncio.run(_run())
+
     def test_find_by_event_returns_all_subscribers(self):
         async def _run():
             store = InMemoryWebhookEndpointStore()
@@ -144,7 +149,9 @@ class TestInMemoryWebhookEndpointStore:
                 await store.save(ep)
             found = await store.find_by_event("order.created")
             assert len(found) == 3
+
         asyncio.run(_run())
+
     def test_remove_endpoint(self):
         async def _run():
             store = InMemoryWebhookEndpointStore()
@@ -153,12 +160,16 @@ class TestInMemoryWebhookEndpointStore:
             await store.remove("ep1")
             found = await store.find_by_event("x")
             assert found == []
+
         asyncio.run(_run())
+
     def test_remove_nonexistent_is_noop(self):
         async def _run():
             store = InMemoryWebhookEndpointStore()
             await store.remove("ghost")  # must not raise
+
         asyncio.run(_run())
+
     def test_disabled_endpoint_not_returned(self):
         async def _run():
             store = InMemoryWebhookEndpointStore()
@@ -172,7 +183,9 @@ class TestInMemoryWebhookEndpointStore:
             await store.save(ep)
             found = await store.find_by_event("order.created")
             assert found == []
+
         asyncio.run(_run())
+
     def test_is_protocol_compatible(self):
         store = InMemoryWebhookEndpointStore()
         assert isinstance(store, WebhookEndpointStore)

@@ -1,4 +1,5 @@
 """Application notifications – push and SMS ports + in-memory fakes."""
+
 from mp_commons.application.notifications.push import (
     InMemoryPushSender,
     PushNotification,

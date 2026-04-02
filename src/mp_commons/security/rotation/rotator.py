@@ -1,11 +1,13 @@
 """Secret rotation primitives."""
+
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
+from dataclasses import dataclass, field
+from datetime import UTC, datetime
 import secrets
 import string
-from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from typing import Any, Awaitable, Callable, Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 __all__ = [
     "DatabasePasswordRotatable",
@@ -21,8 +23,7 @@ class RotatableSecret(Protocol):
     """Protocol for any secret that can be rotated."""
 
     @property
-    def secret_name(self) -> str:
-        ...
+    def secret_name(self) -> str: ...
 
     async def rotate(self) -> str:
         """Generate and persist a new secret value; return the new value."""
@@ -36,7 +37,7 @@ class RotatableSecret(Protocol):
 @dataclass(frozen=True)
 class SecretRotatedEvent:
     secret_name: str
-    rotated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    rotated_at: datetime = field(default_factory=lambda: datetime.now(UTC))
 
 
 class SecretRotator:
@@ -59,12 +60,12 @@ class SecretRotator:
         events: list[SecretRotatedEvent] = []
         for secret in self._secrets:
             try:
-                new_value = await secret.rotate()
+                await secret.rotate()
                 event = SecretRotatedEvent(secret_name=secret.secret_name)
                 events.append(event)
                 if self._on_rotated:
                     await self._on_rotated(event)
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 self.rotation_errors[secret.secret_name] = exc
         return events
 
@@ -79,6 +80,7 @@ class RotationScheduler:
     def _require_apscheduler(self) -> Any:
         try:
             from apscheduler.schedulers.asyncio import AsyncIOScheduler
+
             return AsyncIOScheduler
         except ImportError as exc:
             raise ImportError("pip install apscheduler") from exc
@@ -125,8 +127,11 @@ class DatabasePasswordRotatable:
         new_password = _generate_strong_password()
         if self._engine is not None:  # pragma: no cover
             from sqlalchemy import text
+
             async with self._engine.begin() as conn:
-                await conn.execute(text(f"ALTER USER '{self._user}' IDENTIFIED BY :pw"), {"pw": new_password})
+                await conn.execute(
+                    text(f"ALTER USER '{self._user}' IDENTIFIED BY :pw"), {"pw": new_password}
+                )
         self._current = new_password
         return new_password
 

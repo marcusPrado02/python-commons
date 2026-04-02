@@ -1,17 +1,19 @@
 """Testing chaos – ToxiproxyHarness."""
+
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import Any, AsyncIterator
+from typing import Any
 
 
 class _ToxicContext:
-    def __init__(self, harness: "ToxiproxyHarness", proxy_name: str, toxic_name: str) -> None:
+    def __init__(self, harness: ToxiproxyHarness, proxy_name: str, toxic_name: str) -> None:
         self._harness = harness
         self._proxy = proxy_name
         self._name = toxic_name
 
-    async def __aenter__(self) -> "_ToxicContext":
+    async def __aenter__(self) -> _ToxicContext:
         return self
 
     async def __aexit__(self, *_: Any) -> None:
@@ -39,12 +41,20 @@ class ToxiproxyHarness:
 
     @asynccontextmanager
     async def latency(
-        self, proxy_name: str, latency_ms: int = 1000, jitter_ms: int = 0, toxic_name: str = "latency"
+        self,
+        proxy_name: str,
+        latency_ms: int = 1000,
+        jitter_ms: int = 0,
+        toxic_name: str = "latency",
     ) -> AsyncIterator[_ToxicContext]:
         await self._request(
             "POST",
             f"/proxies/{proxy_name}/toxics",
-            json={"name": toxic_name, "type": "latency", "attributes": {"latency": latency_ms, "jitter": jitter_ms}},
+            json={
+                "name": toxic_name,
+                "type": "latency",
+                "attributes": {"latency": latency_ms, "jitter": jitter_ms},
+            },
         )
         ctx = _ToxicContext(self, proxy_name, toxic_name)
         try:

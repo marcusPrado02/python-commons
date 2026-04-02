@@ -12,12 +12,13 @@ Run with: pytest tests/integration/test_e2e_outbox_kafka.py -m integration -v
 
 Requires Docker.
 """
+
 from __future__ import annotations
 
 import asyncio
 import json
-import uuid
 from typing import Any
+import uuid
 
 import pytest
 from testcontainers.kafka import KafkaContainer
@@ -31,7 +32,6 @@ from mp_commons.application.inbox import (
 )
 from mp_commons.kernel.messaging import OutboxRecord, OutboxStatus
 from mp_commons.testing.fakes.outbox import InMemoryOutboxRepository
-
 
 # ---------------------------------------------------------------------------
 # helpers

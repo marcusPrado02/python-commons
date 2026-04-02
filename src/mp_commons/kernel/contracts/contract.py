@@ -1,4 +1,5 @@
 """Kernel contracts – Contract, registry, and loader ports."""
+
 from __future__ import annotations
 
 import abc
@@ -31,10 +32,10 @@ class ContractVersion:
         return f"{self.major}.{self.minor}.{self.patch}"
 
     @classmethod
-    def from_str(cls, value: str) -> "ContractVersion":
+    def from_str(cls, value: str) -> ContractVersion:
         """Parse a ``"major.minor.patch"`` string."""
         parts = value.strip().split(".")
-        if len(parts) != 3:  # noqa: PLR2004
+        if len(parts) != 3:
             raise ValueError(f"Invalid ContractVersion string: {value!r}")
         major, minor, patch = (int(p) for p in parts)
         return cls(major=major, minor=minor, patch=patch)
@@ -43,6 +44,7 @@ class ContractVersion:
 @dataclasses.dataclass(frozen=True)
 class Contract:
     """Represents a versioned API schema contract."""
+
     id: ContractId
     version: SchemaVersion
     mode: CompatibilityMode

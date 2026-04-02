@@ -1,8 +1,8 @@
 """Unit tests – SettingsFactory and InvalidSettingValueError (§23.5, §25.3)."""
+
 from __future__ import annotations
 
-import os
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import ClassVar
 
 import pytest
@@ -17,7 +17,6 @@ from mp_commons.config.validation import (
     InvalidSettingValueError,
     MissingRequiredSettingError,
 )
-
 
 # ---------------------------------------------------------------------------
 # Shared settings fixture
@@ -118,9 +117,7 @@ class TestSettingsFactory:
             SettingsFactory.create(RequiredSettings)
 
     def test_missing_required_overridden_by_override(self) -> None:
-        s = SettingsFactory.create(
-            RequiredSettings, overrides={"api_key": "secret"}
-        )
+        s = SettingsFactory.create(RequiredSettings, overrides={"api_key": "secret"})
         assert s.api_key == "secret"
 
     def test_empty_loaders_list_uses_defaults(self) -> None:
@@ -132,9 +129,7 @@ class TestSettingsFactory:
         s = SettingsFactory.create(ServiceSettings)
         assert isinstance(s, ServiceSettings)
 
-    def test_failing_loader_skipped_silently(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_failing_loader_skipped_silently(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """A loader that raises is skipped; overrides still apply."""
         monkeypatch.delenv("SVC_HOST", raising=False)
 

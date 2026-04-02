@@ -1,8 +1,9 @@
 """Application scheduler – Job dataclass."""
+
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Awaitable, Callable
+from collections.abc import Awaitable, Callable
+from dataclasses import dataclass
 
 __all__ = ["Job"]
 
@@ -14,7 +15,7 @@ class Job:
     id: str
     name: str
     handler: Callable[[], Awaitable[None]]
-    cron: str | None = None          # e.g. "0 9 * * MON"
+    cron: str | None = None  # e.g. "0 9 * * MON"
     interval_seconds: int | None = None
     enabled: bool = True
 

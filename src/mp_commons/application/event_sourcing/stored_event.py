@@ -34,9 +34,7 @@ class StoredEvent:
     metadata: dict[str, Any] = dataclasses.field(default_factory=dict)
     """Infrastructure metadata (correlation_id, tenant_id, …)."""
 
-    occurred_at: datetime = dataclasses.field(
-        default_factory=lambda: datetime.now(UTC)
-    )
+    occurred_at: datetime = dataclasses.field(default_factory=lambda: datetime.now(UTC))
     """Wall-clock time when the event was recorded."""
 
 

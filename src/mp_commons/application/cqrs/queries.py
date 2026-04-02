@@ -1,4 +1,5 @@
 """Application CQRS – Query, QueryHandler, QueryBus, InProcessQueryBus."""
+
 from __future__ import annotations
 
 import abc

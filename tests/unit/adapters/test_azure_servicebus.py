@@ -1,4 +1,5 @@
 """Unit tests for AzureServiceBusProducer and AzureServiceBusConsumer (A-01)."""
+
 from __future__ import annotations
 
 import json
@@ -71,13 +72,16 @@ class TestAzureServiceBusProducer:
         azure_mod = sys.modules.get("azure") or types.ModuleType("azure")
         azure_mod.servicebus = sb_mod  # type: ignore[attr-defined]
 
-        with patch.dict("sys.modules", {
-            "azure.servicebus.aio": aio_mod,
-            "azure.servicebus": sb_mod,
-            "azure": azure_mod,
-        }):
+        with patch.dict(
+            "sys.modules",
+            {
+                "azure.servicebus.aio": aio_mod,
+                "azure.servicebus": sb_mod,
+                "azure": azure_mod,
+            },
+        ):
             monkeypatch.setattr(_mod, "_require_servicebus", lambda: mock_sb_class)
-            monkeypatch.setattr(_mod, "_require_identity", lambda: MagicMock())
+            monkeypatch.setattr(_mod, "_require_identity", MagicMock)
 
             producer = AzureServiceBusProducer("ns.servicebus.net", "orders")
             producer._client = mock_client
@@ -92,7 +96,9 @@ class TestAzureServiceBusProducer:
     async def test_missing_azure_raises(self, monkeypatch):
         from mp_commons.adapters.azure_servicebus.bus import AzureServiceBusProducer
 
-        monkeypatch.setattr(_mod, "_require_servicebus", lambda: (_ for _ in ()).throw(ImportError("no azure")))
+        monkeypatch.setattr(
+            _mod, "_require_servicebus", lambda: (_ for _ in ()).throw(ImportError("no azure"))
+        )
 
         producer = AzureServiceBusProducer("ns", "q")
         with pytest.raises((ImportError, StopAsyncIteration, Exception)):

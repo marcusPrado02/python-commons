@@ -1,8 +1,10 @@
 """Application cache – @cached decorator and CacheWarmupService."""
+
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
 import functools
-from typing import Any, Callable, Awaitable
+from typing import Any
 
 from mp_commons.application.cache.tags import InMemoryTaggedCacheStore, TaggedCacheStore
 
@@ -25,7 +27,11 @@ def cached(
     def decorator(fn: Callable[..., Awaitable[Any]]) -> Callable[..., Awaitable[Any]]:
         @functools.wraps(fn)
         async def wrapper(*args: Any, **kwargs: Any) -> Any:
-            key = key_fn(*args, **kwargs) if key_fn else f"{fn.__qualname__}:{args}:{sorted(kwargs.items())}"
+            key = (
+                key_fn(*args, **kwargs)
+                if key_fn
+                else f"{fn.__qualname__}:{args}:{sorted(kwargs.items())}"
+            )
             cached_val = await _store.get(key)
             if cached_val is not None:
                 return cached_val

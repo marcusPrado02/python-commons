@@ -1,11 +1,10 @@
 """Unit tests for §90 – Feature Flags."""
+
 from __future__ import annotations
 
 import asyncio
-import tempfile
 from pathlib import Path
-
-import pytest
+import tempfile
 
 from mp_commons.config.flags import (
     EvaluationContext,
@@ -104,6 +103,7 @@ class TestFlatFileProvider:
 
     def test_rollout_0_percent_always_off(self):
         import tempfile as tf
+
         content = "zero_flag:\n  rollout_percentage: 0\n"
         with tf.NamedTemporaryFile(suffix=".yaml", mode="w", delete=False) as f:
             f.write(content)
@@ -119,6 +119,7 @@ class TestFlatFileProvider:
 
     def test_rollout_100_percent_always_on(self):
         import tempfile as tf
+
         content = "full_flag:\n  rollout_percentage: 100\n"
         with tf.NamedTemporaryFile(suffix=".yaml", mode="w", delete=False) as f:
             f.write(content)
@@ -188,9 +189,15 @@ class TestFeatureFlagClient:
         class _FailProvider:
             async def get_boolean(self, *args, **kwargs):
                 raise RuntimeError("oops")
-            async def get_string(self, *args, **kwargs): raise RuntimeError()
-            async def get_number(self, *args, **kwargs): raise RuntimeError()
-            async def get_object(self, *args, **kwargs): raise RuntimeError()
+
+            async def get_string(self, *args, **kwargs):
+                raise RuntimeError()
+
+            async def get_number(self, *args, **kwargs):
+                raise RuntimeError()
+
+            async def get_object(self, *args, **kwargs):
+                raise RuntimeError()
 
         client = FeatureFlagClient(_FailProvider())
         result = asyncio.run(client.is_enabled("flag", default=True))
@@ -198,10 +205,17 @@ class TestFeatureFlagClient:
 
     def test_get_string_fallback(self):
         class _FailProvider:
-            async def get_boolean(self, *args, **kwargs): raise RuntimeError()
-            async def get_string(self, *args, **kwargs): raise RuntimeError()
-            async def get_number(self, *args, **kwargs): raise RuntimeError()
-            async def get_object(self, *args, **kwargs): raise RuntimeError()
+            async def get_boolean(self, *args, **kwargs):
+                raise RuntimeError()
+
+            async def get_string(self, *args, **kwargs):
+                raise RuntimeError()
+
+            async def get_number(self, *args, **kwargs):
+                raise RuntimeError()
+
+            async def get_object(self, *args, **kwargs):
+                raise RuntimeError()
 
         client = FeatureFlagClient(_FailProvider())
         assert asyncio.run(client.get_string("f", default="x")) == "x"

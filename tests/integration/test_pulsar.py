@@ -5,6 +5,7 @@ Run with: pytest tests/integration/test_pulsar.py -m integration -v
 
 Requires Docker.  The Pulsar standalone container takes ~30-60s to start.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -14,7 +15,6 @@ from typing import Any
 import pytest
 from testcontainers.core.container import DockerContainer
 from testcontainers.core.waiting_utils import wait_for_logs
-
 
 # ---------------------------------------------------------------------------
 # helpers

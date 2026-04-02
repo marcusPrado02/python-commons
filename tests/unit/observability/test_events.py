@@ -1,4 +1,5 @@
 """Unit tests for §82 / O-05 – Observability Structured Events."""
+
 import asyncio
 import json
 
@@ -81,7 +82,8 @@ class TestInstrumentDecorator:
         assert len(emitter.buffered) == 1
         evt = emitter.buffered[0]
         assert evt.name == "compute"
-        assert evt.duration_ms is not None and evt.duration_ms >= 0
+        assert evt.duration_ms is not None
+        assert evt.duration_ms >= 0
 
     def test_decorator_propagates_exception(self):
         emitter = EventEmitter()
@@ -153,8 +155,12 @@ class TestStructuredEventSchemaVersion:
 
     def test_schema_version_error_message_mentions_version(self):
         future = CURRENT_SCHEMA_VERSION + 5
-        data = {"schema_version": future, "name": "e", "service": "s",
-                "timestamp": "2024-01-01T00:00:00+00:00"}
+        data = {
+            "schema_version": future,
+            "name": "e",
+            "service": "s",
+            "timestamp": "2024-01-01T00:00:00+00:00",
+        }
         with pytest.raises(SchemaVersionError, match=str(future)):
             StructuredEvent.from_dict(data)
 

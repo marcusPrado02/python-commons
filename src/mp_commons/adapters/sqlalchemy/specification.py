@@ -10,12 +10,14 @@ Example::
     from sqlalchemy import Column, String, select
     from mp_commons.adapters.sqlalchemy.specification import SQLAlchemySpecification
 
+
     class ActiveUserSpec(SQLAlchemySpecification[User]):
         def is_satisfied_by(self, candidate: User) -> bool:
             return candidate.is_active
 
         def to_expression(self):
             return User.is_active.is_(True)
+
 
     stmt = select(User).where(ActiveUserSpec().to_expression())
 
@@ -24,6 +26,7 @@ Composite specifications produced by ``&`` / ``|`` / ``~`` also expose
 
 Requires ``sqlalchemy>=2.0``.
 """
+
 from __future__ import annotations
 
 import abc
@@ -60,13 +63,13 @@ class SQLAlchemySpecification(BaseSpecification[T], abc.ABC, Generic[T]):
 
     # Override combinators to return SQLAlchemy-aware composites ----------
 
-    def __and__(self, other: "BaseSpecification[T]") -> "SQLAlchemyAndSpecification[T]":
+    def __and__(self, other: BaseSpecification[T]) -> SQLAlchemyAndSpecification[T]:
         return SQLAlchemyAndSpecification(self, other)
 
-    def __or__(self, other: "BaseSpecification[T]") -> "SQLAlchemyOrSpecification[T]":
+    def __or__(self, other: BaseSpecification[T]) -> SQLAlchemyOrSpecification[T]:
         return SQLAlchemyOrSpecification(self, other)
 
-    def __invert__(self) -> "SQLAlchemyNotSpecification[T]":
+    def __invert__(self) -> SQLAlchemyNotSpecification[T]:
         return SQLAlchemyNotSpecification(self)
 
 
@@ -85,13 +88,13 @@ class SQLAlchemyAndSpecification(AndSpecification[T]):
         right_expr = _get_expression(self._right)
         return and_(left_expr, right_expr)
 
-    def __and__(self, other: "BaseSpecification[T]") -> "SQLAlchemyAndSpecification[T]":
+    def __and__(self, other: BaseSpecification[T]) -> SQLAlchemyAndSpecification[T]:
         return SQLAlchemyAndSpecification(self, other)
 
-    def __or__(self, other: "BaseSpecification[T]") -> "SQLAlchemyOrSpecification[T]":
+    def __or__(self, other: BaseSpecification[T]) -> SQLAlchemyOrSpecification[T]:
         return SQLAlchemyOrSpecification(self, other)
 
-    def __invert__(self) -> "SQLAlchemyNotSpecification[T]":
+    def __invert__(self) -> SQLAlchemyNotSpecification[T]:
         return SQLAlchemyNotSpecification(self)
 
 
@@ -105,13 +108,13 @@ class SQLAlchemyOrSpecification(OrSpecification[T]):
         right_expr = _get_expression(self._right)
         return or_(left_expr, right_expr)
 
-    def __and__(self, other: "BaseSpecification[T]") -> "SQLAlchemyAndSpecification[T]":
+    def __and__(self, other: BaseSpecification[T]) -> SQLAlchemyAndSpecification[T]:
         return SQLAlchemyAndSpecification(self, other)
 
-    def __or__(self, other: "BaseSpecification[T]") -> "SQLAlchemyOrSpecification[T]":
+    def __or__(self, other: BaseSpecification[T]) -> SQLAlchemyOrSpecification[T]:
         return SQLAlchemyOrSpecification(self, other)
 
-    def __invert__(self) -> "SQLAlchemyNotSpecification[T]":
+    def __invert__(self) -> SQLAlchemyNotSpecification[T]:
         return SQLAlchemyNotSpecification(self)
 
 
@@ -124,13 +127,13 @@ class SQLAlchemyNotSpecification(NotSpecification[T]):
         inner_expr = _get_expression(self._spec)
         return not_(inner_expr)
 
-    def __and__(self, other: "BaseSpecification[T]") -> "SQLAlchemyAndSpecification[T]":
+    def __and__(self, other: BaseSpecification[T]) -> SQLAlchemyAndSpecification[T]:
         return SQLAlchemyAndSpecification(self, other)
 
-    def __or__(self, other: "BaseSpecification[T]") -> "SQLAlchemyOrSpecification[T]":
+    def __or__(self, other: BaseSpecification[T]) -> SQLAlchemyOrSpecification[T]:
         return SQLAlchemyOrSpecification(self, other)
 
-    def __invert__(self) -> "SQLAlchemyNotSpecification[T]":
+    def __invert__(self) -> SQLAlchemyNotSpecification[T]:
         return SQLAlchemyNotSpecification(self)
 
 
@@ -139,7 +142,7 @@ class SQLAlchemyNotSpecification(NotSpecification[T]):
 # ---------------------------------------------------------------------------
 
 
-def _get_expression(spec: "BaseSpecification[Any]") -> _ColumnElement:
+def _get_expression(spec: BaseSpecification[Any]) -> _ColumnElement:
     """Retrieve a SQL expression from *spec*, raising if unsupported."""
     if hasattr(spec, "to_expression"):
         return spec.to_expression()  # type: ignore[attr-defined]

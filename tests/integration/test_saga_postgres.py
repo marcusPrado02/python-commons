@@ -11,13 +11,14 @@ DATABASE_URL is not set in the environment.
 
 Run with: pytest tests/integration/test_saga_postgres.py -m integration -v
 """
+
 from __future__ import annotations
 
 import asyncio
 import json
 import os
-import uuid
 from typing import Any
+import uuid
 
 import pytest
 
@@ -29,7 +30,6 @@ from mp_commons.application.saga import (
 from mp_commons.application.saga.orchestrator import SagaFailedError
 from mp_commons.application.saga.state import SagaState
 from mp_commons.application.saga.store import SagaRecord, SagaStore
-
 
 # ---------------------------------------------------------------------------
 # asyncpg-backed SagaStore
@@ -132,7 +132,11 @@ def dsn() -> str:  # type: ignore[return]
     from testcontainers.postgres import PostgresContainer
 
     with PostgresContainer("postgres:16-alpine") as pg:
-        yield pg.get_connection_url().replace("+psycopg2", "").replace("postgresql://", "postgresql://")
+        yield (
+            pg.get_connection_url()
+            .replace("+psycopg2", "")
+            .replace("postgresql://", "postgresql://")
+        )
 
 
 # ---------------------------------------------------------------------------

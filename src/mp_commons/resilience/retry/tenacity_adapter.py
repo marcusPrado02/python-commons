@@ -4,9 +4,11 @@ Optional dependency: ``tenacity``.  Install with::
 
     pip install mp-commons[tenacity]
 """
+
 from __future__ import annotations
 
-from typing import Any, Awaitable, Callable, TypeVar
+from collections.abc import Awaitable, Callable
+from typing import Any, TypeVar
 
 T = TypeVar("T")
 
@@ -43,6 +45,7 @@ class TenacityRetryPolicy:
     ::
 
         from tenacity import wait_exponential, retry_if_exception_type
+
         policy = TenacityRetryPolicy(
             max_attempts=5,
             wait=wait_exponential(multiplier=0.5, max=8),

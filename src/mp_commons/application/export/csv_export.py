@@ -1,4 +1,5 @@
 """Application export – CsvExporter."""
+
 from __future__ import annotations
 
 import csv

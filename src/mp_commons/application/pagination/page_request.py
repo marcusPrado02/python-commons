@@ -1,11 +1,12 @@
 """Application pagination – PageRequest, Sort, SortDirection, Filter."""
+
 from __future__ import annotations
 
 import dataclasses
-from enum import Enum
+from enum import StrEnum
 
 
-class SortDirection(str, Enum):
+class SortDirection(StrEnum):
     ASC = "ASC"
     DESC = "DESC"
 
@@ -13,6 +14,7 @@ class SortDirection(str, Enum):
 @dataclasses.dataclass(frozen=True)
 class Sort:
     """Single sort criterion."""
+
     field: str
     direction: SortDirection = SortDirection.ASC
 
@@ -20,6 +22,7 @@ class Sort:
 @dataclasses.dataclass(frozen=True)
 class Filter:
     """Key/value filter applied to a query."""
+
     field: str
     operator: str
     value: object
@@ -28,6 +31,7 @@ class Filter:
 @dataclasses.dataclass(frozen=True)
 class PageRequest:
     """Offset-based pagination parameters."""
+
     page: int = 1
     size: int = 20
     sorts: tuple[Sort, ...] = ()

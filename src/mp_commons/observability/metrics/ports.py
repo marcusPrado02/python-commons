@@ -1,4 +1,5 @@
 """Observability – Counter, Histogram, Gauge, Metrics ports."""
+
 from __future__ import annotations
 
 import abc
@@ -44,7 +45,13 @@ class Metrics(abc.ABC):
     def counter(self, name: str, description: str = "", unit: str = "") -> Counter: ...
 
     @abc.abstractmethod
-    def histogram(self, name: str, description: str = "", unit: str = "ms", boundaries: list[float] | None = None) -> Histogram: ...
+    def histogram(
+        self,
+        name: str,
+        description: str = "",
+        unit: str = "ms",
+        boundaries: list[float] | None = None,
+    ) -> Histogram: ...
 
     @abc.abstractmethod
     def gauge(self, name: str, description: str = "", unit: str = "") -> Gauge: ...

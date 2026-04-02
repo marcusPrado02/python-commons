@@ -19,9 +19,7 @@ class InMemoryFeatureFlagProvider(FeatureFlagProvider):
         key = flag.key if isinstance(flag, FeatureFlag) else flag
         self._flags[key] = enabled
 
-    async def is_enabled(
-        self, flag: FeatureFlag, context: dict[str, Any] | None = None
-    ) -> bool:
+    async def is_enabled(self, flag: FeatureFlag, context: dict[str, Any] | None = None) -> bool:
         return self._flags.get(flag.key, flag.default_value)
 
     async def get_variant(

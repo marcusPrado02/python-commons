@@ -3,31 +3,29 @@
 §26.8  FastAPIPaginationDep
 §26.10 openapi_extra helpers
 """
+
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Annotated, Literal
-
-if TYPE_CHECKING:
-    pass
+from typing import Annotated, Literal
 
 
 def _require_fastapi() -> None:
     try:
         import fastapi  # noqa: F401
     except ImportError as exc:
-        raise ImportError(
-            "Install 'mp-commons[fastapi]' to use the FastAPI adapter"
-        ) from exc
+        raise ImportError("Install 'mp-commons[fastapi]' to use the FastAPI adapter") from exc
 
 
 # ---------------------------------------------------------------------------
 # §26.8 – Pagination dependency
 # ---------------------------------------------------------------------------
 
-def _pagination_dep_factory():  # noqa: ANN202
+
+def _pagination_dep_factory():
     """Return the ``pagination_dep`` async function bound to FastAPI Depends."""
     _require_fastapi()
     from fastapi import Query  # type: ignore[import-untyped]
+
     from mp_commons.application.pagination.page_request import PageRequest
 
     async def pagination_dep(
@@ -46,11 +44,13 @@ def _pagination_dep_factory():  # noqa: ANN202
     return pagination_dep
 
 
-def _make_pagination_dep():  # noqa: ANN202
+def _make_pagination_dep():
     """Create ``FastAPIPaginationDep`` type alias, importing lazily."""
     try:
         from fastapi import Depends  # type: ignore[import-untyped]
+
         from mp_commons.application.pagination.page_request import PageRequest
+
         fn = _pagination_dep_factory()
         return Annotated[PageRequest, Depends(fn)]
     except ImportError:

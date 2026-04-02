@@ -6,6 +6,7 @@ Run with: PYTHONPATH=src pytest tests/integration/test_nats.py -m integration -v
 Note: NatsMessageBus uses JetStream publish.  The container must have
 JetStream enabled (NATS ≥ 2.2; the default testcontainers image supports it).
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -16,10 +17,10 @@ from testcontainers.nats import NatsContainer
 from mp_commons.adapters.nats import NatsMessageBus
 from mp_commons.kernel.messaging import Message, MessageHeaders
 
-
 # ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------
+
 
 def _run(coro):  # type: ignore[no-untyped-def]
     return asyncio.run(coro)
@@ -28,6 +29,7 @@ def _run(coro):  # type: ignore[no-untyped-def]
 # ---------------------------------------------------------------------------
 # §30.3 – NatsMessageBus
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.integration
 class TestNatsMessageBusIntegration:

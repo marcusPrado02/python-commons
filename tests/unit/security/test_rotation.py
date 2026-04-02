@@ -1,4 +1,5 @@
 """Unit tests for §88 – Secret Rotation."""
+
 from __future__ import annotations
 
 import asyncio
@@ -120,6 +121,7 @@ class TestRotatableSecretProtocol:
 class TestRotationScheduler:
     def test_scheduler_raises_without_apscheduler(self):
         from mp_commons.security.rotation.rotator import RotationScheduler
+
         rotator = SecretRotator()
         scheduler = RotationScheduler(rotator)
         with pytest.raises(ImportError, match="apscheduler"):

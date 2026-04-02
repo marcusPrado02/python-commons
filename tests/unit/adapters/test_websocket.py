@@ -1,13 +1,11 @@
 """Unit tests for the WebSocket hub adapter (§53)."""
+
 from __future__ import annotations
 
 import asyncio
 from unittest.mock import AsyncMock, MagicMock
 
-import pytest
-
 from mp_commons.adapters.websocket.hub import ConnectionHub, GroupManager, WebSocketMiddleware
-
 
 # ---------------------------------------------------------------------------
 # Helpers

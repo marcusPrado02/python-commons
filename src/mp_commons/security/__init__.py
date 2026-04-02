@@ -1,4 +1,5 @@
 """Security — encryption, API keys, JWT."""
+
 from mp_commons.security.apikeys import (
     ApiKey,
     ApiKeyGenerator,

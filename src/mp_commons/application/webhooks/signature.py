@@ -1,4 +1,5 @@
 """Application webhooks – HMAC-SHA256 request signing."""
+
 from __future__ import annotations
 
 import hashlib

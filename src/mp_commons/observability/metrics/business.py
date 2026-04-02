@@ -1,4 +1,5 @@
 """Observability – BusinessMetric."""
+
 from __future__ import annotations
 
 import dataclasses
@@ -9,6 +10,7 @@ from mp_commons.observability.metrics.ports import Metrics
 @dataclasses.dataclass(frozen=True)
 class BusinessMetric:
     """Declare a domain-level metric that maps to a backend metric."""
+
     name: str
     description: str
     unit: str = ""

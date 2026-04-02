@@ -40,7 +40,7 @@ class DatabaseHealthCheck(HealthCheck):
             async with self._factory() as session:
                 await session.execute(__import__("sqlalchemy").text("SELECT 1"))
             return HealthStatus(healthy=True)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             return HealthStatus(healthy=False, detail=str(exc))
 
 
@@ -58,7 +58,7 @@ class RedisHealthCheck(HealthCheck):
         try:
             await self._cache.ping()
             return HealthStatus(healthy=True)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             return HealthStatus(healthy=False, detail=str(exc))
 
 
@@ -78,10 +78,11 @@ class HttpEndpointHealthCheck(HealthCheck):
     async def check(self) -> HealthStatus:
         try:
             import httpx  # optional
+
             async with httpx.AsyncClient(timeout=self._timeout) as client:
                 resp = await client.get(self._url)
             if resp.status_code == self._expected:
                 return HealthStatus(healthy=True)
             return HealthStatus(healthy=False, detail=f"status={resp.status_code}")
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             return HealthStatus(healthy=False, detail=str(exc))

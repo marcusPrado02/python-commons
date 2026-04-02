@@ -3,10 +3,11 @@
 Requires ``celery>=5.3`` for :class:`CeleryTaskBus` and :class:`CeleryResultBackend`.
 :class:`InMemoryTaskBus` is always available.
 """
+
 from __future__ import annotations
 
 import dataclasses
-from enum import Enum
+from enum import StrEnum
 from typing import Any, Protocol, runtime_checkable
 
 
@@ -17,8 +18,7 @@ def _require_celery() -> Any:
         return _celery
     except ImportError as exc:
         raise ImportError(
-            "celery is required for CeleryTaskBus. "
-            "Install it with: pip install 'celery>=5.3'"
+            "celery is required for CeleryTaskBus. Install it with: pip install 'celery>=5.3'"
         ) from exc
 
 
@@ -27,7 +27,7 @@ def _require_celery() -> Any:
 # ---------------------------------------------------------------------------
 
 
-class TaskStatus(str, Enum):
+class TaskStatus(StrEnum):
     PENDING = "PENDING"
     STARTED = "STARTED"
     SUCCESS = "SUCCESS"
@@ -47,6 +47,7 @@ class TaskResult:
 @dataclasses.dataclass(frozen=True)
 class DispatchedTask:
     """Record kept in :class:`InMemoryTaskBus`."""
+
     task_name: str
     payload: dict[str, Any]
     queue: str

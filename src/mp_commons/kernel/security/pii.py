@@ -1,4 +1,5 @@
 """Kernel security – PII redaction port and default sensitive fields."""
+
 from __future__ import annotations
 
 import re
@@ -11,21 +12,34 @@ class PIIRedactor(Protocol):
     def redact(self, data: dict[str, Any]) -> dict[str, Any]: ...
 
 
-DEFAULT_SENSITIVE_FIELDS: frozenset[str] = frozenset({
-    "password", "passwd", "secret", "token", "api_key", "apikey",
-    "authorization", "credit_card", "card_number", "cvv", "ssn", "cpf", "cnpj",
-})
+DEFAULT_SENSITIVE_FIELDS: frozenset[str] = frozenset(
+    {
+        "password",
+        "passwd",
+        "secret",
+        "token",
+        "api_key",
+        "apikey",
+        "authorization",
+        "credit_card",
+        "card_number",
+        "cvv",
+        "ssn",
+        "cpf",
+        "cnpj",
+    }
+)
 
 # Patterns: (compiled regex, replacement label)
 _EMAIL_RE = re.compile(r"\b[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}\b")
 _PHONE_RE = re.compile(r"(?:\+?\d[\s\-\.]?){9,14}\d")
-_CPF_RE   = re.compile(r"\b\d{3}\.\d{3}\.\d{3}[\-/]\d{2}\b")
-_CARD_RE  = re.compile(r"\b(?:\d[ \-]?){15,16}\b")
+_CPF_RE = re.compile(r"\b\d{3}\.\d{3}\.\d{3}[\-/]\d{2}\b")
+_CARD_RE = re.compile(r"\b(?:\d[ \-]?){15,16}\b")
 
 _TEXT_PATTERNS: tuple[tuple[re.Pattern[str], str], ...] = (
     (_EMAIL_RE, "[EMAIL]"),
-    (_CPF_RE,   "[CPF]"),
-    (_CARD_RE,  "[CARD]"),
+    (_CPF_RE, "[CPF]"),
+    (_CARD_RE, "[CARD]"),
     (_PHONE_RE, "[PHONE]"),
 )
 

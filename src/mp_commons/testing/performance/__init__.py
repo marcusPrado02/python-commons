@@ -1,4 +1,5 @@
 """§93 Testing — Performance Assertions."""
+
 from __future__ import annotations
 
 from mp_commons.testing.performance.assertions import (

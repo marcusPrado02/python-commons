@@ -3,13 +3,11 @@
 from __future__ import annotations
 
 import asyncio
-import time
 
 import pytest
 
-from mp_commons.resilience.timeouts import Deadline, TimeoutPolicy
 from mp_commons.kernel.errors import TimeoutError as AppTimeoutError
-
+from mp_commons.resilience.timeouts import Deadline, TimeoutPolicy
 
 # ---------------------------------------------------------------------------
 # Deadline (18.1 — deadline helper)

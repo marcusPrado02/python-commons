@@ -67,9 +67,34 @@ nav:
   - Guides:
     - Quickstart: guides/quickstart.md
     - Adapters: guides/adapters.md
+    - Migration to v1: guides/migration-v1.md
+    - Troubleshooting: guides/troubleshooting.md
+  - Adapters:
+    - Redis: adapters/redis.md
+    - Kafka: adapters/kafka.md
+    - PostgreSQL: adapters/postgresql.md
+    - Elasticsearch: adapters/elasticsearch.md
+    - S3: adapters/s3.md
+    - MongoDB: adapters/mongodb.md
   - Architecture:
     - Diagrams: architecture/diagrams.md
-    - Decisions: architecture/index.md
+    - ADR-0001 Kernel Boundaries: architecture/ADR-0001-kernel-boundaries.md
+    - ADR-0002 Outbox/Inbox Idempotency: architecture/ADR-0002-outbox-inbox-idempotency.md
+    - ADR-0003 Ports and Adapters: architecture/ADR-0003-ports-and-adapters.md
+    - ADR-0004 Async First: architecture/ADR-0004-async-first.md
+    - ADR-0005 Optional Extras: architecture/ADR-0005-optional-extras.md
+    - ADR-0006 Result Type: architecture/ADR-0006-result-type.md
+    - ADR-0007 Multi-Tenancy: architecture/ADR-0007-multi-tenancy.md
+    - ADR-0008 Event Sourcing: architecture/ADR-0008-event-sourcing.md
+  - Observability:
+    - Logging Contract: observability/logging-contract.md
+  - Security:
+    - Threat Model: security/threat-model.md
+    - PII Redaction: security/pii-redaction.md
+  - Contracts:
+    - OpenAPI Compatibility: contracts/openapi-compatibility.md
+  - Versioning:
+    - Semantic Versioning: versioning/semantic-versioning.md
   - API Reference:
     - Kernel: api/kernel.md
     - Application: api/application.md

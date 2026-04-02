@@ -1,4 +1,5 @@
 """Celery task-bus adapter."""
+
 from __future__ import annotations
 
 from mp_commons.adapters.celery.task_bus import (

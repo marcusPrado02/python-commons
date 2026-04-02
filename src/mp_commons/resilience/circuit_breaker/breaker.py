@@ -1,14 +1,16 @@
 """Resilience – CircuitBreaker implementation."""
+
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Awaitable, Callable
 import logging
 import time
-from typing import Awaitable, Callable, TypeVar
+from typing import TypeVar
 
 from mp_commons.resilience.circuit_breaker.errors import CircuitOpenError
-from mp_commons.resilience.circuit_breaker.state import CircuitBreakerState
 from mp_commons.resilience.circuit_breaker.policy import CircuitBreakerPolicy
+from mp_commons.resilience.circuit_breaker.state import CircuitBreakerState
 
 T = TypeVar("T")
 logger = logging.getLogger(__name__)
@@ -76,7 +78,9 @@ class CircuitBreaker:
         self._failure_count += 1
         logger.warning(
             "circuit_breaker.failure name=%s count=%d threshold=%d",
-            self.name, self._failure_count, self._policy.failure_threshold,
+            self.name,
+            self._failure_count,
+            self._policy.failure_threshold,
         )
         if self._failure_count >= self._policy.failure_threshold:
             logger.error("circuit_breaker.opened name=%s", self.name)

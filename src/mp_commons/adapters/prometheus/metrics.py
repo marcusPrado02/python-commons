@@ -16,6 +16,7 @@ The adapter creates ``prometheus_client`` instruments lazily on first access and
 caches them by name so repeated calls to ``counter("foo")`` always return the
 same underlying instrument.
 """
+
 from __future__ import annotations
 
 from typing import Any

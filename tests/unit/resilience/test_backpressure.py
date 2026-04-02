@@ -1,4 +1,5 @@
 """Unit tests for BackpressurePolicy (R-01)."""
+
 from __future__ import annotations
 
 import asyncio
@@ -28,15 +29,14 @@ class TestBackpressurePolicy:
 
     async def test_raises_when_full(self):
         policy = BackpressurePolicy(max_in_flight=2)
-        async with policy:
-            async with policy:
-                assert policy.in_flight == 2
-                assert policy.is_overloaded
-                with pytest.raises(BackpressureError) as exc_info:
-                    async with policy:
-                        pass
-                assert exc_info.value.in_flight == 2
-                assert exc_info.value.max_in_flight == 2
+        async with policy, policy:
+            assert policy.in_flight == 2
+            assert policy.is_overloaded
+            with pytest.raises(BackpressureError) as exc_info:
+                async with policy:
+                    pass
+            assert exc_info.value.in_flight == 2
+            assert exc_info.value.max_in_flight == 2
 
     async def test_slot_released_after_exception(self):
         policy = BackpressurePolicy(max_in_flight=1)
@@ -47,9 +47,8 @@ class TestBackpressurePolicy:
 
     async def test_utilization(self):
         policy = BackpressurePolicy(max_in_flight=4)
-        async with policy:
-            async with policy:
-                assert policy.utilization == pytest.approx(0.5)
+        async with policy, policy:
+            assert policy.utilization == pytest.approx(0.5)
 
     async def test_concurrent_slots(self):
         policy = BackpressurePolicy(max_in_flight=5)

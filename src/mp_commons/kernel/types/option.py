@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Callable, Generic, Iterator, NoReturn, TypeVar
+from collections.abc import Callable, Iterator
+from typing import Generic, NoReturn, TypeVar
 
 T = TypeVar("T")
 
@@ -31,19 +32,19 @@ class Some(Generic[T]):
         """Return the contained value."""
         return self._value
 
-    def unwrap_or(self, default: T) -> T:  # noqa: ARG002
+    def unwrap_or(self, default: T) -> T:
         """Return the contained value, ignoring *default*."""
         return self._value
 
-    def map(self, func: Callable[[T], T]) -> "Some[T]":
+    def map(self, func: Callable[[T], T]) -> Some[T]:
         """Apply *func* to the value and wrap the result in a new ``Some``."""
         return Some(func(self._value))
 
-    def flat_map(self, func: "Callable[[T], Option[T]]") -> "Option[T]":
+    def flat_map(self, func: Callable[[T], Option[T]]) -> Option[T]:
         """Apply *func* (which returns an ``Option``) to the contained value."""
         return func(self._value)
 
-    def filter(self, predicate: "Callable[[T], bool]") -> "Option[T]":
+    def filter(self, predicate: Callable[[T], bool]) -> Option[T]:
         """Return ``self`` if *predicate* holds, otherwise ``Nothing``."""
         return self if predicate(self._value) else Nothing()
 
@@ -75,15 +76,15 @@ class Nothing(Generic[T]):
         """Return *default* because no value is present."""
         return default
 
-    def map(self, func: Callable[[T], T]) -> "Nothing[T]":  # noqa: ARG002
+    def map(self, func: Callable[[T], T]) -> Nothing[T]:
         """Return ``self`` unchanged — mapping over Nothing is a no-op."""
         return self
 
-    def flat_map(self, func: "Callable[[T], Option[T]]") -> "Nothing[T]":  # noqa: ARG002
+    def flat_map(self, func: Callable[[T], Option[T]]) -> Nothing[T]:
         """Return ``self`` unchanged — chaining over Nothing is a no-op."""
         return self
 
-    def filter(self, predicate: "Callable[[T], bool]") -> "Nothing[T]":  # noqa: ARG002
+    def filter(self, predicate: Callable[[T], bool]) -> Nothing[T]:
         """Return ``self`` unchanged — filtering Nothing always yields Nothing."""
         return self
 

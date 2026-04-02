@@ -1,4 +1,5 @@
 """Testing fakes – FakeSecretStore (§36.10)."""
+
 from __future__ import annotations
 
 from mp_commons.config.secrets.port import SecretRef, SecretStore
@@ -34,17 +35,13 @@ class FakeSecretStore(SecretStore):
 
     async def get_all(self, path: str) -> dict[str, str]:
         prefix = path.rstrip("/") + "/"
-        return {
-            k[len(prefix):]: v
-            for k, v in self._store.items()
-            if k.startswith(prefix)
-        }
+        return {k[len(prefix) :]: v for k, v in self._store.items() if k.startswith(prefix)}
 
     # ------------------------------------------------------------------
     # Test-setup helpers
     # ------------------------------------------------------------------
 
-    def seed(self, key: str, value: str) -> "FakeSecretStore":
+    def seed(self, key: str, value: str) -> FakeSecretStore:
         """Pre-populate *key* → *value*.
 
         *key* should match the string representation of a :class:`SecretRef`,
@@ -53,7 +50,7 @@ class FakeSecretStore(SecretStore):
         self._store[key] = value
         return self
 
-    def seed_ref(self, ref: SecretRef, value: str) -> "FakeSecretStore":
+    def seed_ref(self, ref: SecretRef, value: str) -> FakeSecretStore:
         """Convenience overload that accepts a :class:`SecretRef` directly."""
         self._store[str(ref)] = value
         return self

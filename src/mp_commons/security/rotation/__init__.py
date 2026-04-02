@@ -1,4 +1,5 @@
 """§88 Security — Secret Rotation."""
+
 from __future__ import annotations
 
 from mp_commons.security.rotation.rotator import (

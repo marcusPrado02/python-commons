@@ -1,4 +1,5 @@
 """Unit tests for OpenSearch adapter (A-10)."""
+
 from __future__ import annotations
 
 import dataclasses
@@ -17,12 +18,11 @@ _async_os_class = MagicMock(name="AsyncOpenSearch")
 _os_module.AsyncOpenSearch = _async_os_class  # type: ignore[attr-defined]
 sys.modules.setdefault("opensearchpy", _os_module)
 
-from mp_commons.adapters.opensearch.client import (  # noqa: E402
+from mp_commons.adapters.opensearch.client import (
     OpenSearchClient,
     OpenSearchRepository,
     OpenSearchSearchQuery,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -148,8 +148,9 @@ class TestOpenSearchClient:
 
     @pytest.mark.asyncio
     async def test_missing_opensearch_raises(self):
-        import mp_commons.adapters.opensearch.client as mod
         from unittest.mock import patch
+
+        import mp_commons.adapters.opensearch.client as mod
 
         with patch.object(mod, "_require_opensearch", side_effect=ImportError("no os")):
             with pytest.raises(ImportError):

@@ -1,4 +1,5 @@
 """Testing fakes – InMemoryIdempotencyStore."""
+
 from __future__ import annotations
 
 from mp_commons.kernel.messaging import IdempotencyKey, IdempotencyRecord, IdempotencyStore

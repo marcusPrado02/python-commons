@@ -1,4 +1,5 @@
 """Kernel messaging – message primitives and bus ports."""
+
 from __future__ import annotations
 
 import abc
@@ -70,7 +71,9 @@ class EventPublisher(abc.ABC):
     """Port: domain-event publisher with routing by event type."""
 
     @abc.abstractmethod
-    async def publish(self, topic: str, payload: Any, headers: MessageHeaders | None = None) -> None:
+    async def publish(
+        self, topic: str, payload: Any, headers: MessageHeaders | None = None
+    ) -> None:
         """Publish *payload* to *topic*, attaching optional *headers*."""
         ...
 

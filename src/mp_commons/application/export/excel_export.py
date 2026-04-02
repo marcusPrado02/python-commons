@@ -1,4 +1,5 @@
 """Application export – ExcelExporter (requires openpyxl extra)."""
+
 from __future__ import annotations
 
 import io
@@ -11,12 +12,12 @@ __all__ = ["ExcelExporter"]
 
 def _require_openpyxl() -> Any:  # pragma: no cover
     try:
-        import openpyxl  # noqa: PLC0415
+        import openpyxl
+
         return openpyxl
     except ImportError as exc:
         raise ImportError(
-            "openpyxl is required for Excel export. "
-            "Install it with: pip install openpyxl"
+            "openpyxl is required for Excel export. Install it with: pip install openpyxl"
         ) from exc
 
 
@@ -29,7 +30,7 @@ class ExcelExporter:
         ws = wb.active
         ws.title = request.filename[:31]  # sheet name limit
 
-        from openpyxl.styles import Font  # noqa: PLC0415
+        from openpyxl.styles import Font
 
         # Write header row with bold font
         for col_idx, col_def in enumerate(request.columns, start=1):

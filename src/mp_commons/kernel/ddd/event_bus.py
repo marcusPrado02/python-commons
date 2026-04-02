@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Any, Callable, Coroutine, Protocol
+from collections.abc import Callable, Coroutine
+from typing import Any, Protocol
 
 from mp_commons.kernel.ddd.domain_event import DomainEvent
 

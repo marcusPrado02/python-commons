@@ -1,10 +1,11 @@
 """Unit tests for the Pulsar adapter (§57)."""
+
 from __future__ import annotations
 
 import asyncio
 import sys
 import types
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -24,12 +25,11 @@ _pulsar_mod.Timeout = _timeout_exc_class  # type: ignore[attr-defined]
 
 sys.modules.setdefault("pulsar", _pulsar_mod)
 
-from mp_commons.adapters.pulsar.messaging import (  # noqa: E402
+from mp_commons.adapters.pulsar.messaging import (
     PulsarConsumer,
     PulsarOutboxDispatcher,
     PulsarProducer,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helper factories
@@ -80,7 +80,7 @@ def test_producer_connect_creates_client():
 def test_producer_publish_sends_payload():
     from mp_commons.kernel.messaging.message import Message
 
-    prod, mock_client, topic_producer = _make_producer()
+    prod, _mock_client, topic_producer = _make_producer()
 
     class _TestEvent(Message):
         topic = "test.events"
@@ -176,7 +176,7 @@ def test_consumer_ack():
 
 
 def test_dispatcher_publishes_and_marks_dispatched():
-    from mp_commons.kernel.messaging.outbox import OutboxRecord, OutboxStatus
+    from mp_commons.kernel.messaging.outbox import OutboxRecord
 
     record = OutboxRecord(
         id="r1",
@@ -187,7 +187,7 @@ def test_dispatcher_publishes_and_marks_dispatched():
         payload=b'{"id":"o1"}',
     )
 
-    prod, mock_client, topic_producer = _make_producer()
+    prod, _mock_client, _topic_producer = _make_producer()
     repo = MagicMock()
     repo.get_pending = AsyncMock(return_value=[record])
     repo.mark_dispatched = AsyncMock()
@@ -201,7 +201,7 @@ def test_dispatcher_publishes_and_marks_dispatched():
 
 
 def test_dispatcher_marks_failed_on_error():
-    from mp_commons.kernel.messaging.outbox import OutboxRecord, OutboxStatus
+    from mp_commons.kernel.messaging.outbox import OutboxRecord
 
     record = OutboxRecord(
         id="r1",
@@ -212,7 +212,7 @@ def test_dispatcher_marks_failed_on_error():
         payload=b"data",
     )
 
-    prod, mock_client, topic_producer = _make_producer()
+    prod, _mock_client, topic_producer = _make_producer()
     topic_producer.send = MagicMock(side_effect=Exception("broker down"))
     repo = MagicMock()
     repo.get_pending = AsyncMock(return_value=[record])

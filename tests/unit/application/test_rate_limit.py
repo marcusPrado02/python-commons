@@ -12,9 +12,7 @@ from mp_commons.application.rate_limit import (
     Quota,
     RateLimitDecision,
     RateLimitResult,
-    RateLimiter,
 )
-
 
 # ---------------------------------------------------------------------------
 # Quota (12.1)

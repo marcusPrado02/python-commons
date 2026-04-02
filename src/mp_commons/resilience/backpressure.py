@@ -9,23 +9,26 @@ Usage::
 
     policy = BackpressurePolicy(max_in_flight=50)
 
+
     async def handle_request():
-        async with policy:          # raises BackpressureError if overloaded
+        async with policy:  # raises BackpressureError if overloaded
             await do_work()
+
 
     # or lower-level:
     async with policy.acquire():
         await do_work()
 
     # introspect:
-    print(policy.in_flight)         # current in-flight count
-    print(policy.utilization)       # 0.0 – 1.0
+    print(policy.in_flight)  # current in-flight count
+    print(policy.utilization)  # 0.0 – 1.0
 """
+
 from __future__ import annotations
 
 import asyncio
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import AsyncIterator
 
 
 class BackpressureError(Exception):
@@ -40,9 +43,7 @@ class BackpressureError(Exception):
     """
 
     def __init__(self, in_flight: int, max_in_flight: int) -> None:
-        super().__init__(
-            f"Backpressure limit reached: {in_flight}/{max_in_flight} slots in use"
-        )
+        super().__init__(f"Backpressure limit reached: {in_flight}/{max_in_flight} slots in use")
         self.in_flight = in_flight
         self.max_in_flight = max_in_flight
 
@@ -118,7 +119,7 @@ class BackpressurePolicy:
         finally:
             self._semaphore.release()
 
-    async def __aenter__(self) -> "BackpressurePolicy":
+    async def __aenter__(self) -> BackpressurePolicy:
         if self._semaphore._value == 0:  # type: ignore[attr-defined]
             raise BackpressureError(self.in_flight, self._max)
         await self._semaphore.acquire()
@@ -128,10 +129,7 @@ class BackpressurePolicy:
         self._semaphore.release()
 
     def __repr__(self) -> str:
-        return (
-            f"BackpressurePolicy(max_in_flight={self._max}, "
-            f"in_flight={self.in_flight})"
-        )
+        return f"BackpressurePolicy(max_in_flight={self._max}, in_flight={self.in_flight})"
 
 
 __all__ = ["BackpressureError", "BackpressurePolicy"]

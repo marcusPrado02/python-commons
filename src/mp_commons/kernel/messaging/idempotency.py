@@ -1,13 +1,14 @@
 """Kernel messaging – idempotency ports."""
+
 from __future__ import annotations
 
 import abc
 import dataclasses
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 
 
-class DeduplicationPolicy(str, Enum):
+class DeduplicationPolicy(StrEnum):
     """How to handle duplicate requests."""
 
     RETURN_CACHED = "RETURN_CACHED"

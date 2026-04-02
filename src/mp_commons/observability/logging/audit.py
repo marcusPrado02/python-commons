@@ -2,15 +2,16 @@
 
 A dedicated structured-log sink for security-sensitive actions.
 """
+
 from __future__ import annotations
 
 import datetime
+from enum import StrEnum
 import logging
-from enum import Enum
 from typing import Any
 
 
-class AuditOutcome(str, Enum):
+class AuditOutcome(StrEnum):
     """Standardised audit outcomes."""
 
     SUCCESS = "success"
@@ -77,7 +78,7 @@ class AuditLogger:
             "resource": resource,
             "action": action,
             "outcome": outcome.value if isinstance(outcome, AuditOutcome) else str(outcome),
-            "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "timestamp": datetime.datetime.now(datetime.UTC).isoformat(),
             **extra,
         }
         self._emit(entry)
@@ -112,7 +113,7 @@ class AuditLogger:
             "service": self._service,
             "event_type": event_type,
             "description": description,
-            "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "timestamp": datetime.datetime.now(datetime.UTC).isoformat(),
             **extra,
         }
         if principal_id is not None:
@@ -123,6 +124,7 @@ class AuditLogger:
         # structlog bound loggers accept event as first positional arg
         try:
             import structlog  # noqa: F401  - just check it exists
+
             event = entry.pop("event", "audit")
             self._log.warning(event, **entry)
         except (ImportError, TypeError):

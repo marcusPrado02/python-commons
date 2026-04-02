@@ -1,4 +1,5 @@
 """Kernel time – Clock protocol + implementations."""
+
 from __future__ import annotations
 
 from datetime import UTC, date, datetime, timedelta

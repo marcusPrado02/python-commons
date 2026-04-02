@@ -1,5 +1,7 @@
 """Resilience – Bulkhead composite."""
+
 from __future__ import annotations
+
 from mp_commons.resilience.bulkhead.limiters import QueueLimiter
 
 
@@ -10,7 +12,7 @@ class Bulkhead:
         self.name = name
         self._limiter = QueueLimiter(max_concurrent, max_queue)
 
-    async def __aenter__(self) -> "Bulkhead":
+    async def __aenter__(self) -> Bulkhead:
         await self._limiter.__aenter__()
         return self
 

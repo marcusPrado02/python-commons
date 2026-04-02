@@ -8,10 +8,8 @@ import pytest
 
 from mp_commons.application.feature_flags import (
     FeatureFlag,
-    FeatureFlagProvider,
     InMemoryFeatureFlagProvider,
 )
-
 
 # ---------------------------------------------------------------------------
 # FeatureFlag value object (13.1)

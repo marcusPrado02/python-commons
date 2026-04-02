@@ -6,6 +6,7 @@ Injects/extracts the W3C ``traceparent`` header into NATS message headers
 Usage (publisher)::
 
     from mp_commons.adapters.opentelemetry.nats_propagation import inject_trace_headers
+
     headers = {}
     inject_trace_headers(headers)
     await js.publish("orders", payload, headers=headers)
@@ -13,6 +14,7 @@ Usage (publisher)::
 Usage (subscriber)::
 
     from mp_commons.adapters.opentelemetry.nats_propagation import extract_trace_context
+
     token = extract_trace_context(msg.headers or {})
     try:
         await process(msg)
@@ -20,6 +22,7 @@ Usage (subscriber)::
         if token is not None:
             context.detach(token)
 """
+
 from __future__ import annotations
 
 import logging
@@ -31,6 +34,7 @@ logger = logging.getLogger(__name__)
 def _get_propagator() -> Any | None:
     try:
         from opentelemetry.propagate import get_global_textmap
+
         return get_global_textmap()
     except ImportError:
         return None
@@ -39,6 +43,7 @@ def _get_propagator() -> Any | None:
 def _get_context_api() -> Any | None:
     try:
         from opentelemetry import context
+
         return context
     except ImportError:
         return None
@@ -116,4 +121,4 @@ def extract_trace_context(headers: dict[str, str] | None) -> object | None:
         return None
 
 
-__all__ = ["inject_trace_headers", "extract_trace_context"]
+__all__ = ["extract_trace_context", "inject_trace_headers"]

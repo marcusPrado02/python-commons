@@ -13,7 +13,9 @@ from mp_commons.kernel.ddd.domain_service import (
     get_default_registry,
 )
 from mp_commons.kernel.ddd.entity import Entity
+from mp_commons.kernel.ddd.event_bus import DomainEventBus
 from mp_commons.kernel.ddd.invariant import Invariant, ensure
+from mp_commons.kernel.ddd.outbox_publisher import OutboxPublisher
 from mp_commons.kernel.ddd.policies import (
     AllOf,
     AnyOf,
@@ -23,8 +25,6 @@ from mp_commons.kernel.ddd.policies import (
     PolicyResult,
 )
 from mp_commons.kernel.ddd.repository import Repository
-from mp_commons.kernel.ddd.event_bus import DomainEventBus
-from mp_commons.kernel.ddd.outbox_publisher import OutboxPublisher
 from mp_commons.kernel.ddd.saga import Saga
 from mp_commons.kernel.ddd.specification import (
     AndSpecification,

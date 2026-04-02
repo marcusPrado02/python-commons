@@ -16,13 +16,15 @@ Usage::
         registry=health_registry,
         metrics=PrometheusMetrics(namespace="myapp"),
     )
-    await exporter.collect()   # run checks and update metrics
+    await exporter.collect()  # run checks and update metrics
+
 
     # Or integrate with a FastAPI background task / scheduler:
     @app.on_event("startup")
     async def start_health_collector():
         asyncio.create_task(exporter.collect_loop(interval=15.0))
 """
+
 from __future__ import annotations
 
 import asyncio

@@ -1,4 +1,5 @@
 """Unit tests for the Cassandra adapter (§55)."""
+
 from __future__ import annotations
 
 import asyncio
@@ -13,14 +14,15 @@ from mp_commons.adapters.cassandra.repository import (
     CassandraSessionFactory,
 )
 
-
 # ---------------------------------------------------------------------------
 # CassandraSessionFactory
 # ---------------------------------------------------------------------------
 
 
 def test_session_factory_delegates_kwargs():
-    with patch("mp_commons.adapters.cassandra.repository._require_cassandra", return_value=MagicMock()):
+    with patch(
+        "mp_commons.adapters.cassandra.repository._require_cassandra", return_value=MagicMock()
+    ):
         factory = CassandraSessionFactory(["localhost"], "my_keyspace", port=9042)
         assert factory._contact_points == ["localhost"]
         assert factory._keyspace == "my_keyspace"
@@ -28,7 +30,9 @@ def test_session_factory_delegates_kwargs():
 
 
 def test_session_property_raises_before_connect():
-    with patch("mp_commons.adapters.cassandra.repository._require_cassandra", return_value=MagicMock()):
+    with patch(
+        "mp_commons.adapters.cassandra.repository._require_cassandra", return_value=MagicMock()
+    ):
         factory = CassandraSessionFactory(["localhost"], "ks")
         with pytest.raises(RuntimeError, match="connect()"):
             _ = factory.session
@@ -51,11 +55,10 @@ def _named_tuple_row(id_: str, value: str = "") -> MagicMock:
     row._fields = ("id", "value")
     row.__iter__ = lambda self: iter((id_, value))
     row[0] = id_
+
     # Allow tuple unpacking via zip
     def to_iter(self):
         return iter((id_, value))
-    import builtins
-    orig_zip = builtins.zip
 
     return (id_, value)  # Use plain tuple for zip compatibility
 
@@ -63,6 +66,7 @@ def _named_tuple_row(id_: str, value: str = "") -> MagicMock:
 def _make_row_named(id_: str, value: str = ""):
     """Create a simple namedtuple row compatible with zip(row._fields, row)."""
     from collections import namedtuple
+
     _R = namedtuple("_R", ["id", "value"])
     return _R(id=id_, value=value)
 
@@ -152,5 +156,6 @@ def test_repo_find_by():
 
 def test_outbox_bucket_hour():
     from datetime import datetime
+
     dt = datetime(2024, 3, 15, 14, 33, 0)
     assert CassandraOutboxStore._bucket_hour(dt) == "2024-03-15T14:00:00"

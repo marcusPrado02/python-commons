@@ -1,4 +1,5 @@
 """Application email – Jinja2EmailRenderer (optional 'jinja2' extra)."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -11,12 +12,12 @@ __all__ = ["Jinja2EmailRenderer"]
 
 def _require_jinja2() -> Any:  # pragma: no cover
     try:
-        import jinja2  # noqa: PLC0415
+        import jinja2
+
         return jinja2
     except ImportError as exc:
         raise ImportError(
-            "Jinja2 is required for email rendering. "
-            "Install it with: pip install jinja2"
+            "Jinja2 is required for email rendering. Install it with: pip install jinja2"
         ) from exc
 
 
@@ -53,13 +54,15 @@ class Jinja2EmailRenderer:
         text_body: str | None = None
         try:
             text_body = self._env.get_template(f"{template_name}.txt.j2").render(**context)
-        except Exception:  # noqa: BLE001
+        except Exception:
             pass
 
         resolved_subject = subject or ""
         try:
-            resolved_subject = self._env.get_template(f"{template_name}.subject.j2").render(**context).strip()
-        except Exception:  # noqa: BLE001
+            resolved_subject = (
+                self._env.get_template(f"{template_name}.subject.j2").render(**context).strip()
+            )
+        except Exception:
             pass
 
         return EmailMessage(

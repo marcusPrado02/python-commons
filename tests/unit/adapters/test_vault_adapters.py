@@ -1,32 +1,33 @@
 """Unit tests for Vault adapter – §34.1–34.2 (mocked, no hvac required)."""
+
 from __future__ import annotations
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, call, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
 from mp_commons.adapters.vault.store import VaultSecretStore, VaultTokenRenewer
 from mp_commons.config.secrets.port import SecretRef
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _make_mock_hvac(kv_data: dict | None = None):
     """Return (mock_module, mock_client)."""
     kv_data = kv_data if kv_data is not None else {"my-key": "my-value"}
     mock_client = MagicMock()
-    mock_client.secrets.kv.v2.read_secret_version.return_value = {
-        "data": {"data": kv_data}
-    }
+    mock_client.secrets.kv.v2.read_secret_version.return_value = {"data": {"data": kv_data}}
     mock_hvac = MagicMock()
     mock_hvac.Client.return_value = mock_client
     return mock_hvac, mock_client
 
 
-def _make_store(kv_data: dict | None = None, mount: str = "secret") -> tuple[VaultSecretStore, MagicMock]:
+def _make_store(
+    kv_data: dict | None = None, mount: str = "secret"
+) -> tuple[VaultSecretStore, MagicMock]:
     mock_hvac, mock_client = _make_mock_hvac(kv_data)
     with patch("mp_commons.adapters.vault.store._require_hvac", return_value=mock_hvac):
         store = VaultSecretStore(url="http://vault:8200", token="tok", mount_point=mount)
@@ -37,28 +38,30 @@ def _make_store(kv_data: dict | None = None, mount: str = "secret") -> tuple[Vau
 # Import guard
 # ===========================================================================
 
+
 class TestVaultImportError:
     def test_raises_import_error_without_lib(self):
-        with patch(
-            "mp_commons.adapters.vault.store._require_hvac",
-            side_effect=ImportError("mp-commons[vault]"),
+        with (
+            patch(
+                "mp_commons.adapters.vault.store._require_hvac",
+                side_effect=ImportError("mp-commons[vault]"),
+            ),
+            pytest.raises(ImportError, match="vault"),
         ):
-            with pytest.raises(ImportError, match="vault"):
-                VaultSecretStore()
+            VaultSecretStore()
 
 
 # ===========================================================================
 # §34.1 – VaultSecretStore
 # ===========================================================================
 
+
 class TestVaultSecretStoreInit:
     def test_creates_hvac_client_with_url_and_token(self):
-        mock_hvac, mock_client = _make_mock_hvac()
+        mock_hvac, _mock_client = _make_mock_hvac()
         with patch("mp_commons.adapters.vault.store._require_hvac", return_value=mock_hvac):
             VaultSecretStore(url="http://my-vault:8200", token="s.abc123")
-        mock_hvac.Client.assert_called_once_with(
-            url="http://my-vault:8200", token="s.abc123"
-        )
+        mock_hvac.Client.assert_called_once_with(url="http://my-vault:8200", token="s.abc123")
 
     def test_default_mount_point_is_secret(self):
         store, _ = _make_store()
@@ -71,7 +74,7 @@ class TestVaultSecretStoreInit:
 
 class TestVaultSecretStoreGet:
     def test_get_returns_value_for_key(self):
-        store, mock_client = _make_store(kv_data={"db-password": "s3cr3t"})
+        store, _mock_client = _make_store(kv_data={"db-password": "s3cr3t"})
         ref = SecretRef(path="app/db", key="db-password")
         result = asyncio.run(store.get(ref))
         assert result == "s3cr3t"
@@ -107,7 +110,7 @@ class TestVaultSecretStoreGet:
 class TestVaultSecretStoreGetAll:
     def test_get_all_returns_full_dict(self):
         data = {"host": "db.internal", "port": "5432", "user": "admin"}
-        store, mock_client = _make_store(kv_data=data)
+        store, _mock_client = _make_store(kv_data=data)
         result = asyncio.run(store.get_all("infra/db"))
         assert result == data
 
@@ -125,12 +128,14 @@ class TestVaultSecretStoreGetAll:
 
     def test_implements_secret_store_interface(self):
         from mp_commons.config.secrets.port import SecretStore
+
         assert issubclass(VaultSecretStore, SecretStore)
 
 
 # ===========================================================================
 # §34.2 – VaultTokenRenewer
 # ===========================================================================
+
 
 class TestVaultTokenRenewer:
     def _make_client(self, ttl: int = 3600):

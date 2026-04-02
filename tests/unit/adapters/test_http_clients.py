@@ -1,24 +1,23 @@
 """Unit tests – HTTP adapter (§32.1–32.4)."""
+
 from __future__ import annotations
 
 import asyncio
-import dataclasses
-from typing import Any
 
 import httpx
 import pytest
 import respx
 
+from mp_commons.adapters.http.circuit_client import CircuitBreakingHttpClient
 from mp_commons.adapters.http.client import HttpxHttpClient
 from mp_commons.adapters.http.retry_client import RetryingHttpClient
-from mp_commons.adapters.http.circuit_client import CircuitBreakingHttpClient
 from mp_commons.kernel.errors import ExternalServiceError
 from mp_commons.observability.correlation import CorrelationContext, RequestContext
-
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _set_correlation(
     correlation_id: str = "test-cid",
@@ -39,6 +38,7 @@ def _set_correlation(
 # ---------------------------------------------------------------------------
 # §32.1 – Correlation header injection
 # ---------------------------------------------------------------------------
+
 
 class TestCorrelationHeaderInjection:
     """HttpxHttpClient injects correlation headers from CorrelationContext."""
@@ -61,9 +61,7 @@ class TestCorrelationHeaderInjection:
 
     @respx.mock
     def test_tenant_and_user_headers_injected(self) -> None:
-        _set_correlation(
-            correlation_id="cid", tenant_id="tenant-1", user_id="user-42"
-        )
+        _set_correlation(correlation_id="cid", tenant_id="tenant-1", user_id="user-42")
         route = respx.get("http://svc/ok").mock(return_value=httpx.Response(200))
 
         async def run() -> None:
@@ -96,9 +94,7 @@ class TestCorrelationHeaderInjection:
 
         async def run() -> None:
             async with HttpxHttpClient() as client:
-                await client.get(
-                    "http://svc/ok", headers={"X-Correlation-ID": "caller-override"}
-                )
+                await client.get("http://svc/ok", headers={"X-Correlation-ID": "caller-override"})
             sent = route.calls.last.request
             assert sent.headers.get("x-correlation-id") == "caller-override"
 
@@ -108,6 +104,7 @@ class TestCorrelationHeaderInjection:
 # ---------------------------------------------------------------------------
 # §32.1 – Error mapping
 # ---------------------------------------------------------------------------
+
 
 class TestHttpxErrorMapping:
     """HttpxHttpClient maps httpx errors to domain errors."""
@@ -151,6 +148,7 @@ class TestHttpxErrorMapping:
 # §32.2 – RetryingHttpClient
 # ---------------------------------------------------------------------------
 
+
 class TestRetryingHttpClient:
     """RetryingHttpClient retries on transient 5xx responses."""
 
@@ -187,6 +185,7 @@ class TestRetryingHttpClient:
 # ---------------------------------------------------------------------------
 # §32.3 – CircuitBreakingHttpClient
 # ---------------------------------------------------------------------------
+
 
 class TestCircuitBreakingHttpClient:
     """CircuitBreakingHttpClient opens the circuit after repeated failures."""

@@ -1,4 +1,5 @@
 """Testing fixtures – tenant_fixture."""
+
 from __future__ import annotations
 
 try:
@@ -8,6 +9,7 @@ try:
     def tenant_fixture():
         from mp_commons.kernel.ddd import TenantContext
         from mp_commons.kernel.types import TenantId
+
         tenant_id = TenantId("test-tenant")
         token = TenantContext.set(tenant_id)
         yield tenant_id

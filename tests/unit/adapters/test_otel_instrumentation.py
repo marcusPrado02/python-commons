@@ -1,15 +1,15 @@
 """Unit tests for SQLAlchemy OTel instrumentation and Kafka trace propagation (O-01, O-02)."""
+
 from __future__ import annotations
 
 import sys
 import types
-from unittest.mock import MagicMock, patch, call
-
-import pytest
+from unittest.mock import MagicMock, patch
 
 # ---------------------------------------------------------------------------
 # Stub opentelemetry so tests run without the real library
 # ---------------------------------------------------------------------------
+
 
 def _build_otel_stub() -> None:
     if "opentelemetry" in sys.modules:
@@ -59,18 +59,15 @@ def _build_otel_stub() -> None:
 
 _build_otel_stub()
 
-from mp_commons.adapters.opentelemetry.kafka_propagation import (  # noqa: E402
-    inject_trace_headers,
+from mp_commons.adapters.opentelemetry.kafka_propagation import (
     extract_trace_context,
+    inject_trace_headers,
 )
-from mp_commons.adapters.opentelemetry.sqlalchemy_instrumentation import (  # noqa: E402
-    instrument_engine,
-    uninstrument_engine,
-    _before_cursor_execute,
+from mp_commons.adapters.opentelemetry.sqlalchemy_instrumentation import (
     _after_cursor_execute,
     _sanitize_sql,
+    instrument_engine,
 )
-
 
 # ---------------------------------------------------------------------------
 # SQLAlchemy instrumentation
@@ -89,20 +86,23 @@ class TestSQLAlchemyInstrumentation:
 
         import mp_commons.adapters.opentelemetry.sqlalchemy_instrumentation as _mod
 
-        with patch.object(_mod, "_get_tracer", return_value=MagicMock()):
-            with patch.dict(sys.modules, {"sqlalchemy": MagicMock(), "sqlalchemy.event": sqlalchemy_event}):
-                import importlib
-                from unittest.mock import patch as _patch
+        with (
+            patch.object(_mod, "_get_tracer", return_value=MagicMock()),
+            patch.dict(
+                sys.modules, {"sqlalchemy": MagicMock(), "sqlalchemy.event": sqlalchemy_event}
+            ),
+        ):
+            from unittest.mock import patch as _patch
 
-                sa_mod = types.ModuleType("sqlalchemy")
-                sa_mod.event = MagicMock()  # type: ignore[attr-defined]
-                sa_mod.event.contains.return_value = False  # type: ignore[attr-defined]
+            sa_mod = types.ModuleType("sqlalchemy")
+            sa_mod.event = MagicMock()  # type: ignore[attr-defined]
+            sa_mod.event.contains.return_value = False  # type: ignore[attr-defined]
 
-                with _patch.dict(sys.modules, {"sqlalchemy": sa_mod}):
-                    engine = self._make_engine()
-                    engine.sync_engine = engine  # simulate sync engine attr
-                    instrument_engine(engine)
-                    sa_mod.event.listen.assert_called()
+            with _patch.dict(sys.modules, {"sqlalchemy": sa_mod}):
+                engine = self._make_engine()
+                engine.sync_engine = engine  # simulate sync engine attr
+                instrument_engine(engine)
+                sa_mod.event.listen.assert_called()
 
     def test_sanitize_sql_removes_named_params(self):
         sql = "SELECT * FROM users WHERE id = :user_id AND status = :status"

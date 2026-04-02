@@ -1,4 +1,5 @@
 """Application CQRS – Command, CommandHandler, CommandBus, InProcessCommandBus."""
+
 from __future__ import annotations
 
 import abc

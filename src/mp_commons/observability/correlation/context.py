@@ -1,14 +1,16 @@
 """Observability – RequestContext, CorrelationContext."""
+
 from __future__ import annotations
 
-import dataclasses
 from contextvars import ContextVar
+import dataclasses
 from uuid import uuid4
 
 
 @dataclasses.dataclass(frozen=True)
 class RequestContext:
     """Ambient context for a single request/use-case execution."""
+
     correlation_id: str
     tenant_id: str | None = None
     user_id: str | None = None
@@ -16,7 +18,7 @@ class RequestContext:
     span_id: str | None = None
 
     @classmethod
-    def new(cls, tenant_id: str | None = None, user_id: str | None = None) -> "RequestContext":
+    def new(cls, tenant_id: str | None = None, user_id: str | None = None) -> RequestContext:
         return cls(correlation_id=str(uuid4()), tenant_id=tenant_id, user_id=user_id)
 
 
@@ -54,7 +56,7 @@ class CorrelationContext:
         _CTX_VAR.set(None)
 
     @staticmethod
-    def set_from_headers(headers: dict[str, str]) -> "RequestContext":
+    def set_from_headers(headers: dict[str, str]) -> RequestContext:
         """Extract correlation context from HTTP headers and store it.
 
         Priority order for correlation ID:
@@ -67,11 +69,7 @@ class CorrelationContext:
         """
         norm: dict[str, str] = {k.lower(): v for k, v in headers.items()}
 
-        correlation_id = (
-            norm.get("x-correlation-id")
-            or norm.get("x-request-id")
-            or str(uuid4())
-        )
+        correlation_id = norm.get("x-correlation-id") or norm.get("x-request-id") or str(uuid4())
 
         # W3C traceparent: 00-{trace-id}-{parent-id}-{flags}
         trace_id: str | None = None

@@ -21,8 +21,10 @@ Or copy the ``conftest.py`` snippet::
     # conftest.py
     def pytest_addoption(parser):
         from mp_commons.testing.approval.plugin import add_approve_option
+
         add_approve_option(parser)
 """
+
 from __future__ import annotations
 
 import os

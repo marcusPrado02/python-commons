@@ -1,4 +1,5 @@
 """Testing fakes – FakeFeatureFlagProvider (§36.9)."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -31,9 +32,7 @@ class FakeFeatureFlagProvider(FeatureFlagProvider):
     # FeatureFlagProvider protocol
     # ------------------------------------------------------------------
 
-    async def is_enabled(
-        self, flag: FeatureFlag, context: dict[str, Any] | None = None
-    ) -> bool:
+    async def is_enabled(self, flag: FeatureFlag, context: dict[str, Any] | None = None) -> bool:
         if flag.key in self._enabled:
             return self._enabled[flag.key]
         return flag.default_value if self._default is False else self._default
@@ -47,21 +46,19 @@ class FakeFeatureFlagProvider(FeatureFlagProvider):
     # Test-setup helpers
     # ------------------------------------------------------------------
 
-    def enable(self, flag: str | FeatureFlag) -> "FakeFeatureFlagProvider":
+    def enable(self, flag: str | FeatureFlag) -> FakeFeatureFlagProvider:
         """Enable *flag* (by key string or :class:`FeatureFlag` instance)."""
         key = flag.key if isinstance(flag, FeatureFlag) else flag
         self._enabled[key] = True
         return self
 
-    def disable(self, flag: str | FeatureFlag) -> "FakeFeatureFlagProvider":
+    def disable(self, flag: str | FeatureFlag) -> FakeFeatureFlagProvider:
         """Disable *flag*."""
         key = flag.key if isinstance(flag, FeatureFlag) else flag
         self._enabled[key] = False
         return self
 
-    def set_variant(
-        self, flag: str | FeatureFlag, variant: str | None
-    ) -> "FakeFeatureFlagProvider":
+    def set_variant(self, flag: str | FeatureFlag, variant: str | None) -> FakeFeatureFlagProvider:
         """Set the variant returned by :meth:`get_variant`."""
         key = flag.key if isinstance(flag, FeatureFlag) else flag
         self._variants[key] = variant

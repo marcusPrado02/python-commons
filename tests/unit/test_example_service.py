@@ -1,10 +1,11 @@
 """Smoke tests for the simple_service example (D-01)."""
+
 from __future__ import annotations
 
 import pytest
 
 
-@pytest.fixture()
+@pytest.fixture
 def client():
     # Import inside fixture — avoids requiring fastapi at collection time.
     # starlette.testclient correctly drives the ASGI lifespan protocol so

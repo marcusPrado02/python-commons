@@ -1,8 +1,10 @@
 """Application UoW – transactional decorator."""
+
 from __future__ import annotations
 
+from collections.abc import Callable
 import functools
-from typing import Any, Callable, TypeVar
+from typing import Any, TypeVar
 
 from mp_commons.kernel.ddd import UnitOfWork
 

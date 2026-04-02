@@ -1,9 +1,10 @@
 """Unit tests for the Prometheus adapter (A-09, O-04)."""
+
 from __future__ import annotations
 
 import sys
 import types
-from unittest.mock import AsyncMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -20,9 +21,9 @@ class _FakeInstrument:
     def __init__(self, *args: object, **kwargs: object) -> None:
         self._labelnames: list[str] = list(kwargs.get("labelnames", []))
         self._values: list[tuple] = []
-        self._label_cache: dict[tuple, "_FakeInstrument"] = {}
+        self._label_cache: dict[tuple, _FakeInstrument] = {}
 
-    def labels(self, *args: object) -> "_FakeInstrument":
+    def labels(self, *args: object) -> _FakeInstrument:
         key = args
         if key not in self._label_cache:
             child = _FakeInstrument()
@@ -47,9 +48,8 @@ _prom_mod.Histogram = _FakeInstrument  # type: ignore[attr-defined]
 _prom_mod.Gauge = _FakeInstrument  # type: ignore[attr-defined]
 sys.modules.setdefault("prometheus_client", _prom_mod)
 
-from mp_commons.adapters.prometheus.metrics import PrometheusMetrics  # noqa: E402
-from mp_commons.adapters.prometheus.health_exporter import PrometheusHealthExporter  # noqa: E402
-
+from mp_commons.adapters.prometheus.health_exporter import PrometheusHealthExporter
+from mp_commons.adapters.prometheus.metrics import PrometheusMetrics
 
 # ---------------------------------------------------------------------------
 # PrometheusMetrics
@@ -96,7 +96,7 @@ class TestPrometheusMetrics:
         m = PrometheusMetrics(namespace="myapp")
         # The full name is passed to prometheus_client constructor; we verify
         # via the instrument being registered under the short name internally
-        g = m.gauge("active_sessions")
+        m.gauge("active_sessions")
         assert "active_sessions" in m._gauges
 
     def test_missing_prometheus_raises(self):
@@ -147,7 +147,7 @@ class TestPrometheusHealthExporter:
         registry.run_all = AsyncMock(
             return_value=self._make_report({"db": self._status(True, 5.0)})
         )
-        metrics, status_gauge, latency_gauge = self._make_metrics()
+        metrics, status_gauge, _latency_gauge = self._make_metrics()
         exporter = PrometheusHealthExporter(registry=registry, metrics=metrics)
         await exporter.collect()
 
@@ -158,7 +158,7 @@ class TestPrometheusHealthExporter:
         registry.run_all = AsyncMock(
             return_value=self._make_report({"redis": self._status(False, 0.0)})
         )
-        metrics, status_gauge, latency_gauge = self._make_metrics()
+        metrics, status_gauge, _latency_gauge = self._make_metrics()
         exporter = PrometheusHealthExporter(registry=registry, metrics=metrics)
         await exporter.collect()
 
@@ -169,7 +169,7 @@ class TestPrometheusHealthExporter:
         registry.run_all = AsyncMock(
             return_value=self._make_report({"db": self._status(True, 12.5)})
         )
-        metrics, status_gauge, latency_gauge = self._make_metrics()
+        metrics, _status_gauge, latency_gauge = self._make_metrics()
         exporter = PrometheusHealthExporter(registry=registry, metrics=metrics, export_latency=True)
         await exporter.collect()
 
@@ -177,14 +177,14 @@ class TestPrometheusHealthExporter:
 
     async def test_collect_no_latency_when_disabled(self):
         registry = MagicMock()
-        registry.run_all = AsyncMock(
-            return_value=self._make_report({"db": self._status(True)})
-        )
+        registry.run_all = AsyncMock(return_value=self._make_report({"db": self._status(True)}))
         # only one gauge created when export_latency=False
         metrics = MagicMock()
         status_gauge = self._make_gauge()
         metrics.gauge.return_value = status_gauge
-        exporter = PrometheusHealthExporter(registry=registry, metrics=metrics, export_latency=False)
+        exporter = PrometheusHealthExporter(
+            registry=registry, metrics=metrics, export_latency=False
+        )
         assert exporter._latency_gauge is None
         await exporter.collect()  # must not raise
 

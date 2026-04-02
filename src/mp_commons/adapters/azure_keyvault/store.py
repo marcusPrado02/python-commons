@@ -19,6 +19,7 @@ Usage::
     password = await store.get(ref)
     all_secrets = await store.get_all("database")
 """
+
 from __future__ import annotations
 
 import logging
@@ -32,6 +33,7 @@ logger = logging.getLogger(__name__)
 def _require_keyvault() -> Any:
     try:
         from azure.keyvault.secrets.aio import SecretClient  # type: ignore[import-untyped]
+
         return SecretClient
     except ImportError as exc:
         raise ImportError(
@@ -43,6 +45,7 @@ def _require_keyvault() -> Any:
 def _require_identity() -> Any:
     try:
         from azure.identity.aio import DefaultAzureCredential  # type: ignore[import-untyped]
+
         return DefaultAzureCredential
     except ImportError as exc:
         raise ImportError(
@@ -107,7 +110,11 @@ class AzureKeyVaultSecretStore(SecretStore):
                 return secret.value
             except Exception as exc:
                 exc_str = str(exc)
-                if "SecretNotFound" in type(exc).__name__ or "404" in exc_str or "SecretNotFound" in exc_str:
+                if (
+                    "SecretNotFound" in type(exc).__name__
+                    or "404" in exc_str
+                    or "SecretNotFound" in exc_str
+                ):
                     raise KeyError(f"Secret '{name}' not found in vault") from exc
                 raise
 

@@ -4,6 +4,7 @@ Run with: pytest tests/integration/test_dynamodb.py -m integration -v
 
 Requires Docker.  LocalStack exposes the DynamoDB API on port 4566.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -12,7 +13,6 @@ from typing import Any
 
 import pytest
 from testcontainers.localstack import LocalStackContainer
-
 
 # ---------------------------------------------------------------------------
 # helpers

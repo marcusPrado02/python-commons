@@ -1,4 +1,5 @@
 """Keycloak adapter – JWKSClient backed by PyJWT (§33.1)."""
+
 from __future__ import annotations
 
 import asyncio
@@ -8,6 +9,7 @@ from typing import Any
 def _require_pyjwt() -> Any:
     try:
         import jwt  # type: ignore[import-untyped]
+
         return jwt
     except ImportError as exc:
         raise ImportError(

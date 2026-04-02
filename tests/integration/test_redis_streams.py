@@ -5,6 +5,7 @@ Run with: pytest tests/integration/test_redis_streams.py -m integration -v
 
 Requires Docker.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -12,7 +13,6 @@ from typing import Any
 
 import pytest
 from testcontainers.redis import RedisContainer
-
 
 # ---------------------------------------------------------------------------
 # helpers

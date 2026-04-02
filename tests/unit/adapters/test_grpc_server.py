@@ -1,4 +1,5 @@
 """Unit tests for gRPC server-side interceptors (G-01, G-02, G-03)."""
+
 from __future__ import annotations
 
 import asyncio
@@ -31,12 +32,11 @@ _grpc_mod.StatusCode = _StatusCode  # type: ignore[attr-defined]
 sys.modules.setdefault("grpc", _grpc_mod)
 sys.modules.setdefault("grpc.aio", _grpc_aio_mod)
 
-from mp_commons.adapters.grpc.server import (  # noqa: E402
+from mp_commons.adapters.grpc.server import (
     AuthServerInterceptor,
     CorrelationIdServerInterceptor,
     MetricsServerInterceptor,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -56,7 +56,6 @@ def _make_handler(return_value: Any = "rpc_result") -> MagicMock:
 
 
 from typing import Any
-
 
 # ---------------------------------------------------------------------------
 # CorrelationIdServerInterceptor

@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import asyncio
-import uuid
 from datetime import UTC, datetime
+import uuid
 
 from mp_commons.kernel.messaging import (
     IdempotencyKey,
@@ -26,7 +26,6 @@ from mp_commons.testing.fakes import (
     InMemoryMessageBus,
     InMemoryOutboxRepository,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers

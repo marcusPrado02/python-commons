@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import abc
+from collections.abc import Callable
 import json
-from typing import Any, Callable, Generic, TypeVar
+from typing import Any, Generic, TypeVar
 
 from mp_commons.application.event_sourcing.aggregate import EventSourcedAggregate
 from mp_commons.application.event_sourcing.store import EventStore
@@ -43,6 +44,7 @@ class EventSourcedRepository(Generic[T, TId], abc.ABC):
             def _create_empty(self, agg_id: EntityId) -> Order:
                 return Order(agg_id)
 
+
         repo = OrderRepository(store=event_store)
         order = await repo.load(order_id)
         order.place(...)
@@ -77,7 +79,7 @@ class EventSourcedRepository(Generic[T, TId], abc.ABC):
         agg = self._create_empty(agg_id)
         for event in events:
             agg.apply_stored_event(event)
-            agg._version = event.version  # noqa: SLF001
+            agg._version = event.version
         return agg
 
     async def save(self, agg: T) -> None:

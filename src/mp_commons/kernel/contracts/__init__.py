@@ -1,4 +1,5 @@
 """Kernel contracts – API schema contracts and compatibility modes."""
+
 from mp_commons.kernel.contracts.compatibility import CompatibilityMode
 from mp_commons.kernel.contracts.contract import (
     AsyncAPILoader,

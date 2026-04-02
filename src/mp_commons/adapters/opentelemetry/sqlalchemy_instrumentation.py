@@ -17,11 +17,12 @@ Usage::
     )
 
     engine = create_async_engine("postgresql+asyncpg://...")
-    instrument_engine(engine)          # sync and async engines both work
+    instrument_engine(engine)  # sync and async engines both work
 
     # To remove instrumentation:
     uninstrument_engine(engine)
 """
+
 from __future__ import annotations
 
 import logging
@@ -112,8 +113,6 @@ def _pop_and_end(conn: Any, error: Exception | None) -> None:
     span = spans.pop()
     try:
         if error is not None:
-            from opentelemetry.trace import StatusCode  # type: ignore[import-untyped]
-
             span.__exit__(type(error), error, None)
         else:
             span.__exit__(None, None, None)
@@ -144,8 +143,7 @@ def instrument_engine(engine: Any) -> None:
         from sqlalchemy import event  # type: ignore[import-untyped]
     except ImportError as exc:
         raise ImportError(
-            "sqlalchemy is required for instrument_engine. "
-            "Install it with: pip install sqlalchemy"
+            "sqlalchemy is required for instrument_engine. Install it with: pip install sqlalchemy"
         ) from exc
 
     # AsyncEngine wraps a sync engine — instrument the sync engine

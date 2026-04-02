@@ -18,6 +18,7 @@ Usage (server — verifying the pair)::
     # Raises PKCEVerificationError on mismatch
     verify_code_challenge(stored_challenge, received_verifier, method="S256")
 """
+
 from __future__ import annotations
 
 import base64
@@ -121,10 +122,9 @@ def verify_code_challenge(
     expected = compute_code_challenge(received_verifier, method=method)
     # Use compare_digest to avoid timing attacks
     import hmac
+
     if not hmac.compare_digest(expected.encode("ascii"), stored_challenge.encode("ascii")):
-        raise PKCEVerificationError(
-            "code_verifier does not match the stored code_challenge"
-        )
+        raise PKCEVerificationError("code_verifier does not match the stored code_challenge")
 
 
 def generate_pkce_pair(method: str = "S256") -> tuple[str, str]:

@@ -1,11 +1,12 @@
 """SQLAlchemy ORM mixins – TimestampMixin, SoftDeleteMixin (§27.8 / §27.9)."""
+
 from __future__ import annotations
 
 import datetime
 from typing import Any
 
 from sqlalchemy import DateTime, func
-from sqlalchemy.orm import declared_attr, mapped_column, Mapped
+from sqlalchemy.orm import Mapped, mapped_column
 
 
 class TimestampMixin:

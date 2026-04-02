@@ -6,6 +6,7 @@ Run with: pytest tests/integration/test_cassandra.py -m integration -v
 Requires Docker.  The Cassandra container exposes the CQL port (9042).
 Warning: Cassandra containers are slow to start (~60-90s).
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -15,7 +16,6 @@ from typing import Any
 
 import pytest
 from testcontainers.cassandra import CassandraContainer
-
 
 # ---------------------------------------------------------------------------
 # helpers
@@ -65,8 +65,7 @@ def cassandra_session() -> Any:  # type: ignore[return]
         )
         session.set_keyspace(_KEYSPACE)
         session.execute(
-            f"CREATE TABLE IF NOT EXISTS {_TABLE} "
-            "(pk text PRIMARY KEY, name text, price decimal)"
+            f"CREATE TABLE IF NOT EXISTS {_TABLE} (pk text PRIMARY KEY, name text, price decimal)"
         )
 
         yield session
@@ -145,7 +144,9 @@ class TestCassandraRepositoryIntegration:
             # _prepare_cache is internal; verify indirectly by asserting data is correct
             a = await repo.get("prep-1")
             b = await repo.get("prep-2")
-            assert a is not None and a.name == "A"
-            assert b is not None and b.name == "B"
+            assert a is not None
+            assert a.name == "A"
+            assert b is not None
+            assert b.name == "B"
 
         _run(_run_test())

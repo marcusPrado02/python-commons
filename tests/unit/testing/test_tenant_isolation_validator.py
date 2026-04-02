@@ -1,13 +1,12 @@
 """Unit tests for TenantIsolationValidator (S-01)."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 from mp_commons.testing.tenant_isolation import TenantIsolationValidator, TenantLeakError
-
 
 # ---------------------------------------------------------------------------
 # Test helpers

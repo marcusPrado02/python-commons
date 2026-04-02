@@ -1,17 +1,17 @@
 # Kernel API
 
-## CQRS
+## DDD Building Blocks
 
-::: mp_commons.kernel.cqrs
+::: mp_commons.kernel.ddd
 
-## Events
+## Messaging
 
-::: mp_commons.kernel.events
+::: mp_commons.kernel.messaging
 
-## Saga
+## Types
 
-::: mp_commons.kernel.saga
+::: mp_commons.kernel.types
 
-## Outbox
+## Errors
 
-::: mp_commons.kernel.outbox
+::: mp_commons.kernel.errors

@@ -1,4 +1,5 @@
 """Observability – SLO / Error Budget."""
+
 from mp_commons.observability.slo.tracker import (
     BurnRateAlert,
     ErrorBudget,

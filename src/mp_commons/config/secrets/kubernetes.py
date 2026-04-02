@@ -1,4 +1,5 @@
 """Config secrets – KubernetesSecretStore."""
+
 from __future__ import annotations
 
 from mp_commons.config.secrets.port import SecretRef, SecretStore
@@ -12,6 +13,7 @@ class KubernetesSecretStore(SecretStore):
 
     async def get(self, ref: SecretRef) -> str:
         import pathlib
+
         secret_path = pathlib.Path(self._root) / ref.path / ref.key
         if not secret_path.exists():
             raise FileNotFoundError(f"Secret not found: {secret_path}")
@@ -19,6 +21,7 @@ class KubernetesSecretStore(SecretStore):
 
     async def get_all(self, path: str) -> dict[str, str]:
         import pathlib
+
         base = pathlib.Path(self._root) / path
         return {f.name: f.read_text().strip() for f in base.iterdir() if f.is_file()}
 

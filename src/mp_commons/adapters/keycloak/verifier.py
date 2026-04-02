@@ -1,11 +1,12 @@
 """Keycloak adapter – OIDCTokenVerifier using PyJWT (§33.2)."""
+
 from __future__ import annotations
 
 from typing import Any
 
+from mp_commons.adapters.keycloak.jwks import JWKSClient, _require_pyjwt
 from mp_commons.kernel.errors import UnauthorizedError
 from mp_commons.kernel.security import Permission, Principal, Role
-from mp_commons.adapters.keycloak.jwks import JWKSClient, _require_pyjwt
 
 
 class OIDCTokenVerifier:

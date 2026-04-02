@@ -1,14 +1,17 @@
 """Unit tests for the S3 object-store adapter (§49)."""
+
 from __future__ import annotations
 
 import asyncio
-from contextlib import asynccontextmanager
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from mp_commons.adapters.s3.object_store import InMemoryObjectStore, S3ObjectStore, S3PresignedUrlGenerator
-
+from mp_commons.adapters.s3.object_store import (
+    InMemoryObjectStore,
+    S3ObjectStore,
+    S3PresignedUrlGenerator,
+)
 
 # ---------------------------------------------------------------------------
 # InMemoryObjectStore
@@ -186,9 +189,7 @@ def test_s3_exists_false_on_exception():
 
 
 def test_s3_list_keys():
-    mock_client = _mock_s3_client(
-        list_objects_v2={"Contents": [{"Key": "a/1"}, {"Key": "a/2"}]}
-    )
+    mock_client = _mock_s3_client(list_objects_v2={"Contents": [{"Key": "a/1"}, {"Key": "a/2"}]})
     store = S3ObjectStore.__new__(S3ObjectStore)
     store._bucket = "b"
     store._region = "us-east-1"

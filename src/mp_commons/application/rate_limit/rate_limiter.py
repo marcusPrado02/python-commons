@@ -1,13 +1,14 @@
 """Application rate limiting – RateLimiter, RateLimitDecision, RateLimitResult, Quota."""
+
 from __future__ import annotations
 
 import abc
 import dataclasses
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 
 
-class RateLimitDecision(str, Enum):
+class RateLimitDecision(StrEnum):
     ALLOWED = "ALLOWED"
     DENIED = "DENIED"
 
@@ -15,6 +16,7 @@ class RateLimitDecision(str, Enum):
 @dataclasses.dataclass(frozen=True)
 class Quota:
     """Rate limit quota rule."""
+
     key: str
     limit: int
     window_seconds: int
@@ -27,6 +29,7 @@ class Quota:
 @dataclasses.dataclass
 class RateLimitResult:
     """Result of a rate limit check."""
+
     decision: RateLimitDecision
     remaining: int
     reset_at: datetime

@@ -5,6 +5,7 @@ Usage
 From your project root::
 
     from mp_commons.adapters.sqlalchemy.migrations import generate_alembic_files
+
     generate_alembic_files(".")
 
 This will create:
@@ -13,9 +14,9 @@ This will create:
   - ``migrations/script.py.mako`` — default Alembic migration script template
   - ``migrations/versions/`` — empty directory for migration scripts
 """
+
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
 # ---------------------------------------------------------------------------
@@ -254,9 +255,7 @@ def generate_alembic_files(
     for path, content in files.items():
         path.parent.mkdir(parents=True, exist_ok=True)
         if path.exists() and not overwrite:
-            raise FileExistsError(
-                f"{path} already exists. Pass overwrite=True to replace it."
-            )
+            raise FileExistsError(f"{path} already exists. Pass overwrite=True to replace it.")
         path.write_text(content, encoding="utf-8")
         created.append(path)
 

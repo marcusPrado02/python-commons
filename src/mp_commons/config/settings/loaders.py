@@ -1,4 +1,5 @@
 """Config settings – EnvSettingsLoader, DotenvSettingsLoader."""
+
 from __future__ import annotations
 
 import abc
@@ -45,7 +46,7 @@ class EnvSettingsLoader(SettingsLoader):
         except Exception as exc:
             raise ConfigError(f"Failed to load settings: {exc}") from exc
 
-    def _coerce(self, value: str, type_hint: Any) -> Any:  # noqa: PLR0911
+    def _coerce(self, value: str, type_hint: Any) -> Any:
         origin = getattr(type_hint, "__origin__", None)
         if type_hint is bool or type_hint == "bool":
             return value.lower() in ("1", "true", "yes", "on")
@@ -68,6 +69,7 @@ class DotenvSettingsLoader(SettingsLoader):
     def load(self, settings_class: type[T]) -> T:
         try:
             from dotenv import load_dotenv  # type: ignore[import-untyped]
+
             load_dotenv(self._env_file, override=self._override)
         except ImportError as exc:
             raise ImportError("Install 'python-dotenv' to use DotenvSettingsLoader") from exc

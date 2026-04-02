@@ -1,4 +1,5 @@
 """Unit tests for GCSObjectStore (A-04)."""
+
 from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
@@ -82,7 +83,7 @@ class TestGCSObjectStore:
     @pytest.mark.asyncio
     async def test_presigned_url_returns_url(self):
         store, _, bucket = _make_store()
-        blob = _make_blob(bucket)
+        _make_blob(bucket)
         url = await store.presigned_url("file.txt", expires_in=600)
         assert url == "https://signed.url/file"
 

@@ -1,8 +1,9 @@
 """Database testing fixtures: DatabaseFixture, TransactionalTestSession, db_fixture."""
+
 from __future__ import annotations
 
-import asyncio
-from typing import Any, AsyncGenerator, Callable, Type
+from collections.abc import AsyncGenerator, Callable
+from typing import Any
 
 __all__ = [
     "DatabaseFixture",
@@ -55,9 +56,9 @@ class TransactionalTestSession:
             raise ImportError("pip install sqlalchemy[asyncio]") from exc
 
         conn = await engine.connect()
-        trans = await conn.begin()
+        await conn.begin()
         session = AsyncSession(bind=conn)
-        nested = await conn.begin_nested()  # SAVEPOINT
+        await conn.begin_nested()  # SAVEPOINT
         return cls(session=session, savepoint=conn)
 
     async def rollback(self) -> None:
@@ -72,8 +73,7 @@ def db_fixture(engine_factory: Callable[[], Any]) -> Any:
     Usage::
 
         @db_fixture(lambda: create_async_engine(...))
-        async def db_session():
-            ...
+        async def db_session(): ...
     """
     try:
         import pytest

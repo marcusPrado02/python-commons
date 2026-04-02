@@ -1,8 +1,10 @@
 """Config settings – SettingsFactory."""
+
 from __future__ import annotations
 
+from collections.abc import Sequence
 import dataclasses
-from typing import Any, Sequence, TypeVar
+from typing import Any, TypeVar
 
 from mp_commons.config.settings.base import Settings
 from mp_commons.config.settings.loaders import SettingsLoader
@@ -66,7 +68,7 @@ SettingsLoader` instances.  Later loaders win on field conflicts.
                 instance = loader.load(settings_cls)
                 for field in dataclasses.fields(instance):  # type: ignore[arg-type]
                     merged[field.name] = getattr(instance, field.name)
-            except Exception:  # noqa: BLE001 – skip failing loaders
+            except Exception:
                 pass
 
         if overrides:

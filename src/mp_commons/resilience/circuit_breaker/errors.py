@@ -1,4 +1,5 @@
 """Resilience – circuit-breaker specific errors (§16.4)."""
+
 from __future__ import annotations
 
 from mp_commons.kernel.errors import InfrastructureError

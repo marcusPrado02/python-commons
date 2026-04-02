@@ -21,6 +21,7 @@ Usage::
     )
     message_id = await sender.send(msg)
 """
+
 from __future__ import annotations
 
 import logging
@@ -36,11 +37,11 @@ _SENDGRID_API_URL = "https://api.sendgrid.com/v3/mail/send"
 def _require_httpx() -> Any:
     try:
         import httpx  # type: ignore[import-untyped]
+
         return httpx
     except ImportError as exc:
         raise ImportError(
-            "httpx is required for SendGridEmailSender. "
-            "Install it with: pip install 'httpx>=0.27'"
+            "httpx is required for SendGridEmailSender. Install it with: pip install 'httpx>=0.27'"
         ) from exc
 
 
@@ -71,6 +72,7 @@ def _build_payload(message: EmailMessage, from_email: str, from_name: str | None
         payload["reply_to"] = {"email": message.reply_to}
     if message.attachments:
         import base64
+
         payload["attachments"] = [
             {
                 "filename": att.filename,

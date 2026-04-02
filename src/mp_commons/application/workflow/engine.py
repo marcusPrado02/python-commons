@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, Protocol
 import uuid
 
@@ -29,7 +29,7 @@ class WorkflowInstance:
     workflow_name: str = ""
     current_state: str = ""
     history: list[TransitionRecord] = field(default_factory=list)
-    started_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    started_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     context: Any = None
 
 

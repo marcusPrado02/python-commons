@@ -5,13 +5,13 @@ CLOSED state with 50 concurrent coroutines against a no-op backend.
 
 Target: overhead < 5 % compared to a direct call.
 """
+
 from __future__ import annotations
 
 import asyncio
 from typing import Any
 
 from mp_commons.resilience.circuit_breaker import CircuitBreaker, CircuitBreakerPolicy
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -62,9 +62,7 @@ def test_circuit_breaker_50_concurrent_calls(benchmark: Any, event_loop: Any) ->
     breaker = _make_breaker()
 
     async def _batch() -> list[str]:
-        return await asyncio.gather(
-            *[breaker.call(_noop_backend) for _ in range(50)]
-        )
+        return await asyncio.gather(*[breaker.call(_noop_backend) for _ in range(50)])
 
     def run() -> list[str]:
         return event_loop.run_until_complete(_batch())

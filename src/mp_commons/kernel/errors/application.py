@@ -51,7 +51,7 @@ class RateLimitError(ApplicationError):
         self.retry_after_seconds = retry_after_seconds
 
 
-class TimeoutError(ApplicationError):  # noqa: A001
+class TimeoutError(ApplicationError):
     """Operation timed out."""
 
     default_code = "timeout"

@@ -1,4 +1,5 @@
 """Certificate fingerprint pinning."""
+
 from __future__ import annotations
 
 import hashlib
@@ -36,8 +37,7 @@ class CertificatePinner:
         if fp in self._pins[host]:
             return True
         raise CertPinningError(
-            f"Certificate fingerprint {fp!r} for host {host!r} "
-            f"does not match pinned values."
+            f"Certificate fingerprint {fp!r} for host {host!r} does not match pinned values."
         )
 
     def pinned_hosts(self) -> list[str]:

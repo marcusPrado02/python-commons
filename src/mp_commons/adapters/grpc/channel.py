@@ -4,10 +4,11 @@ and health checker.
 Requires ``grpcio>=1.60``.  All classes raise :class:`ImportError` with a clear
 message when the library is absent.
 """
+
 from __future__ import annotations
 
-from enum import Enum
-from typing import Any, Callable
+from enum import StrEnum
+from typing import Any
 
 
 def _require_grpc() -> Any:
@@ -17,8 +18,7 @@ def _require_grpc() -> Any:
         return grpc
     except ImportError as exc:
         raise ImportError(
-            "grpcio is required for the gRPC adapter. "
-            "Install it with: pip install 'grpcio>=1.60'"
+            "grpcio is required for the gRPC adapter. Install it with: pip install 'grpcio>=1.60'"
         ) from exc
 
 
@@ -32,7 +32,7 @@ def _require_grpc_aio() -> Any:
 # ---------------------------------------------------------------------------
 
 
-class GrpcHealthStatus(str, Enum):
+class GrpcHealthStatus(StrEnum):
     SERVING = "SERVING"
     NOT_SERVING = "NOT_SERVING"
     UNKNOWN = "UNKNOWN"
@@ -117,7 +117,7 @@ class CorrelationIdClientInterceptor:
 
     def _inject(self, client_call_details: Any) -> Any:
         """Return a copy of *client_call_details* with the x-correlation-id header."""
-        grpc = _require_grpc()
+        _require_grpc()
 
         correlation_id = self._get_correlation_id()
         if not correlation_id:
@@ -129,14 +129,20 @@ class CorrelationIdClientInterceptor:
         details = copy.copy(client_call_details)
         existing = list(getattr(details, "metadata", None) or [])
         existing.append((self._METADATA_KEY, correlation_id))
-        object.__setattr__(details, "metadata", existing) if hasattr(details, "__setattr__") else setattr(details, "metadata", existing)
+        object.__setattr__(details, "metadata", existing) if hasattr(
+            details, "__setattr__"
+        ) else setattr(details, "metadata", existing)
         return details
 
     # Depending on grpc version the method signature differs slightly.
-    async def intercept_unary_unary(self, continuation: Any, client_call_details: Any, request: Any) -> Any:
+    async def intercept_unary_unary(
+        self, continuation: Any, client_call_details: Any, request: Any
+    ) -> Any:
         return await continuation(self._inject(client_call_details), request)
 
-    async def intercept_unary_stream(self, continuation: Any, client_call_details: Any, request: Any) -> Any:
+    async def intercept_unary_stream(
+        self, continuation: Any, client_call_details: Any, request: Any
+    ) -> Any:
         return await continuation(self._inject(client_call_details), request)
 
 
@@ -158,8 +164,10 @@ class RetryClientInterceptor:
     def __init__(self, retry_policy: Any) -> None:
         self._policy = retry_policy
 
-    async def intercept_unary_unary(self, continuation: Any, client_call_details: Any, request: Any) -> Any:
-        grpc = _require_grpc()
+    async def intercept_unary_unary(
+        self, continuation: Any, client_call_details: Any, request: Any
+    ) -> Any:
+        _require_grpc()
 
         async def _call() -> Any:
             response = await continuation(client_call_details, request)
@@ -168,7 +176,7 @@ class RetryClientInterceptor:
 
         try:
             return await self._policy.execute_async(_call)
-        except Exception as exc:
+        except Exception:
             # Re-raise any exception that exhausted retries
             raise
 

@@ -16,7 +16,6 @@ from mp_commons.observability.metrics import (
     NoopMetrics,
 )
 
-
 # ---------------------------------------------------------------------------
 # Minimal stubs that implement the ABC ports
 # ---------------------------------------------------------------------------
@@ -247,13 +246,19 @@ class TestBusinessMetric:
             description="Order total amount",
             unit="BRL",
         )
-        m = _StubMetrics()
+        _StubMetrics()
         # Replace histogram to track calls
         recorded: list[float] = []
 
         class _TrackingMetrics(_StubMetrics):
-            def histogram(self, name: str, description: str = "", unit: str = "ms", boundaries: list[float] | None = None) -> Histogram:
-                h = _StubHistogram()
+            def histogram(
+                self,
+                name: str,
+                description: str = "",
+                unit: str = "ms",
+                boundaries: list[float] | None = None,
+            ) -> Histogram:
+                _StubHistogram()
 
                 class _CapturingHistogram(_StubHistogram):
                     def record(self, value: float, labels: dict[str, str] | None = None) -> None:

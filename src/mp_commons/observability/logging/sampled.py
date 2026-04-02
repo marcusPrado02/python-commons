@@ -3,10 +3,11 @@
 A logger wrapper that emits only 1-in-N records for high-frequency events.
 Sampling rate is configurable per log level.
 """
+
 from __future__ import annotations
 
-import threading
 from collections import defaultdict
+import threading
 from typing import Any
 
 
@@ -37,9 +38,9 @@ class SampledLogger:
 
         base = structlog.get_logger("my_service")
         log = SampledLogger(base, sample_rates={"DEBUG": 100, "INFO": 10})
-        log.debug("cache_hit", key="abc")   # emits 1 % of the time
-        log.info("request_received")        # emits 10 % of the time
-        log.error("unhandled_exception")    # always emitted
+        log.debug("cache_hit", key="abc")  # emits 1 % of the time
+        log.info("request_received")  # emits 10 % of the time
+        log.error("unhandled_exception")  # always emitted
     """
 
     def __init__(
@@ -86,7 +87,7 @@ class SampledLogger:
     def critical(self, event: str, **kwargs: Any) -> None:
         self._delegate("critical", event, **kwargs)
 
-    def bind(self, **kwargs: Any) -> "SampledLogger":
+    def bind(self, **kwargs: Any) -> SampledLogger:
         """Return a new :class:`SampledLogger` with bound context."""
         try:
             bound_logger = self._logger.bind(**kwargs)
@@ -94,7 +95,7 @@ class SampledLogger:
             bound_logger = self._logger
         return SampledLogger(
             bound_logger,
-            sample_rates={k: v for k, v in self._rates.items()},
+            sample_rates=dict(self._rates.items()),
             default_rate=self._default_rate,
         )
 

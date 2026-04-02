@@ -1,17 +1,14 @@
 """Concurrency stress tests for CircuitBreaker (T-08)."""
+
 from __future__ import annotations
 
 import asyncio
 import random
-from typing import Any
-
-import pytest
 
 from mp_commons.resilience.circuit_breaker.breaker import CircuitBreaker
 from mp_commons.resilience.circuit_breaker.errors import CircuitOpenError
 from mp_commons.resilience.circuit_breaker.policy import CircuitBreakerPolicy
 from mp_commons.resilience.circuit_breaker.state import CircuitBreakerState
-
 
 # ---------------------------------------------------------------------------
 # Helpers

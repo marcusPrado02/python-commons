@@ -1,11 +1,12 @@
 """Application files – FileUploadService and ObjectStore protocol."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Protocol, runtime_checkable
 
 from mp_commons.application.files.upload import UploadedFile
-from mp_commons.application.files.validator import FileValidator, FileValidationError
+from mp_commons.application.files.validator import FileValidator
 
 __all__ = [
     "FileUploadService",

@@ -16,10 +16,11 @@ Usage::
         data = await store.get("path/to/file.txt")
         url = await store.presigned_url("path/to/file.txt", expires_in=3600)
 """
+
 from __future__ import annotations
 
+from datetime import UTC, datetime, timedelta
 import logging
-from datetime import datetime, timedelta, timezone
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -28,6 +29,7 @@ logger = logging.getLogger(__name__)
 def _require_blob() -> Any:
     try:
         from azure.storage.blob.aio import BlobServiceClient  # type: ignore[import-untyped]
+
         return BlobServiceClient
     except ImportError as exc:
         raise ImportError(
@@ -39,6 +41,7 @@ def _require_blob() -> Any:
 def _require_identity() -> Any:
     try:
         from azure.identity.aio import DefaultAzureCredential  # type: ignore[import-untyped]
+
         return DefaultAzureCredential
     except ImportError as exc:
         raise ImportError(
@@ -75,7 +78,7 @@ class AzureBlobObjectStore:
         self._connection_string = connection_string
         self._client: Any = None
 
-    async def __aenter__(self) -> "AzureBlobObjectStore":
+    async def __aenter__(self) -> AzureBlobObjectStore:
         BlobServiceClient = _require_blob()
         if self._connection_string:
             self._client = BlobServiceClient.from_connection_string(self._connection_string)
@@ -100,7 +103,9 @@ class AzureBlobObjectStore:
     ) -> None:
         """Upload *data* to blob *key*."""
         async with self._blob_client(key) as blob:
-            await blob.upload_blob(data, overwrite=True, content_settings={"content_type": content_type})
+            await blob.upload_blob(
+                data, overwrite=True, content_settings={"content_type": content_type}
+            )
             logger.debug("azure_blob.put key=%s size=%d", key, len(data))
 
     async def get(self, key: str) -> bytes:
@@ -110,7 +115,11 @@ class AzureBlobObjectStore:
                 stream = await blob.download_blob()
                 return await stream.readall()
             except Exception as exc:
-                if "BlobNotFound" in type(exc).__name__ or "404" in str(exc) or "BlobNotFound" in str(exc):
+                if (
+                    "BlobNotFound" in type(exc).__name__
+                    or "404" in str(exc)
+                    or "BlobNotFound" in str(exc)
+                ):
                     raise KeyError(key) from exc
                 raise
 
@@ -120,7 +129,11 @@ class AzureBlobObjectStore:
             try:
                 await blob.delete_blob()
             except Exception as exc:
-                if "BlobNotFound" in type(exc).__name__ or "404" in str(exc) or "BlobNotFound" in str(exc):
+                if (
+                    "BlobNotFound" in type(exc).__name__
+                    or "404" in str(exc)
+                    or "BlobNotFound" in str(exc)
+                ):
                     return
                 raise
 
@@ -142,14 +155,17 @@ class AzureBlobObjectStore:
             BlobSasPermissions,
             generate_blob_sas,
         )
-        expiry = datetime.now(timezone.utc) + timedelta(seconds=expires_in)
+
+        expiry = datetime.now(UTC) + timedelta(seconds=expires_in)
         # For user delegation SAS with managed identity, we need a user delegation key
         # Synchronous key fetch via sync client is simpler here
         sas_token = generate_blob_sas(
             account_name=self._client.account_name,
             container_name=self._container_name,
             blob_name=key,
-            account_key=self._client.credential.account_key if hasattr(self._client.credential, "account_key") else None,
+            account_key=self._client.credential.account_key
+            if hasattr(self._client.credential, "account_key")
+            else None,
             permission=BlobSasPermissions(read=True),
             expiry=expiry,
         )

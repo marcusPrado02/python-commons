@@ -15,7 +15,7 @@ class UnitOfWork(abc.ABC):
     @abc.abstractmethod
     async def rollback(self) -> None: ...
 
-    async def __aenter__(self) -> "UnitOfWork":
+    async def __aenter__(self) -> UnitOfWork:
         """Enter the transactional block and return ``self``."""
         return self
 

@@ -1,4 +1,5 @@
 """§91 Testing — Snapshot Testing."""
+
 from __future__ import annotations
 
 from mp_commons.testing.snapshot.asserter import SnapshotAsserter, SnapshotStore

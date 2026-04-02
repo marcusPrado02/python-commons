@@ -7,17 +7,20 @@ Usage::
 
     shutdown = GracefulShutdown(drain_timeout=30.0)
 
+
     @shutdown.on_shutdown
     async def close_db():
         await pool.close()
+
 
     @shutdown.on_shutdown
     async def flush_metrics():
         await registry.flush()
 
+
     # In your main coroutine:
-    shutdown.install()               # register signal handlers
-    await shutdown.wait()            # blocks until SIGTERM / SIGINT
+    shutdown.install()  # register signal handlers
+    await shutdown.wait()  # blocks until SIGTERM / SIGINT
     # hooks are called automatically in LIFO order after wait() returns
     # OR call explicitly:
     await shutdown.run_hooks()
@@ -26,12 +29,14 @@ Shutdown hooks are called in **LIFO** order (last registered, first called),
 mirroring Python's :mod:`atexit` behaviour.  Both sync and async callables
 are accepted.
 """
+
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Callable
 import logging
 import signal
-from typing import Any, Callable, Coroutine
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -65,9 +70,7 @@ class GracefulShutdown:
     # Hook registration
     # ------------------------------------------------------------------
 
-    def on_shutdown(
-        self, func: Callable[[], Any]
-    ) -> Callable[[], Any]:
+    def on_shutdown(self, func: Callable[[], Any]) -> Callable[[], Any]:
         """Decorator / callable that registers *func* as a shutdown hook.
 
         Hooks are called in **LIFO** order (last registered, first called).
@@ -158,7 +161,7 @@ class GracefulShutdown:
                 if asyncio.iscoroutine(result):
                     await asyncio.wait_for(result, timeout=remaining)
                 logger.debug("Shutdown hook %r completed", name)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 logger.warning("Shutdown hook %r timed out", name)
             except Exception:
                 logger.exception("Shutdown hook %r raised an exception", name)

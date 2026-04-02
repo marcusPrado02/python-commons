@@ -15,6 +15,7 @@ Usage::
         backoff_base=2.0,
     )
 
+
     # Integrate with GracefulShutdown:
     async def run():
         shutdown = GracefulShutdown()
@@ -23,11 +24,11 @@ Usage::
         await scheduler.start()
         await shutdown.wait()
 """
+
 from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Any
 
 from mp_commons.kernel.messaging.dead_letter import DeadLetterEntry, DeadLetterStore
 
@@ -90,7 +91,8 @@ class DeadLetterReplayScheduler:
         self._task = asyncio.create_task(self._loop(), name="dead_letter_replay")
         logger.info(
             "dead_letter_scheduler.started interval_seconds=%.1f max_retries=%d",
-            self._interval, self._max_retries,
+            self._interval,
+            self._max_retries,
         )
 
     async def stop(self) -> None:
@@ -140,11 +142,12 @@ class DeadLetterReplayScheduler:
             if entry.retry_count >= self._max_retries:
                 logger.warning(
                     "dead_letter_scheduler.giving_up entry_id=%s retry_count=%d",
-                    entry.id, entry.retry_count,
+                    entry.id,
+                    entry.retry_count,
                 )
                 continue
             backoff = min(
-                self._backoff_base ** entry.retry_count,
+                self._backoff_base**entry.retry_count,
                 self._max_backoff,
             )
             if backoff > 0:
@@ -156,9 +159,7 @@ class DeadLetterReplayScheduler:
             except asyncio.CancelledError:
                 raise
             except Exception:
-                logger.exception(
-                    "dead_letter_scheduler.replay_failed entry_id=%s", entry.id
-                )
+                logger.exception("dead_letter_scheduler.replay_failed entry_id=%s", entry.id)
         return replayed
 
 

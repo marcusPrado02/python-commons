@@ -1,4 +1,5 @@
 """Unit tests for PKCE helpers — RFC 7636 (S-03)."""
+
 from __future__ import annotations
 
 import base64
@@ -14,7 +15,6 @@ from mp_commons.kernel.security.pkce import (
     generate_pkce_pair,
     verify_code_challenge,
 )
-
 
 # ---------------------------------------------------------------------------
 # generate_code_verifier
@@ -33,6 +33,7 @@ class TestGenerateCodeVerifier:
 
     def test_only_unreserved_chars(self):
         import re
+
         v = generate_code_verifier()
         assert re.fullmatch(r"[A-Za-z0-9\-._~]+", v)
 

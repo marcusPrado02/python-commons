@@ -1,4 +1,5 @@
 """Resilience – Deadline propagation via contextvars."""
+
 from mp_commons.resilience.deadline.context import (
     DeadlineContext,
     DeadlineExceededError,

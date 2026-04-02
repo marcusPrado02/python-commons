@@ -15,6 +15,7 @@ Usage::
         await client.index("doc-1", {"name": "Alice"}, index="users")
         doc = await client.get("doc-1", index="users")
 """
+
 from __future__ import annotations
 
 import dataclasses
@@ -24,6 +25,7 @@ from typing import Any, Generic, TypeVar
 def _require_opensearch() -> Any:
     try:
         from opensearchpy import AsyncOpenSearch  # type: ignore[import-untyped]
+
         return AsyncOpenSearch
     except ImportError as exc:
         raise ImportError(
@@ -47,15 +49,15 @@ class OpenSearchSearchQuery:
         self._from: int = 0
         self._size: int = 10
 
-    def must(self, field: str, value: Any) -> "OpenSearchSearchQuery":
+    def must(self, field: str, value: Any) -> OpenSearchSearchQuery:
         self._must.append({"term": {field: value}})
         return self
 
-    def should(self, field: str, value: Any) -> "OpenSearchSearchQuery":
+    def should(self, field: str, value: Any) -> OpenSearchSearchQuery:
         self._should.append({"term": {field: value}})
         return self
 
-    def range(self, field: str, *, gte: Any = None, lte: Any = None) -> "OpenSearchSearchQuery":
+    def range(self, field: str, *, gte: Any = None, lte: Any = None) -> OpenSearchSearchQuery:
         conditions: dict[str, Any] = {}
         if gte is not None:
             conditions["gte"] = gte
@@ -64,11 +66,11 @@ class OpenSearchSearchQuery:
         self._must.append({"range": {field: conditions}})
         return self
 
-    def sort(self, field: str, order: str = "asc") -> "OpenSearchSearchQuery":
+    def sort(self, field: str, order: str = "asc") -> OpenSearchSearchQuery:
         self._sort.append({field: {"order": order}})
         return self
 
-    def paginate(self, page: int, size: int) -> "OpenSearchSearchQuery":
+    def paginate(self, page: int, size: int) -> OpenSearchSearchQuery:
         self._from = (page - 1) * size
         self._size = size
         return self
@@ -130,7 +132,11 @@ class OpenSearchClient:
             await self._client.delete(index=self._index(index), id=doc_id)
         except Exception as exc:
             exc_str = str(exc)
-            if "NotFoundError" in type(exc).__name__ or "404" in exc_str or "NotFoundError" in exc_str:
+            if (
+                "NotFoundError" in type(exc).__name__
+                or "404" in exc_str
+                or "NotFoundError" in exc_str
+            ):
                 return
             raise
 
@@ -142,7 +148,7 @@ class OpenSearchClient:
     async def close(self) -> None:
         await self._client.close()
 
-    async def __aenter__(self) -> "OpenSearchClient":
+    async def __aenter__(self) -> OpenSearchClient:
         return self
 
     async def __aexit__(self, *_: Any) -> None:

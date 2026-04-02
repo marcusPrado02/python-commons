@@ -1,7 +1,8 @@
 """Unit tests for AzureBlobObjectStore (A-03)."""
+
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock, patch, AsyncMock as AM
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 

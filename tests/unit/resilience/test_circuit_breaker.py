@@ -6,13 +6,12 @@ import asyncio
 
 import pytest
 
+from mp_commons.kernel.errors import ApplicationError
 from mp_commons.resilience.circuit_breaker import (
     CircuitBreaker,
     CircuitBreakerPolicy,
     CircuitBreakerState,
 )
-from mp_commons.kernel.errors import ApplicationError
-
 
 # ---------------------------------------------------------------------------
 # Helpers

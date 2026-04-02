@@ -1,7 +1,8 @@
 """Application inbox – exactly-once message processor."""
+
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, Protocol
 
 from mp_commons.application.inbox.store import InboxRecord, InboxStatus, InboxStore
@@ -38,8 +39,8 @@ class InboxProcessor:
         try:
             await self._bus.dispatch(record.event_type, record.payload)
             record.status = InboxStatus.PROCESSED
-            record.processed_at = datetime.now(timezone.utc)
-        except Exception as exc:  # noqa: BLE001
+            record.processed_at = datetime.now(UTC)
+        except Exception as exc:
             record.status = InboxStatus.FAILED
             record.error = str(exc)
 

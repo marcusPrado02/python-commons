@@ -21,11 +21,13 @@ Usage (subscriber — pull mode)::
         async for message in sub.pull():
             process(message)
 """
+
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
 import json
 import logging
-from typing import Any, AsyncIterator
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +35,7 @@ logger = logging.getLogger(__name__)
 def _require_pubsub() -> Any:
     try:
         from google.cloud import pubsub_v1  # type: ignore[import-untyped]
+
         return pubsub_v1
     except ImportError as exc:
         raise ImportError(
@@ -68,7 +71,7 @@ class PubSubProducer:
         self._publisher: Any = None
         self._topic_path: str = ""
 
-    async def __aenter__(self) -> "PubSubProducer":
+    async def __aenter__(self) -> PubSubProducer:
         pubsub_v1 = _require_pubsub()
         kwargs: dict[str, Any] = {}
         if self._credentials:
@@ -102,6 +105,7 @@ class PubSubProducer:
             The published message ID.
         """
         import asyncio
+
         data = json.dumps(payload).encode("utf-8")
         future = self._publisher.publish(self._topic_path, data, **attributes)
         # publish() returns a Future; run in executor for async compatibility
@@ -148,7 +152,7 @@ class PubSubSubscriber:
         self._subscriber: Any = None
         self._subscription_path: str = ""
 
-    async def __aenter__(self) -> "PubSubSubscriber":
+    async def __aenter__(self) -> PubSubSubscriber:
         pubsub_v1 = _require_pubsub()
         kwargs: dict[str, Any] = {}
         if self._credentials:
@@ -179,6 +183,7 @@ class PubSubSubscriber:
             Decoded JSON payload.
         """
         import asyncio
+
         response = await asyncio.get_event_loop().run_in_executor(
             None,
             lambda: self._subscriber.pull(
@@ -196,9 +201,7 @@ class PubSubSubscriber:
                 ack_ids.append(received_message.ack_id)
                 yield payload
             except Exception:
-                logger.exception(
-                    "pubsub.decode_error subscription=%s", self._subscription_path
-                )
+                logger.exception("pubsub.decode_error subscription=%s", self._subscription_path)
 
         if ack_ids:
             await asyncio.get_event_loop().run_in_executor(

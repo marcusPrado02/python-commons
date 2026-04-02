@@ -20,9 +20,7 @@ class CompatibilityAsserter:
         new_props = set(new_schema.get("properties", {}).keys())
         missing = old_required - new_props
         if missing:
-            raise AssertionError(
-                f"Backward compatibility violated – fields removed: {missing}"
-            )
+            raise AssertionError(f"Backward compatibility violated – fields removed: {missing}")
 
     def assert_forward_compatible(
         self,
@@ -34,6 +32,4 @@ class CompatibilityAsserter:
         old_props = set(old_schema.get("properties", {}).keys())
         missing = new_required - old_props
         if missing:
-            raise AssertionError(
-                f"Forward compatibility violated – new required fields: {missing}"
-            )
+            raise AssertionError(f"Forward compatibility violated – new required fields: {missing}")

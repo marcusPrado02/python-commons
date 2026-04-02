@@ -1,11 +1,12 @@
 """Deterministic JSON serialiser for snapshot testing."""
+
 from __future__ import annotations
 
 import dataclasses
-import enum
-import json
 from datetime import date, datetime
 from decimal import Decimal
+import enum
+import json
 from typing import Any
 from uuid import UUID
 
@@ -13,7 +14,7 @@ __all__ = ["SnapshotSerializer"]
 
 
 class _SnapshotEncoder(json.JSONEncoder):
-    def default(self, obj: Any) -> Any:  # noqa: ANN001
+    def default(self, obj: Any) -> Any:
         if isinstance(obj, datetime):
             return obj.isoformat()
         if isinstance(obj, date):

@@ -1,4 +1,5 @@
 """Testing fakes – InMemoryInboxRepository."""
+
 from __future__ import annotations
 
 from mp_commons.kernel.messaging import InboxRecord, InboxRepository, InboxStatus

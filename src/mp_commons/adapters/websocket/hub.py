@@ -2,11 +2,11 @@
 
 No external dependencies required.
 """
+
 from __future__ import annotations
 
 import asyncio
 from typing import Any, Protocol, runtime_checkable
-
 
 # ---------------------------------------------------------------------------
 # Protocol
@@ -77,7 +77,9 @@ class ConnectionHub:
         if conn is not None:
             await conn.send(data)
 
-    async def group_broadcast(self, group_id: str, data: str | bytes, *, group_manager: "GroupManager") -> None:
+    async def group_broadcast(
+        self, group_id: str, data: str | bytes, *, group_manager: GroupManager
+    ) -> None:
         """Send *data* to all connections in *group_id*.
 
         Silently skips connections that have since been unregistered.
@@ -159,8 +161,10 @@ class WebSocketMiddleware:
         # Set CorrelationContext if available
         token = None
         try:
-            from mp_commons.observability.correlation.context import CorrelationContext, RequestContext
-            from mp_commons.kernel.types.ids import CorrelationId
+            from mp_commons.observability.correlation.context import (
+                CorrelationContext,
+                RequestContext,
+            )
 
             if correlation_id_raw:
                 ctx = RequestContext(correlation_id=correlation_id_raw)

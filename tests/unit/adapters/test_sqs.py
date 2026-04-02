@@ -1,4 +1,5 @@
 """Unit tests for SQSTaskBus (A-07)."""
+
 from __future__ import annotations
 
 import json
@@ -40,6 +41,7 @@ class TestSQSTaskBusStandard:
         mock_client = _make_sqs_client("ret-id-1")
 
         import mp_commons.adapters.sqs.task_bus as mod
+
         with patch.object(mod, "_require_aiobotocore") as mock_aio:
             mock_session = MagicMock()
             mock_session.create_client.return_value = mock_client
@@ -62,6 +64,7 @@ class TestSQSTaskBusStandard:
         mock_client.send_message = capture
 
         import mp_commons.adapters.sqs.task_bus as mod
+
         with patch.object(mod, "_require_aiobotocore") as mock_aio:
             mock_session = MagicMock()
             mock_session.create_client.return_value = mock_client
@@ -86,6 +89,7 @@ class TestSQSTaskBusStandard:
         mock_client.send_message = capture
 
         import mp_commons.adapters.sqs.task_bus as mod
+
         with patch.object(mod, "_require_aiobotocore") as mock_aio:
             mock_session = MagicMock()
             mock_session.create_client.return_value = mock_client
@@ -108,6 +112,7 @@ class TestSQSTaskBusStandard:
         mock_client.send_message = capture
 
         import mp_commons.adapters.sqs.task_bus as mod
+
         with patch.object(mod, "_require_aiobotocore") as mock_aio:
             mock_session = MagicMock()
             mock_session.create_client.return_value = mock_client
@@ -130,6 +135,7 @@ class TestSQSTaskBusStandard:
         mock_client.send_message = capture
 
         import mp_commons.adapters.sqs.task_bus as mod
+
         with patch.object(mod, "_require_aiobotocore") as mock_aio:
             mock_session = MagicMock()
             mock_session.create_client.return_value = mock_client
@@ -161,6 +167,7 @@ class TestSQSTaskBusFIFO:
         mock_client.send_message = capture
 
         import mp_commons.adapters.sqs.task_bus as mod
+
         with patch.object(mod, "_require_aiobotocore") as mock_aio:
             mock_session = MagicMock()
             mock_session.create_client.return_value = mock_client
@@ -184,6 +191,7 @@ class TestSQSTaskBusFIFO:
         mock_client.send_message = capture
 
         import mp_commons.adapters.sqs.task_bus as mod
+
         with patch.object(mod, "_require_aiobotocore") as mock_aio:
             mock_session = MagicMock()
             mock_session.create_client.return_value = mock_client
@@ -207,6 +215,7 @@ class TestSQSTaskBusFIFO:
         mock_client.send_message = capture
 
         import mp_commons.adapters.sqs.task_bus as mod
+
         with patch.object(mod, "_require_aiobotocore") as mock_aio:
             mock_session = MagicMock()
             mock_session.create_client.return_value = mock_client
@@ -215,6 +224,7 @@ class TestSQSTaskBusFIFO:
             await bus.dispatch("t", {})
 
         import uuid
+
         dedup_id = sent_kwargs[0]["MessageDeduplicationId"]
         # Must be a valid UUID4
         parsed = uuid.UUID(dedup_id)
@@ -234,6 +244,7 @@ class TestSQSTaskBusFIFO:
         mock_client.send_message = capture
 
         import mp_commons.adapters.sqs.task_bus as mod
+
         with patch.object(mod, "_require_aiobotocore") as mock_aio:
             mock_session = MagicMock()
             mock_session.create_client.return_value = mock_client
@@ -250,6 +261,7 @@ class TestSQSMissingDependency:
         bus = _make_bus()
 
         import mp_commons.adapters.sqs.task_bus as mod
+
         with patch.object(mod, "_require_aiobotocore", side_effect=ImportError("no aio")):
             with pytest.raises(ImportError, match="no aio"):
                 await bus.dispatch("t", {})

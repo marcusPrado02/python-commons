@@ -13,11 +13,12 @@ Usage::
         data = await store.get("path/to/file.txt")
         url = await store.presigned_url("path/to/file.txt", expires_in=3600)
 """
+
 from __future__ import annotations
 
 import asyncio
+from datetime import timedelta
 import logging
-from datetime import datetime, timedelta, timezone
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -26,6 +27,7 @@ logger = logging.getLogger(__name__)
 def _require_storage() -> Any:
     try:
         from google.cloud import storage  # type: ignore[import-untyped]
+
         return storage
     except ImportError as exc:
         raise ImportError(
@@ -63,7 +65,7 @@ class GCSObjectStore:
         self._client: Any = None
         self._bucket: Any = None
 
-    async def __aenter__(self) -> "GCSObjectStore":
+    async def __aenter__(self) -> GCSObjectStore:
         storage = _require_storage()
         kwargs: dict[str, Any] = {}
         if self._project:
@@ -104,9 +106,7 @@ class GCSObjectStore:
         """Download blob *key*.  Raises :class:`KeyError` if not found."""
         blob = self._blob(key)
         try:
-            return await asyncio.get_event_loop().run_in_executor(
-                None, blob.download_as_bytes
-            )
+            return await asyncio.get_event_loop().run_in_executor(None, blob.download_as_bytes)
         except Exception as exc:
             exc_str = str(exc)
             if "NotFound" in type(exc).__name__ or "404" in exc_str or "No such object" in exc_str:

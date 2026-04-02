@@ -14,17 +14,15 @@ Usage::
     if key_record is None:
         raise Unauthorized()
 """
+
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import Any
 
 import bcrypt
 
 from mp_commons.security.apikeys.generator import ApiKey, ApiKeyStore
-
-if TYPE_CHECKING:
-    pass
 
 logger = logging.getLogger(__name__)
 
@@ -43,14 +41,12 @@ def _is_argon2(key_hash: bytes) -> bool:
 def _require_argon2() -> Any:
     try:
         import argon2  # type: ignore[import-untyped]
+
         return argon2
     except ImportError as exc:
         raise ImportError(
             "Install 'mp-commons[argon2]' or 'argon2-cffi' to use ApiKeyHashUpgrade"
         ) from exc
-
-
-from typing import Any
 
 
 class ApiKeyHashUpgrade:
@@ -120,7 +116,7 @@ class ApiKeyHashUpgrade:
         ApiKey | None
             The valid key record, or ``None`` if verification fails.
         """
-        from mp_commons.security.apikeys.generator import _PREFIX_LEN  # noqa: PLC0415
+        from mp_commons.security.apikeys.generator import _PREFIX_LEN
 
         if len(raw_key) < _PREFIX_LEN:
             return None

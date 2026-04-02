@@ -12,7 +12,7 @@ Usage in a producer::
     from mp_commons.adapters.opentelemetry.kafka_propagation import inject_trace_headers
 
     headers = [("key", b"val")]
-    inject_trace_headers(headers)           # appends traceparent + tracestate
+    inject_trace_headers(headers)  # appends traceparent + tracestate
     await producer.send(topic, value=body, headers=headers)
 
 Usage in a consumer::
@@ -27,6 +27,7 @@ Usage in a consumer::
             if token is not None:
                 context_api.detach(token)
 """
+
 from __future__ import annotations
 
 import logging
@@ -56,9 +57,7 @@ class _KafkaHeaderCarrier:
         self._headers.append((key, value.encode()))
 
     def keys(self) -> list[str]:
-        return [
-            (k.decode() if isinstance(k, bytes) else k) for k, _ in self._headers
-        ]
+        return [(k.decode() if isinstance(k, bytes) else k) for k, _ in self._headers]
 
 
 def _get_propagator() -> Any | None:
@@ -109,6 +108,7 @@ def extract_trace_context(
         finally:
             if token is not None:
                 from opentelemetry import context as context_api
+
                 context_api.detach(token)
 
     Parameters

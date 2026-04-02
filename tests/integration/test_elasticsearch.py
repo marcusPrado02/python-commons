@@ -5,6 +5,7 @@ Run with: pytest tests/integration/test_elasticsearch.py -m integration -v
 
 Requires Docker.  The ES container exposes port 9200.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -13,7 +14,6 @@ from typing import Any
 
 import pytest
 from testcontainers.elasticsearch import ElasticSearchContainer
-
 
 # ---------------------------------------------------------------------------
 # helpers
@@ -110,9 +110,15 @@ class TestElasticsearchClientIntegration:
 
         async def _run_test() -> None:
             async with client:
-                await client.index("search-1", {"category": "fruit", "name": "apple"}, index="search-test")
-                await client.index("search-2", {"category": "fruit", "name": "banana"}, index="search-test")
-                await client.index("search-3", {"category": "veggie", "name": "carrot"}, index="search-test")
+                await client.index(
+                    "search-1", {"category": "fruit", "name": "apple"}, index="search-test"
+                )
+                await client.index(
+                    "search-2", {"category": "fruit", "name": "banana"}, index="search-test"
+                )
+                await client.index(
+                    "search-3", {"category": "veggie", "name": "carrot"}, index="search-test"
+                )
                 # ES needs a moment to refresh before search reflects new docs
                 await asyncio.sleep(2)
 

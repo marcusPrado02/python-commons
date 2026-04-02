@@ -1,25 +1,22 @@
 """Unit tests for IncomingWebhookMiddleware and SecurityHeadersMiddleware (S-02, S-04)."""
+
 from __future__ import annotations
 
 import hashlib
 import hmac
-import json
 import sys
 import types
 from unittest.mock import AsyncMock, MagicMock
-
-import pytest
 
 # Stub fastapi/starlette so tests run without the real library
 for _mod_name in ("fastapi", "starlette", "starlette.types"):
     if _mod_name not in sys.modules:
         sys.modules[_mod_name] = types.ModuleType(_mod_name)
 
-from mp_commons.adapters.fastapi.middleware import (  # noqa: E402
+from mp_commons.adapters.fastapi.middleware import (
     FastAPIIncomingWebhookMiddleware,
     FastAPISecurityHeadersMiddleware,
 )
-
 
 # ---------------------------------------------------------------------------
 # ASGI test helpers
@@ -72,7 +69,9 @@ def _make_signature(secret: str, body: bytes) -> str:
 class TestFastAPIIncomingWebhookMiddleware:
     _SECRET = "super-secret"
 
-    def _make_middleware(self, inner_app: MagicMock | None = None) -> FastAPIIncomingWebhookMiddleware:
+    def _make_middleware(
+        self, inner_app: MagicMock | None = None
+    ) -> FastAPIIncomingWebhookMiddleware:
         app = inner_app or AsyncMock()
         return FastAPIIncomingWebhookMiddleware(app, secret=self._SECRET)
 
@@ -161,7 +160,6 @@ class TestFastAPIIncomingWebhookMiddleware:
 
 class TestFastAPISecurityHeadersMiddleware:
     async def _run(self, mw: FastAPISecurityHeadersMiddleware) -> dict[str, str]:
-        inner_sent: list[dict] = []
 
         async def inner(scope, receive, send):
             await send({"type": "http.response.start", "status": 200, "headers": []})

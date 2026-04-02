@@ -43,7 +43,6 @@ class SQLAlchemyAuditStore(AuditStore):
         from sqlalchemy import (  # type: ignore[import-untyped]
             Column,
             DateTime,
-            LargeBinary,
             MetaData,
             String,
             Table,
@@ -51,7 +50,7 @@ class SQLAlchemyAuditStore(AuditStore):
         )
 
         meta = MetaData()
-        table = Table(
+        Table(
             cls.TABLE_NAME,
             meta,
             Column("event_id", String(128), primary_key=True),
@@ -99,7 +98,7 @@ class SQLAlchemyAuditStore(AuditStore):
     async def record(self, event: AuditEvent) -> None:
         import json
 
-        from sqlalchemy import insert, table, column  # type: ignore[import-untyped]
+        from sqlalchemy import column, insert, table  # type: ignore[import-untyped]
 
         t = table(
             self.TABLE_NAME,
@@ -136,7 +135,7 @@ class SQLAlchemyAuditStore(AuditStore):
     ) -> list[AuditEvent]:
         import json
 
-        from sqlalchemy import select, text, table, column  # type: ignore[import-untyped]
+        from sqlalchemy import column, select, table  # type: ignore[import-untyped]
 
         t = table(
             self.TABLE_NAME,

@@ -22,17 +22,19 @@ Usage (consumer)::
     consumer = AzureServiceBusConsumer(
         fully_qualified_namespace="myns.servicebus.windows.net",
         queue_or_topic="orders",
-        subscription="order-processor",   # omit for queues
+        subscription="order-processor",  # omit for queues
     )
     async with consumer:
         async for message in consumer.receive():
             process(message)
 """
+
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
 import json
 import logging
-from typing import Any, AsyncIterator
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +42,7 @@ logger = logging.getLogger(__name__)
 def _require_servicebus() -> Any:
     try:
         from azure.servicebus.aio import ServiceBusClient  # type: ignore[import-untyped]
+
         return ServiceBusClient
     except ImportError as exc:
         raise ImportError(
@@ -51,6 +54,7 @@ def _require_servicebus() -> Any:
 def _require_identity() -> Any:
     try:
         from azure.identity.aio import DefaultAzureCredential  # type: ignore[import-untyped]
+
         return DefaultAzureCredential
     except ImportError as exc:
         raise ImportError(
@@ -92,7 +96,7 @@ class AzureServiceBusProducer:
         self._max_wait_time = max_wait_time
         self._client: Any = None
 
-    async def __aenter__(self) -> "AzureServiceBusProducer":
+    async def __aenter__(self) -> AzureServiceBusProducer:
         ServiceBusClient = _require_servicebus()
         if self._connection_string:
             self._client = ServiceBusClient.from_connection_string(self._connection_string)
@@ -108,8 +112,9 @@ class AzureServiceBusProducer:
 
     async def send(self, payload: dict[str, Any]) -> None:
         """Send a single JSON-serialised message."""
-        ServiceBusClient = _require_servicebus()
+        _require_servicebus()
         from azure.servicebus import ServiceBusMessage  # type: ignore[import-untyped]
+
         body = json.dumps(payload)
         async with self._client.get_queue_sender(self._entity) as sender:
             msg = ServiceBusMessage(body)
@@ -119,12 +124,15 @@ class AzureServiceBusProducer:
     async def send_batch(self, payloads: list[dict[str, Any]]) -> None:
         """Send a batch of messages atomically."""
         from azure.servicebus import ServiceBusMessage  # type: ignore[import-untyped]
+
         async with self._client.get_queue_sender(self._entity) as sender:
             batch = await sender.create_message_batch()
             for payload in payloads:
                 batch.add_message(ServiceBusMessage(json.dumps(payload)))
             await sender.send_messages(batch)
-            logger.debug("azure_servicebus.sent_batch count=%d entity=%s", len(payloads), self._entity)
+            logger.debug(
+                "azure_servicebus.sent_batch count=%d entity=%s", len(payloads), self._entity
+            )
 
 
 class AzureServiceBusConsumer:
@@ -164,7 +172,7 @@ class AzureServiceBusConsumer:
         self._max_wait_time = max_wait_time
         self._client: Any = None
 
-    async def __aenter__(self) -> "AzureServiceBusConsumer":
+    async def __aenter__(self) -> AzureServiceBusConsumer:
         ServiceBusClient = _require_servicebus()
         if self._connection_string:
             self._client = ServiceBusClient.from_connection_string(self._connection_string)
@@ -208,4 +216,4 @@ class AzureServiceBusConsumer:
                     await receiver.abandon_message(msg)
 
 
-__all__ = ["AzureServiceBusProducer", "AzureServiceBusConsumer"]
+__all__ = ["AzureServiceBusConsumer", "AzureServiceBusProducer"]

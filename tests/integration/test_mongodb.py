@@ -10,7 +10,6 @@ Requires Docker (used automatically via ``testcontainers``).
 from __future__ import annotations
 
 import asyncio
-import dataclasses
 from typing import Any
 
 import pytest
@@ -31,7 +30,6 @@ from mp_commons.kernel.ddd.specification import Specification
 from mp_commons.kernel.errors import NotFoundError
 from mp_commons.kernel.messaging import OutboxRecord, OutboxStatus
 from mp_commons.kernel.types.ids import EntityId
-
 
 # ---------------------------------------------------------------------------
 # Shared helpers
@@ -80,7 +78,7 @@ def mongo_uri() -> str:  # type: ignore[return]
         yield mongo.get_connection_url()
 
 
-@pytest.fixture()
+@pytest.fixture
 def motor_client(mongo_uri: str) -> Any:
     import motor.motor_asyncio as motor_async  # type: ignore[import]
 
@@ -89,7 +87,7 @@ def motor_client(mongo_uri: str) -> Any:
     client.close()
 
 
-@pytest.fixture()
+@pytest.fixture
 def db(motor_client: Any, request: Any) -> Any:
     """Return a fresh DB for each test by using the test id as DB name."""
     safe_name = request.node.nodeid.replace("/", "_").replace("::", "_").replace(".", "_")
@@ -197,7 +195,7 @@ class TestMongoUnitOfWork:
             # A standalone instance will raise on start_transaction —
             # we wrap and verify the pattern at least structurally.
             try:
-                async with MongoUnitOfWork(motor_client) as uow:
+                async with MongoUnitOfWork(motor_client):
                     await repo.save(Product(pid, "UoW-test", 1.0))
             except Exception:
                 # Standalone MongoDB: no transactions — do a plain save instead
@@ -210,6 +208,7 @@ class TestMongoUnitOfWork:
 
     def test_rollback_on_exception(self, motor_client: Any) -> None:
         """__aexit__ with exception calls abort_transaction without raising."""
+
         # This verifies the UoW does not mask the original exception.
         async def run() -> None:
             with pytest.raises(ValueError, match="boom"):

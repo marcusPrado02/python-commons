@@ -15,11 +15,12 @@ Usage::
     safe_repo = TenantIsolationValidator(repo, tenant_id=TenantId("acme"))
 
     async with TenantContext.scoped(TenantId("acme")):
-        orders = await safe_repo.find_all()   # passes: all orders belong to "acme"
+        orders = await safe_repo.find_all()  # passes: all orders belong to "acme"
 
     # If the underlying repo leaks tenant "other-org":
     # TenantLeakError: found 2 result(s) belonging to other tenant(s): {'other-org'}
 """
+
 from __future__ import annotations
 
 import functools
@@ -93,9 +94,9 @@ class TenantIsolationValidator:
         items: list[Any] = []
         if result is None:
             return
-        if isinstance(result, (list, tuple)):
-            items = list(result)
-        elif hasattr(result, "__iter__") and not isinstance(result, (str, bytes, dict)):
+        if isinstance(result, (list, tuple)) or (
+            hasattr(result, "__iter__") and not isinstance(result, (str, bytes, dict))
+        ):
             items = list(result)
         else:
             items = [result]
@@ -124,6 +125,7 @@ class TenantIsolationValidator:
             return attr
 
         if inspect.iscoroutinefunction(attr):
+
             @functools.wraps(attr)
             async def _async_wrapper(*args: Any, **kwargs: Any) -> Any:
                 result = await attr(*args, **kwargs)

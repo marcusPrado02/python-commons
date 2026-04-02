@@ -1,4 +1,5 @@
 """§89 Config — Dynamic / Hot-Reload."""
+
 from __future__ import annotations
 
 from mp_commons.config.dynamic.source import (

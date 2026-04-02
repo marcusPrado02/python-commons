@@ -1,4 +1,5 @@
 """Unit tests for §93 – Performance Assertions."""
+
 from __future__ import annotations
 
 import asyncio
@@ -24,6 +25,7 @@ class TestAssertCompletesWithin:
     def test_slow_coroutine_fails(self):
         async def slow():
             import asyncio as _asyncio
+
             await _asyncio.sleep(0.2)
 
         with pytest.raises(PerformanceAssertionError, match="ms"):

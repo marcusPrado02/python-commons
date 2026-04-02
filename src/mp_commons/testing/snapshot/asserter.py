@@ -1,4 +1,5 @@
 """Snapshot asserter and store."""
+
 from __future__ import annotations
 
 import difflib
@@ -76,6 +77,4 @@ class SnapshotAsserter:
                 lineterm="",
             )
         )
-        raise AssertionError(
-            f"Snapshot mismatch for {snapshot_name!r}:\n{diff}"
-        )
+        raise AssertionError(f"Snapshot mismatch for {snapshot_name!r}:\n{diff}")

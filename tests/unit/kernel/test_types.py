@@ -8,6 +8,8 @@ import pytest
 
 from mp_commons.kernel.errors import ValidationError
 from mp_commons.kernel.types import (
+    UID,
+    ULID,
     CorrelationId,
     Email,
     EntityId,
@@ -18,12 +20,7 @@ from mp_commons.kernel.types import (
     PhoneNumber,
     Slug,
     Some,
-    TenantId,
-    UID,
-    ULID,
-    UUIDv7,
 )
-
 
 # ---------------------------------------------------------------------------
 # EntityId
@@ -192,7 +189,7 @@ class TestPhoneNumber:
     def test_national_number_length(self) -> None:
         p = PhoneNumber("+447911123456")
         cc = p.country_code
-        assert p.national_number == p.value[1 + len(cc):]
+        assert p.national_number == p.value[1 + len(cc) :]
 
 
 # ---------------------------------------------------------------------------
@@ -269,7 +266,7 @@ class TestResultMonad:
 
     def test_err_flat_map_is_identity(self) -> None:
         err: Err[ValueError] = Err(ValueError("original"))
-        result = err.flat_map(lambda x: Ok(x))
+        result = err.flat_map(Ok)
         assert result.is_err()
 
     def test_ok_err_repr(self) -> None:
@@ -313,7 +310,7 @@ class TestOptionMonad:
 
     def test_nothing_flat_map_is_identity(self) -> None:
         n: Nothing[int] = Nothing()
-        result = n.flat_map(lambda x: Some(x))
+        result = n.flat_map(Some)
         assert result.is_none()
 
     def test_some_filter_passes(self) -> None:
@@ -344,6 +341,7 @@ class TestUID:
     def test_generate_url_safe(self) -> None:
         # URL-safe base64 chars: A-Z a-z 0-9 - _
         import re
+
         uid = UID.generate()
         assert re.fullmatch(r"[A-Za-z0-9\-_]{12}", uid.value)
 
@@ -390,10 +388,12 @@ class TestPublicReExports:
 
     def test_uid_in_public_api(self) -> None:
         from mp_commons.kernel import types as t
+
         assert hasattr(t, "UID")
 
     def test_all_symbols_importable(self) -> None:
         import importlib
+
         mod = importlib.import_module("mp_commons.kernel.types")
         for name in mod.__all__:
             assert hasattr(mod, name), f"{name!r} listed in __all__ but not found"

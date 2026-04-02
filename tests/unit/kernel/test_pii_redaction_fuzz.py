@@ -1,11 +1,11 @@
 """Hypothesis fuzz tests for RegexPIIRedactor (T-07)."""
+
 from __future__ import annotations
 
-from hypothesis import given, assume, settings
+from hypothesis import assume, given
 from hypothesis import strategies as st
 
-from mp_commons.kernel.security.pii import RegexPIIRedactor, DEFAULT_SENSITIVE_FIELDS
-
+from mp_commons.kernel.security.pii import DEFAULT_SENSITIVE_FIELDS, RegexPIIRedactor
 
 redactor = RegexPIIRedactor()
 
@@ -24,9 +24,7 @@ EMAIL_LOCAL = st.text(
     max_size=20,
 ).filter(lambda s: s[0] not in ".+-" and s[-1] not in ".+-")
 
-EMAIL_DOMAIN = st.sampled_from([
-    "example.com", "test.org", "mail.net", "foo.io", "company.co.uk"
-])
+EMAIL_DOMAIN = st.sampled_from(["example.com", "test.org", "mail.net", "foo.io", "company.co.uk"])
 
 
 @st.composite

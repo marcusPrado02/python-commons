@@ -28,12 +28,15 @@ class AuditMiddleware(Middleware):
 
     Usage::
 
-        pipeline = Pipeline([
-            AuditMiddleware(
-                store=audit_store,
-                action="orders:command",
-            ),
-        ], handler=bus.dispatch)
+        pipeline = Pipeline(
+            [
+                AuditMiddleware(
+                    store=audit_store,
+                    action="orders:command",
+                ),
+            ],
+            handler=bus.dispatch,
+        )
     """
 
     def __init__(

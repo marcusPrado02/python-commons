@@ -1,4 +1,5 @@
 """Resilience – ConcurrencyLimiter, QueueLimiter."""
+
 from __future__ import annotations
 
 import asyncio
@@ -15,9 +16,9 @@ class ConcurrencyLimiter:
 
     @property
     def available(self) -> int:
-        return self._semaphore._value  # noqa: SLF001
+        return self._semaphore._value
 
-    async def __aenter__(self) -> "ConcurrencyLimiter":
+    async def __aenter__(self) -> ConcurrencyLimiter:
         acquired = await asyncio.wait_for(self._semaphore.acquire(), timeout=0.01)
         if not acquired:
             raise BulkheadFullError("Concurrency limit reached")
@@ -36,8 +37,8 @@ class QueueLimiter:
         self.max_concurrent = max_concurrent
         self.max_queue = max_queue
 
-    async def __aenter__(self) -> "QueueLimiter":
-        if not self._queue._value:  # noqa: SLF001
+    async def __aenter__(self) -> QueueLimiter:
+        if not self._queue._value:
             raise BulkheadFullError("Queue is full")
         await self._queue.acquire()
         await self._semaphore.acquire()

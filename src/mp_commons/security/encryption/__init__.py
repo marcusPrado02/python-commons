@@ -1,4 +1,5 @@
 """Security – Encryption."""
+
 from mp_commons.security.encryption.fernet import (
     AesGcmEncryptionProvider,
     EncryptionProvider,

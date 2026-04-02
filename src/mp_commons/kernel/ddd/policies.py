@@ -13,6 +13,7 @@ Example::
         def evaluate(self, ctx: User) -> PolicyResult:
             return PolicyResult(ctx.age >= 18, reason="must be adult")
 
+
     policy = AllOf(AgePolicy(), VerifiedEmailPolicy())
     result = policy.evaluate(user)
     if not result.allowed:
@@ -23,7 +24,7 @@ from __future__ import annotations
 
 import abc
 import dataclasses
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Generic, TypeVar
 
 TContext = TypeVar("TContext")
@@ -49,11 +50,11 @@ class PolicyResult:
     # Convenience factories -----------------------------------------------
 
     @classmethod
-    def permit(cls, reason: str | None = None) -> "PolicyResult":
+    def permit(cls, reason: str | None = None) -> PolicyResult:
         return cls(allowed=True, reason=reason)
 
     @classmethod
-    def deny(cls, reason: str = "denied") -> "PolicyResult":
+    def deny(cls, reason: str = "denied") -> PolicyResult:
         return cls(allowed=False, reason=reason)
 
     def __bool__(self) -> bool:  # allows ``if policy.evaluate(ctx):``
@@ -123,9 +124,7 @@ class NoneOf(Policy[TContext]):
         for p in self._policies:
             result = p.evaluate(context)
             if result.allowed:
-                return PolicyResult.deny(
-                    f"policy was allowed but NoneOf forbids: {result.reason}"
-                )
+                return PolicyResult.deny(f"policy was allowed but NoneOf forbids: {result.reason}")
         return PolicyResult.permit()
 
 
@@ -195,7 +194,7 @@ class QuotaPolicy(Policy["_RateLimitResult"]):
             raise QuotaExceededError(policy_result.reason)
     """
 
-    def evaluate(self, context: "_RateLimitResult") -> PolicyResult:  # type: ignore[override]
+    def evaluate(self, context: _RateLimitResult) -> PolicyResult:  # type: ignore[override]
         if context.allowed:
             return PolicyResult.permit(
                 f"quota has {context.remaining} request(s) remaining "
@@ -213,7 +212,9 @@ class QuotaPolicy(Policy["_RateLimitResult"]):
 # ---------------------------------------------------------------------------
 
 try:
-    from mp_commons.application.rate_limit.rate_limiter import RateLimitResult as _RateLimitResult  # noqa: F401
+    from mp_commons.application.rate_limit.rate_limiter import (
+        RateLimitResult as _RateLimitResult,
+    )
 except ImportError:  # pragma: no cover  — library not installed in minimal envs
     _RateLimitResult = object  # type: ignore[assignment,misc]
 

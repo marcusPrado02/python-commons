@@ -23,9 +23,7 @@ class DomainEvent:
     """
 
     event_id: str = dataclasses.field(default_factory=lambda: str(uuid4()))
-    occurred_at: datetime = dataclasses.field(
-        default_factory=lambda: datetime.now(UTC)
-    )
+    occurred_at: datetime = dataclasses.field(default_factory=lambda: datetime.now(UTC))
 
     @property
     def event_type(self) -> str:

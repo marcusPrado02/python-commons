@@ -14,10 +14,10 @@ asyncio.ensure_future, or asyncio.get_event_loop directly):
 
 These modules require explicit anyio porting before they support trio.
 """
+
 from __future__ import annotations
 
 import pytest
-
 
 # Override anyio backend for this module — run all anyio tests under BOTH
 # asyncio and trio so incompatibilities surface.
@@ -79,7 +79,7 @@ async def test_async_lru_cache_trio() -> None:
 async def test_result_ok_trio() -> None:
     from mp_commons.kernel.types.result import Err, Ok
 
-    async def divide(a: int, b: int) -> "Ok[float] | Err[str]":
+    async def divide(a: int, b: int) -> Ok[float] | Err[str]:
         if b == 0:
             return Err("division by zero")
         return Ok(a / b)
