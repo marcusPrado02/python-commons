@@ -43,7 +43,7 @@ def keycloak_base_url() -> str:  # type: ignore[return]
         .with_exposed_ports(8080)
     )
     with container:
-        wait_for_logs(container, "Keycloak", timeout=120)
+        wait_for_logs(container, "started in", timeout=180)
         # Allow a moment for the HTTP server to become ready
         host = container.get_container_host_ip()
         port = container.get_exposed_port(8080)
@@ -52,7 +52,7 @@ def keycloak_base_url() -> str:  # type: ignore[return]
         yield base
 
 
-def _wait_keycloak_ready(base_url: str, timeout: int = 60) -> None:
+def _wait_keycloak_ready(base_url: str, timeout: int = 90) -> None:
     """Poll /health/ready until Keycloak accepts requests."""
     deadline = time.time() + timeout
     while time.time() < deadline:
