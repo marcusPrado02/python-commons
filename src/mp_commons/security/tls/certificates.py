@@ -59,6 +59,8 @@ class CertificateLoader:
         data = Path(pkcs12_path).read_bytes()
         pwd = password.encode() if isinstance(password, str) else password
         p12 = load_pkcs12(data, pwd)
+        if p12.cert is None or p12.key is None:
+            raise ValueError("PKCS12 bundle must contain both a certificate and a private key")
 
         import os
         import tempfile

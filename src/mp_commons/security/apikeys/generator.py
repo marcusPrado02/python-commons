@@ -3,10 +3,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 import secrets
-from typing import Protocol
+from typing import Any, Protocol
 
 
-def _require_bcrypt():  # type: ignore[no-untyped-def]
+def _require_bcrypt() -> Any:
     try:
         import bcrypt  # type: ignore[import-untyped]
 

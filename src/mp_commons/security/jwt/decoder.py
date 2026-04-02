@@ -5,7 +5,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Any
 
 
-def _require_pyjwt():  # type: ignore[no-untyped-def]
+def _require_pyjwt() -> Any:
     try:
         import jwt as pyjwt  # type: ignore[import-untyped]
 
