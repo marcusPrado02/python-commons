@@ -129,7 +129,7 @@ class CassandraRepository(Generic[T]):
         if rows is not None:
             row_list = list(rows)
             if row_list:
-                return self._model(**dict(zip(row_list[0]._fields, row_list[0], strict=False)))
+                return self._model(row_list[0])
         return None
 
     async def save(self, entity: T) -> None:
@@ -149,7 +149,7 @@ class CassandraRepository(Generic[T]):
         results: list[T] = []
         if rows:
             for row in rows:
-                results.append(self._model(**dict(zip(row._fields, row, strict=False))))
+                results.append(self._model(row))
         return results
 
 

@@ -75,7 +75,7 @@ def _make_repo(session: MagicMock) -> CassandraRepository[_Row]:
     repo: CassandraRepository[_Row] = CassandraRepository.__new__(CassandraRepository)
     repo._session = session
     repo._table = "items"
-    repo._model = _Row
+    repo._model = lambda row: _Row(id=row.id, value=row.value)
     repo._pk_field = "id"
     repo._prepared = {}
     return repo
