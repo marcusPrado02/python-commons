@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import Any
 
 from mp_commons.application.cqrs.commands import Command, CommandHandler, InProcessCommandBus
@@ -20,7 +21,9 @@ _QUERY_REGISTRY: dict[type[Query], type[QueryHandler[Any, Any]]] = {}
 # ---------------------------------------------------------------------------
 
 
-def command_handler(command_type: type[Command]):
+def command_handler(
+    command_type: type[Command],
+) -> Callable[[type[CommandHandler[Any]]], type[CommandHandler[Any]]]:
     """Class decorator that registers a :class:`CommandHandler` for the given
     command type in the global command registry.
 
@@ -41,7 +44,9 @@ def command_handler(command_type: type[Command]):
     return decorator
 
 
-def query_handler(query_type: type[Query]):
+def query_handler(
+    query_type: type[Query],
+) -> Callable[[type[QueryHandler[Any, Any]]], type[QueryHandler[Any, Any]]]:
     """Class decorator that registers a :class:`QueryHandler` for the given
     query type in the global query registry.
 

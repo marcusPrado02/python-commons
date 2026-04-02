@@ -87,7 +87,7 @@ class SmtpEmailSender:
         if self._client is None:
             await self.connect()
         mime = self._build_mime(message)
-        await self._client.send_message(mime)
+        await self._client.send_message(mime)  # type: ignore[union-attr]
         return str(uuid.uuid4())
 
     async def send_bulk(self, messages: list[EmailMessage]) -> list[str]:  # pragma: no cover

@@ -103,14 +103,14 @@ class AsyncLRUCache:
                 self._misses += 1
                 return None
             value, expires_at = entry  # type: ignore[misc]
-            if expires_at is not None and time.monotonic() > expires_at:
+            if expires_at is not None and time.monotonic() > expires_at:  # type: ignore[has-type]
                 del self._store[key]
                 self._misses += 1
                 return None
             # Move to end (most recently used)
             self._store.move_to_end(key)
             self._hits += 1
-            return value
+            return value  # type: ignore[has-type]
 
     async def set(self, key: Any, value: Any, ttl: float | None = None) -> None:
         """Store *value* under *key*.

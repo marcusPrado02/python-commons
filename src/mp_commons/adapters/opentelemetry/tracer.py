@@ -69,7 +69,7 @@ class OtelTracer(Tracer):
             yield _OtelSpan(span)
 
     @contextlib.asynccontextmanager
-    async def start_async_span(
+    async def start_async_span(  # type: ignore[override]
         self,
         name: str,
         kind: SpanKind = SpanKind.INTERNAL,

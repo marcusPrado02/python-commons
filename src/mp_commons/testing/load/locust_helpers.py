@@ -97,7 +97,7 @@ class LocustKernelUser:
         try:
             from mp_commons.observability.correlation import CorrelationContext
 
-            CorrelationContext.set(str(uuid4()))
+            CorrelationContext.set(str(uuid4()))  # type: ignore[arg-type]
         except ImportError:
             pass
 
@@ -153,7 +153,7 @@ def task_with_metrics(
             try:
                 from mp_commons.observability.correlation import CorrelationContext
 
-                CorrelationContext.set(str(uuid4()))
+                CorrelationContext.set(str(uuid4()))  # type: ignore[arg-type]
             except ImportError:
                 pass
 

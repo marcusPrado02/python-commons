@@ -39,7 +39,7 @@ def FastAPIHealthRouter(
     from fastapi import APIRouter  # type: ignore[import-untyped]
     from fastapi.responses import JSONResponse  # type: ignore[import-untyped]
 
-    router = APIRouter(tags=tags or ["ops"])
+    router = APIRouter(tags=tags or ["ops"])  # type: ignore[arg-type]
     checks = readiness_checks or []
 
     @router.get(f"{path}/live")

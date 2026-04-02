@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from mp_commons.security.encryption.fernet import EncryptionProvider
 
 __all__ = ["KeyRotationService"]
@@ -19,8 +21,8 @@ class KeyRotationService:
 
     @staticmethod
     async def rotate_column(
-        session,
-        model_cls,
+        session: Any,
+        model_cls: Any,
         field_name: str,
         old_provider: EncryptionProvider,
         new_provider: EncryptionProvider,

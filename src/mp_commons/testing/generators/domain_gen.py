@@ -15,12 +15,13 @@ def email_gen(domain: str = "example.com") -> str:
 def money_gen(min_cents: int = 1, max_cents: int = 100000) -> object:
     """Generate a random ``Money`` value object."""
     import random
+    from decimal import Decimal
 
     from mp_commons.kernel.types import Money
 
     currencies = ["EUR", "USD", "GBP"]
     amount = random.randint(min_cents, max_cents)
-    return Money(amount=amount, currency=random.choice(currencies))
+    return Money(amount=Decimal(amount), currency=random.choice(currencies))
 
 
 def slug_gen(length: int = 8) -> str:

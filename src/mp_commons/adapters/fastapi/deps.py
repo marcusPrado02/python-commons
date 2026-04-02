@@ -39,7 +39,7 @@ def _pagination_dep_factory():
         if sort_by:
             prefix = "" if sort_dir == "asc" else "-"
             sorts = (f"{prefix}{sort_by}",)
-        return PageRequest(page=page, size=size, sorts=sorts)
+        return PageRequest(page=page, size=size, sorts=sorts)  # type: ignore[arg-type]
 
     return pagination_dep
 

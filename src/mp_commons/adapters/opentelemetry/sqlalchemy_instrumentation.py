@@ -177,7 +177,7 @@ def uninstrument_engine(engine: Any) -> None:
         (_handle_error, "handle_error"),
     ]:
         try:
-            event.remove(sync_engine, evt_name, fn)
+            event.remove(sync_engine, evt_name, fn)  # type: ignore[arg-type]
         except Exception:
             pass
 

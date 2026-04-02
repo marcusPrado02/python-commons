@@ -20,7 +20,7 @@ class RedisStreamEntry:
         val = self.fields.get(key)
         if val is None:
             # Redis may return bytes keys; fall back
-            val = self.fields.get(key.encode("utf-8"))
+            val = self.fields.get(key.encode("utf-8"))  # type: ignore[call-overload]
         if val is None:
             return default
         return val.decode("utf-8", errors="replace") if isinstance(val, bytes) else str(val)

@@ -45,7 +45,7 @@ class DeadlineContext:
 
     @staticmethod
     @contextlib.asynccontextmanager
-    async def scoped(deadline: Deadline):  # type: ignore[return]
+    async def scoped(deadline: Deadline):  # type: ignore[no-untyped-def, return]
         token = _DEADLINE_VAR.set(deadline)
         try:
             yield deadline

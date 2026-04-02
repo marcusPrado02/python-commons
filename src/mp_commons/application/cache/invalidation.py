@@ -16,7 +16,7 @@ def cached(
     key_fn: Callable[..., str] | None = None,
     tags: list[str] | None = None,
     store: TaggedCacheStore | None = None,
-):
+) -> Callable[[Callable[..., Awaitable[Any]]], Callable[..., Awaitable[Any]]]:
     """Decorator: caches an async function's result in *store*.
 
     If no *store* is given, a module-level ``InMemoryTaggedCacheStore`` is used.

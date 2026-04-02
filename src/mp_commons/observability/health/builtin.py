@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
+from typing import Any
+
 from mp_commons.observability.health.check import HealthCheck, HealthStatus
 
 __all__ = [
@@ -13,7 +16,7 @@ __all__ = [
 class LambdaHealthCheck(HealthCheck):
     """Simple health check backed by a callable — useful in tests."""
 
-    def __init__(self, name_: str, fn) -> None:
+    def __init__(self, name_: str, fn: Callable[[], Awaitable[HealthStatus]]) -> None:
         self._name = name_
         self._fn = fn
 
@@ -28,7 +31,7 @@ class LambdaHealthCheck(HealthCheck):
 class DatabaseHealthCheck(HealthCheck):
     """Checks DB connectivity by running a lightweight query."""
 
-    def __init__(self, session_factory) -> None:
+    def __init__(self, session_factory: Any) -> None:
         self._factory = session_factory
 
     @property
@@ -47,7 +50,7 @@ class DatabaseHealthCheck(HealthCheck):
 class RedisHealthCheck(HealthCheck):
     """Checks Redis connectivity with a PING."""
 
-    def __init__(self, cache) -> None:
+    def __init__(self, cache: Any) -> None:
         self._cache = cache
 
     @property

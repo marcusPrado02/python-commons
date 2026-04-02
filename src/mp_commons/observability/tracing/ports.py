@@ -56,7 +56,7 @@ class Tracer(abc.ABC):
     ) -> Iterator[Span]: ...
 
     @abc.abstractmethod
-    @contextlib.asynccontextmanager
+    @contextlib.asynccontextmanager  # type: ignore[arg-type]
     async def start_async_span(
         self,
         name: str,

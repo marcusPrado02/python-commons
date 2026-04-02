@@ -42,7 +42,7 @@ class SqlAlchemyOutboxRepository(OutboxRepository):
         from sqlalchemy import update  # type: ignore[import-untyped]
 
         await self._session.execute(
-            update(self._model).where(self._model.id == record_id).values(**values)
+            update(self._model).where(self._model.id == record_id).values(**values)  # type: ignore[arg-type, union-attr]
         )
 
     def _record_to_dict(self, record: OutboxRecord) -> dict[str, Any]:

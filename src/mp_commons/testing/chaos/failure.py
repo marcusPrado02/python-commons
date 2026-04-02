@@ -26,7 +26,7 @@ class FailureInjector:
 
         if random.random() < self._rate:
             if inspect.isawaitable(coro):
-                coro.close()  # type: ignore[union-attr]
+                coro.close()  # type: ignore[attr-defined]
             raise self._factory()
         if inspect.isawaitable(coro):
             return await coro  # type: ignore[misc]
