@@ -158,7 +158,7 @@ jobs:
       - name: Build
         run: uv build
       - name: Generate SBOM (CycloneDX JSON)
-        run: uvx cyclonedx-py environment --output-format json --outfile sbom.json
+        run: uvx --from cyclonedx-bom cyclonedx-py environment --output-format json -o sbom.json
       - name: Upload SBOM as release asset
         uses: softprops/action-gh-release@v2
         with:
