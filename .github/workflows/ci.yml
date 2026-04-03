@@ -166,7 +166,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish to GitHub Packages
-        run: |
-          uv publish \
-            --publish-url https://python.pkg.github.com/${{ github.repository_owner }}/ \
-            --token ${{ secrets.GITHUB_TOKEN }}
+        env:
+          TWINE_USERNAME: ${{ github.repository_owner }}
+          TWINE_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+          TWINE_REPOSITORY_URL: https://python.pkg.github.com/${{ github.repository_owner }}/
+        run: uvx twine upload dist/*
