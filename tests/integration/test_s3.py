@@ -73,8 +73,19 @@ class TestS3ObjectStoreIntegration:
         from mp_commons.adapters.s3 import S3ObjectStore
 
         return S3ObjectStore(
-            bucket_name=cfg["bucket"],
-            region_name=cfg["region_name"],
+            cfg["bucket"],
+            region=cfg["region_name"],
+            endpoint_url=cfg["endpoint_url"],
+            aws_access_key_id=cfg["access_key_id"],
+            aws_secret_access_key=cfg["secret_access_key"],
+        )
+
+    def _make_presign(self, cfg: dict) -> Any:
+        from mp_commons.adapters.s3.object_store import S3PresignedUrlGenerator
+
+        return S3PresignedUrlGenerator(
+            cfg["bucket"],
+            region=cfg["region_name"],
             endpoint_url=cfg["endpoint_url"],
             aws_access_key_id=cfg["access_key_id"],
             aws_secret_access_key=cfg["secret_access_key"],
@@ -84,10 +95,9 @@ class TestS3ObjectStoreIntegration:
         store = self._make_store(s3_config)
 
         async def _run_test() -> None:
-            async with store:
-                await store.put("folder/file.txt", b"hello world", "text/plain")
-                data = await store.get("folder/file.txt")
-                assert data == b"hello world"
+            await store.put("folder/file.txt", b"hello world", "text/plain")
+            data = await store.get("folder/file.txt")
+            assert data == b"hello world"
 
         _run(_run_test())
 
@@ -95,11 +105,10 @@ class TestS3ObjectStoreIntegration:
         store = self._make_store(s3_config)
 
         async def _run_test() -> None:
-            async with store:
-                await store.put("to-delete.bin", b"data", "application/octet-stream")
-                await store.delete("to-delete.bin")
-                with pytest.raises(KeyError):
-                    await store.get("to-delete.bin")
+            await store.put("to-delete.bin", b"data", "application/octet-stream")
+            await store.delete("to-delete.bin")
+            with pytest.raises(KeyError):
+                await store.get("to-delete.bin")
 
         _run(_run_test())
 
@@ -107,9 +116,8 @@ class TestS3ObjectStoreIntegration:
         store = self._make_store(s3_config)
 
         async def _run_test() -> None:
-            async with store:
-                with pytest.raises(KeyError):
-                    await store.get("does-not-exist.txt")
+            with pytest.raises(KeyError):
+                await store.get("does-not-exist.txt")
 
         _run(_run_test())
 
@@ -117,12 +125,11 @@ class TestS3ObjectStoreIntegration:
         store = self._make_store(s3_config)
 
         async def _run_test() -> None:
-            async with store:
-                await store.put("prefix/a.txt", b"a", "text/plain")
-                await store.put("prefix/b.txt", b"b", "text/plain")
-                keys = await store.list_keys("prefix/")
-                assert "prefix/a.txt" in keys
-                assert "prefix/b.txt" in keys
+            await store.put("prefix/a.txt", b"a", "text/plain")
+            await store.put("prefix/b.txt", b"b", "text/plain")
+            keys = await store.list_keys("prefix/")
+            assert "prefix/a.txt" in keys
+            assert "prefix/b.txt" in keys
 
         _run(_run_test())
 
@@ -130,11 +137,11 @@ class TestS3ObjectStoreIntegration:
         import urllib.request
 
         store = self._make_store(s3_config)
+        presign = self._make_presign(s3_config)
 
         async def _get_url() -> str:
-            async with store:
-                await store.put("signed/obj.bin", b"signed-content", "application/octet-stream")
-                return await store.presigned_url("signed/obj.bin", expires_in=300)
+            await store.put("signed/obj.bin", b"signed-content", "application/octet-stream")
+            return await presign.presign_get("signed/obj.bin", expires_in=300)
 
         url = _run(_get_url())
         assert url.startswith("http")
