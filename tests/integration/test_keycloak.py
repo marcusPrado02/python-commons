@@ -102,9 +102,11 @@ class TestKeycloakOIDCIntegration:
         import jwt as _jwt  # type: ignore[import-untyped]
 
         unverified = _jwt.decode(token, options={"verify_signature": False})
-        audience = unverified.get("aud") or unverified.get("azp", _CLIENT_ID)
-        if isinstance(audience, list):
-            audience = audience[0]
+        # admin-cli tokens may omit 'aud'; pass None to skip audience validation
+        raw_aud = unverified.get("aud")
+        if isinstance(raw_aud, list):
+            raw_aud = raw_aud[0]
+        audience: str | None = raw_aud or None
 
         jwks = JWKSClient(jwks_uri=_jwks_uri(keycloak_base_url))
         verifier = OIDCTokenVerifier(

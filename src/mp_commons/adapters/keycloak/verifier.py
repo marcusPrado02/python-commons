@@ -33,7 +33,7 @@ class OIDCTokenVerifier:
     def __init__(
         self,
         jwks_client: JWKSClient,
-        audience: str,
+        audience: str | None = None,
         algorithms: list[str] | None = None,
         realm_roles_claim: str = "realm_access.roles",
         permissions_claim: str = "scope",
@@ -53,11 +53,15 @@ class OIDCTokenVerifier:
         jwt = _require_pyjwt()
         try:
             signing_key = await self._jwks.get_signing_key(token)
+            decode_opts: dict[str, Any] = {}
+            if self._audience is None:
+                decode_opts["verify_aud"] = False
             claims: dict[str, Any] = jwt.decode(
                 token,
                 signing_key.key,
                 algorithms=self._algorithms,
                 audience=self._audience,
+                options=decode_opts,
             )
         except jwt.InvalidTokenError as exc:
             raise UnauthorizedError(f"Invalid token: {exc}") from exc
