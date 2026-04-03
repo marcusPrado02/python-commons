@@ -41,12 +41,6 @@ Homepage = "https://github.com/marcusPrado02/python-commons"
 Repository = "https://github.com/marcusPrado02/python-commons"
 "Bug Tracker" = "https://github.com/marcusPrado02/python-commons/issues"
 
-[tool.uv]
-[[tool.uv.index]]
-name = "github-packages"
-url = "https://python.pkg.github.com/marcusPrado02/simple/"
-publish-url = "https://python.pkg.github.com/marcusPrado02/"
-explicit = true
 
 [tool.mypy]
 python_version = "3.12"
