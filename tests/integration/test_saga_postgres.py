@@ -101,7 +101,9 @@ class AsyncpgSagaStore(SagaStore):
             saga_id=row["saga_id"],
             state=SagaState(row["state"]),
             step_index=row["step_index"],
-            ctx_snapshot=row["ctx_snapshot"] if isinstance(row["ctx_snapshot"], dict) else json.loads(row["ctx_snapshot"]),
+            ctx_snapshot=row["ctx_snapshot"]
+            if isinstance(row["ctx_snapshot"], dict)
+            else json.loads(row["ctx_snapshot"]),
         )
 
     async def close(self) -> None:
