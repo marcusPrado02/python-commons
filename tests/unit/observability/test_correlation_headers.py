@@ -1,4 +1,5 @@
 """Tests for §19.3 – CorrelationContext.set_from_headers()."""
+
 from __future__ import annotations
 
 import re

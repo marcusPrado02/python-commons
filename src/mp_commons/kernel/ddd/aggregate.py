@@ -13,7 +13,7 @@ class AggregateRoot(Entity):
     _version: int
     _events: list[DomainEvent]
 
-    def __init__(self, id: EntityId) -> None:  # noqa: A002
+    def __init__(self, id: EntityId) -> None:
         super().__init__(id)
         self._version = 0
         self._events = []

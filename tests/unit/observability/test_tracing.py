@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Any, Iterator
+from collections.abc import Iterator
+from typing import Any
 
 import pytest
 
@@ -10,10 +11,8 @@ from mp_commons.observability.tracing import (
     NoopTracer,
     Span,
     SpanKind,
-    TracePropagator,
     Tracer,
 )
-
 
 # ---------------------------------------------------------------------------
 # Minimal Span stub implementing the ABC
@@ -77,9 +76,8 @@ class TestSpanProtocol:
     def test_context_manager_records_exception(self) -> None:
         span = _StubSpan()
         exc = RuntimeError("boom")
-        with pytest.raises(RuntimeError):
-            with span:
-                raise exc
+        with pytest.raises(RuntimeError), span:
+            raise exc
         assert exc in span.exceptions
         assert span.ended is True
 

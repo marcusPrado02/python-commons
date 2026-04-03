@@ -14,7 +14,6 @@ from mp_commons.kernel.contracts import (
     ContractVersion,
 )
 
-
 # ---------------------------------------------------------------------------
 # CompatibilityMode enum (6.1)
 # ---------------------------------------------------------------------------
@@ -177,8 +176,14 @@ class TestContractRegistryListVersions:
         reg = InMemoryContractRegistry()
 
         async def _run() -> None:
-            reg._add(Contract(id="a", version=1, mode=CompatibilityMode.FULL, schema={}), ContractVersion(1, 0, 0))
-            reg._add(Contract(id="b", version=2, mode=CompatibilityMode.NONE, schema={}), ContractVersion(2, 0, 0))
+            reg._add(
+                Contract(id="a", version=1, mode=CompatibilityMode.FULL, schema={}),
+                ContractVersion(1, 0, 0),
+            )
+            reg._add(
+                Contract(id="b", version=2, mode=CompatibilityMode.NONE, schema={}),
+                ContractVersion(2, 0, 0),
+            )
             assert len(await reg.list_versions("a")) == 1
             assert len(await reg.list_versions("b")) == 1
 

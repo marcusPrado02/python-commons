@@ -1,5 +1,11 @@
 # mp-commons
 
+[![CI](https://github.com/marcusPrado02/python-commons/actions/workflows/ci.yml/badge.svg)](https://github.com/marcusPrado02/python-commons/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/marcusPrado02/python-commons/branch/main/graph/badge.svg)](https://codecov.io/gh/marcusPrado02/python-commons)
+[![PyPI version](https://img.shields.io/pypi/v/mp-commons.svg)](https://pypi.org/project/mp-commons/)
+[![Python versions](https://img.shields.io/pypi/pyversions/mp-commons.svg)](https://pypi.org/project/mp-commons/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 **Platform shared library for Python microservices.**
 
 `mp-commons` delivers the "senior engineer pillars" as importable building

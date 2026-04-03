@@ -21,8 +21,6 @@ from mp_commons.application.pipeline import (
     TracingMiddleware,
     ValidationMiddleware,
 )
-from mp_commons.kernel.errors import ValidationError
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -230,13 +228,16 @@ class _SpyMetrics:
         self.counters[name] = c
         return c
 
-    def histogram(self, name: str, description: str = "", unit: str = "ms", boundaries: list | None = None) -> _SpyHistogram:
+    def histogram(
+        self, name: str, description: str = "", unit: str = "ms", boundaries: list | None = None
+    ) -> _SpyHistogram:
         h = _SpyHistogram()
         self.histograms[name] = h
         return h
 
     def gauge(self, name: str, description: str = "", unit: str = "") -> object:
         from mp_commons.observability.metrics.noop import NoopMetrics
+
         return NoopMetrics().gauge(name)
 
 
@@ -254,6 +255,7 @@ class _InMemIdempotencyStore:
 
     async def complete(self, key: object, response: bytes) -> None:
         from mp_commons.kernel.messaging import IdempotencyRecord
+
         rec = self._store.get(str(key))
         if isinstance(rec, IdempotencyRecord):
             rec.status = "COMPLETED"
@@ -284,9 +286,7 @@ class _InMemCache:
 
 class TestLoggingMiddleware:
     def test_passes_through_result(self) -> None:
-        result = asyncio.run(
-            Pipeline().add(LoggingMiddleware()).execute("hello", identity_handler)
-        )
+        result = asyncio.run(Pipeline().add(LoggingMiddleware()).execute("hello", identity_handler))
         assert result == "hello"
 
     def test_propagates_exception(self) -> None:
@@ -318,9 +318,7 @@ class TestRetryMiddleware:
                 raise OSError("transient")
             return "done"
 
-        result = asyncio.run(
-            Pipeline().add(RetryMiddleware(max_attempts=5)).execute("x", flaky)
-        )
+        result = asyncio.run(Pipeline().add(RetryMiddleware(max_attempts=5)).execute("x", flaky))
         assert result == "done"
         assert len(attempts) == 3
 
@@ -329,9 +327,7 @@ class TestRetryMiddleware:
             raise ValueError("permanent")
 
         with pytest.raises(ValueError, match="permanent"):
-            asyncio.run(
-                Pipeline().add(RetryMiddleware(max_attempts=2)).execute("x", always_fail)
-            )
+            asyncio.run(Pipeline().add(RetryMiddleware(max_attempts=2)).execute("x", always_fail))
 
 
 # ---------------------------------------------------------------------------
@@ -341,6 +337,7 @@ class TestRetryMiddleware:
 
 def _make_principal() -> object:
     from mp_commons.kernel.security.principal import Principal
+
     return Principal(subject="user-1", tenant_id="tenant-1")
 
 
@@ -470,6 +467,7 @@ class TestTracingMiddleware:
 
     def test_span_records_exception_and_reraises(self) -> None:
         from mp_commons.observability.tracing.noop import NoopTracer
+
         recorded: list[Exception] = []
 
         class _RecordingSpan:
@@ -486,11 +484,14 @@ class TestTracingMiddleware:
                 pass
 
         import contextlib
+
         from mp_commons.observability.tracing.ports import SpanKind
 
         class _Tracer(NoopTracer):
             @contextlib.asynccontextmanager  # type: ignore[override]
-            async def start_async_span(self, name: str, kind: SpanKind = SpanKind.INTERNAL, attributes: dict | None = None):  # type: ignore[override]
+            async def start_async_span(
+                self, name: str, kind: SpanKind = SpanKind.INTERNAL, attributes: dict | None = None
+            ):  # type: ignore[override]
                 yield _RecordingSpan()
 
         async def fail(req: object) -> object:
@@ -516,6 +517,7 @@ class TestTimeoutMiddleware:
 
     def test_slow_call_raises_app_timeout(self) -> None:
         import asyncio as _aio
+
         from mp_commons.kernel.errors import TimeoutError as AppTimeoutError
 
         async def slow(req: object) -> object:
@@ -523,9 +525,7 @@ class TestTimeoutMiddleware:
             return req
 
         with pytest.raises(AppTimeoutError):
-            asyncio.run(
-                Pipeline().add(TimeoutMiddleware(timeout_seconds=0.001)).execute("x", slow)
-            )
+            asyncio.run(Pipeline().add(TimeoutMiddleware(timeout_seconds=0.001)).execute("x", slow))
 
 
 # ---------------------------------------------------------------------------
@@ -552,6 +552,7 @@ class TestIdempotencyMiddleware:
 
     def test_new_key_saves_and_completes_record(self) -> None:
         from mp_commons.kernel.messaging import IdempotencyRecord
+
         store = _InMemIdempotencyStore()
         handled: list[object] = []
 
@@ -571,6 +572,7 @@ class TestIdempotencyMiddleware:
 
     def test_completed_record_returns_cached_without_calling_handler(self) -> None:
         from mp_commons.kernel.messaging import IdempotencyKey, IdempotencyRecord
+
         store = _InMemIdempotencyStore()
         ikey = IdempotencyKey(client_key="k2", operation="_ReqWithKey")
         rec = IdempotencyRecord(key=str(ikey), status="COMPLETED", response=b"cached-response")  # type: ignore[arg-type]
@@ -583,7 +585,9 @@ class TestIdempotencyMiddleware:
             return "should-not-reach"
 
         result = asyncio.run(
-            Pipeline().add(IdempotencyMiddleware(store)).execute(_ReqWithKey("k2"), should_not_be_called)
+            Pipeline()
+            .add(IdempotencyMiddleware(store))
+            .execute(_ReqWithKey("k2"), should_not_be_called)
         )
         assert result == b"cached-response"
         assert called == []
@@ -597,11 +601,19 @@ class TestIdempotencyMiddleware:
             return "value"
 
         async def _run() -> tuple[object, object]:
-            r1 = await Pipeline().add(IdempotencyMiddleware(store)).execute(_ReqWithKey("k3"), counting)
-            r2 = await Pipeline().add(IdempotencyMiddleware(store)).execute(_ReqWithKey("k3"), counting)
+            r1 = (
+                await Pipeline()
+                .add(IdempotencyMiddleware(store))
+                .execute(_ReqWithKey("k3"), counting)
+            )
+            r2 = (
+                await Pipeline()
+                .add(IdempotencyMiddleware(store))
+                .execute(_ReqWithKey("k3"), counting)
+            )
             return r1, r2
 
-        r1, r2 = asyncio.run(_run())
+        r1, _r2 = asyncio.run(_run())
         assert r1 == "value"
         # Second call returns cached bytes representation (completed record)
         assert len(calls) == 1
@@ -712,12 +724,8 @@ class TestDeduplicationMiddleware:
             calls.append(1)
             return "ok"
 
-        asyncio.run(
-            Pipeline().add(DeduplicationMiddleware(store)).execute(NoIdCmd(), counting)
-        )
-        asyncio.run(
-            Pipeline().add(DeduplicationMiddleware(store)).execute(NoIdCmd(), counting)
-        )
+        asyncio.run(Pipeline().add(DeduplicationMiddleware(store)).execute(NoIdCmd(), counting))
+        asyncio.run(Pipeline().add(DeduplicationMiddleware(store)).execute(NoIdCmd(), counting))
         assert len(calls) == 2  # no dedup without id
 
     def test_new_command_id_executes_handler(self) -> None:
@@ -734,9 +742,7 @@ class TestDeduplicationMiddleware:
             calls.append(1)
             return "ok"
 
-        asyncio.run(
-            Pipeline().add(DeduplicationMiddleware(store)).execute(MyCmd("c1"), counting)
-        )
+        asyncio.run(Pipeline().add(DeduplicationMiddleware(store)).execute(MyCmd("c1"), counting))
         assert calls == [1]
 
     def test_completed_command_returns_cached_without_calling_handler(self) -> None:
@@ -750,7 +756,9 @@ class TestDeduplicationMiddleware:
         store = _InMemIdempotencyStore()
         ikey = IdempotencyKey(client_key="c2", operation="MyCmd")
         store._store[str(ikey)] = IdempotencyRecord(
-            key=str(ikey), status="COMPLETED", response=b"cached"  # type: ignore[arg-type]
+            key=str(ikey),
+            status="COMPLETED",
+            response=b"cached",  # type: ignore[arg-type]
         )
 
         called: list[bool] = []
@@ -780,5 +788,7 @@ class TestDeduplicationMiddleware:
 
         with pytest.raises(ConflictError, match="Duplicate command"):
             asyncio.run(
-                Pipeline().add(DeduplicationMiddleware(store)).execute(MyCmd("c3"), identity_handler)
+                Pipeline()
+                .add(DeduplicationMiddleware(store))
+                .execute(MyCmd("c3"), identity_handler)
             )

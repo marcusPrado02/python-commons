@@ -1,4 +1,5 @@
 """SQLAlchemy adapter – SqlAlchemyIdempotencyStore."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -25,10 +26,13 @@ class SqlAlchemyIdempotencyStore(IdempotencyStore):
 
     async def complete(self, key: IdempotencyKey, response: bytes) -> None:
         from sqlalchemy import update  # type: ignore[import-untyped]
+
         if self._model is None:
             raise RuntimeError("IdempotencyModel not configured")
         await self._session.execute(
-            update(self._model).where(self._model.key == str(key)).values(response=response, status="COMPLETED")
+            update(self._model)
+            .where(self._model.key == str(key))
+            .values(response=response, status="COMPLETED")
         )
 
 

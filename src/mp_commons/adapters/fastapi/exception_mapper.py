@@ -1,16 +1,16 @@
 """FastAPI adapter – FastAPIExceptionMapper (§26.4)."""
+
 from __future__ import annotations
 
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 
 def _require_fastapi() -> None:
     try:
         import fastapi  # noqa: F401
     except ImportError as exc:
-        raise ImportError(
-            "Install 'mp-commons[fastapi]' to use the FastAPI adapter"
-        ) from exc
+        raise ImportError("Install 'mp-commons[fastapi]' to use the FastAPI adapter") from exc
 
 
 class FastAPIExceptionMapper:
@@ -67,7 +67,7 @@ class FastAPIExceptionMapper:
         for exc_type, status in self._map:
 
             def make_handler(code: int, etype: type) -> Callable[[Any, Any], Any]:
-                def handler(request: Any, exc: Any) -> Any:  # noqa: ARG001
+                def handler(request: Any, exc: Any) -> Any:
                     from mp_commons.kernel.errors.base import BaseError
                     from mp_commons.observability.correlation import CorrelationContext
 

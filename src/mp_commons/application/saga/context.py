@@ -19,10 +19,10 @@ class SagaContext:
     # dict-like access
     # ------------------------------------------------------------------
 
-    def set(self, key: str, value: Any) -> None:  # noqa: ANN401
+    def set(self, key: str, value: Any) -> None:
         self._data[key] = value
 
-    def get(self, key: str, default: Any = None) -> Any:  # noqa: ANN401
+    def get(self, key: str, default: Any = None) -> Any:
         return self._data.get(key, default)
 
     def __contains__(self, key: str) -> bool:
@@ -40,7 +40,7 @@ class SagaContext:
         return dict(self._data)
 
     @classmethod
-    def from_snapshot(cls, data: dict[str, Any]) -> "SagaContext":
+    def from_snapshot(cls, data: dict[str, Any]) -> SagaContext:
         """Restore a context from a previously taken snapshot."""
         return cls(data)
 

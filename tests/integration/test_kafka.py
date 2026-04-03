@@ -3,6 +3,7 @@
 Uses testcontainers to spawn a real Kafka broker.
 Run with: PYTHONPATH=src pytest tests/integration/test_kafka.py -m integration -v
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -14,10 +15,10 @@ from testcontainers.kafka import KafkaContainer
 from mp_commons.adapters.kafka import KafkaConsumer, KafkaOutboxDispatcher, KafkaProducer
 from mp_commons.kernel.messaging import Message, MessageHeaders, OutboxRecord
 
-
 # ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------
+
 
 def _run(coro):  # type: ignore[no-untyped-def]
     return asyncio.run(coro)
@@ -27,6 +28,7 @@ def _run(coro):  # type: ignore[no-untyped-def]
 # Minimal in-memory OutboxRepository for dispatcher tests
 # ---------------------------------------------------------------------------
 
+
 class _InMemoryOutboxRepo:
     def __init__(self, records: list[OutboxRecord]) -> None:
         self._records = list(records)
@@ -35,10 +37,12 @@ class _InMemoryOutboxRepo:
 
     async def get_pending(self, limit: int = 100) -> list[OutboxRecord]:
         from mp_commons.kernel.messaging import OutboxStatus
+
         return [r for r in self._records if r.status == OutboxStatus.PENDING][:limit]
 
     async def mark_dispatched(self, record_id: str) -> None:
         from mp_commons.kernel.messaging import OutboxStatus
+
         for r in self._records:
             if r.id == record_id:
                 object.__setattr__(r, "status", OutboxStatus.DISPATCHED)
@@ -46,6 +50,7 @@ class _InMemoryOutboxRepo:
 
     async def mark_failed(self, record_id: str, error: str) -> None:
         from mp_commons.kernel.messaging import OutboxStatus
+
         for r in self._records:
             if r.id == record_id:
                 object.__setattr__(r, "status", OutboxStatus.FAILED)
@@ -58,6 +63,7 @@ class _InMemoryOutboxRepo:
 # ---------------------------------------------------------------------------
 # §29.5 – KafkaProducer – basic publish
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.integration
 class TestKafkaProducerIntegration:
@@ -105,6 +111,7 @@ class TestKafkaProducerIntegration:
 # §29.5 – KafkaProducer + KafkaConsumer round-trip
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.integration
 class TestKafkaProduceConsumeIntegration:
     """Real Kafka produce/consume round-trip test."""
@@ -150,6 +157,7 @@ class TestKafkaProduceConsumeIntegration:
 # ---------------------------------------------------------------------------
 # §29.5 – KafkaOutboxDispatcher
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.integration
 class TestKafkaOutboxDispatcherIntegration:

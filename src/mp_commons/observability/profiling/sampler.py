@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-import tracemalloc
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
+import tracemalloc
 from typing import Any
 
 __all__ = [
@@ -34,6 +34,7 @@ class MemoryStat:
 def _require_pyinstrument() -> Any:
     try:
         import pyinstrument
+
         return pyinstrument
     except ImportError:
         raise ImportError(

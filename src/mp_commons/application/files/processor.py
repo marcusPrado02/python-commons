@@ -1,8 +1,9 @@
 """Application files – ImageResizer (optional Pillow extra) and AntivirusScanner."""
+
 from __future__ import annotations
 
-import io
 from dataclasses import dataclass
+import io
 from typing import Any, Protocol, runtime_checkable
 
 __all__ = ["AntivirusScanner", "ImageResizer", "ScanResult"]
@@ -10,12 +11,12 @@ __all__ = ["AntivirusScanner", "ImageResizer", "ScanResult"]
 
 def _require_pillow() -> Any:  # pragma: no cover
     try:
-        from PIL import Image  # noqa: PLC0415
+        from PIL import Image
+
         return Image
     except ImportError as exc:
         raise ImportError(
-            "Pillow is required for ImageResizer. "
-            "Install it with: pip install Pillow"
+            "Pillow is required for ImageResizer. Install it with: pip install Pillow"
         ) from exc
 
 

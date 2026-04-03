@@ -1,12 +1,15 @@
-"""Unit tests for §82 – Observability Structured Events."""
+"""Unit tests for §82 / O-05 – Observability Structured Events."""
+
 import asyncio
 import json
 
 import pytest
 
 from mp_commons.observability.events import (
+    CURRENT_SCHEMA_VERSION,
     ConsoleEventEmitter,
     EventEmitter,
+    SchemaVersionError,
     StructuredEvent,
     instrument,
 )
@@ -79,7 +82,8 @@ class TestInstrumentDecorator:
         assert len(emitter.buffered) == 1
         evt = emitter.buffered[0]
         assert evt.name == "compute"
-        assert evt.duration_ms is not None and evt.duration_ms >= 0
+        assert evt.duration_ms is not None
+        assert evt.duration_ms >= 0
 
     def test_decorator_propagates_exception(self):
         emitter = EventEmitter()
@@ -100,3 +104,66 @@ class TestInstrumentDecorator:
 
         asyncio.run(my_func())
         assert "my_func" in emitter.buffered[0].name
+
+
+class TestStructuredEventSchemaVersion:
+    """O-05 — schema_version field and backward-compatible evolution."""
+
+    def test_default_schema_version_is_current(self):
+        evt = StructuredEvent(name="x", service="y")
+        assert evt.schema_version == CURRENT_SCHEMA_VERSION
+
+    def test_schema_version_in_to_dict(self):
+        evt = StructuredEvent(name="x", service="y")
+        assert evt.to_dict()["schema_version"] == CURRENT_SCHEMA_VERSION
+
+    def test_schema_version_in_json(self):
+        evt = StructuredEvent(name="x", service="y")
+        parsed = json.loads(evt.to_json())
+        assert parsed["schema_version"] == CURRENT_SCHEMA_VERSION
+
+    def test_from_dict_round_trip(self):
+        evt = StructuredEvent(
+            name="order.created",
+            service="orders",
+            trace_id="abc",
+            duration_ms=12.5,
+            fields={"user_id": 42},
+        )
+        restored = StructuredEvent.from_dict(evt.to_dict())
+        assert restored.name == evt.name
+        assert restored.service == evt.service
+        assert restored.trace_id == evt.trace_id
+        assert restored.duration_ms == evt.duration_ms
+        assert restored.fields.get("user_id") == 42
+        assert restored.schema_version == CURRENT_SCHEMA_VERSION
+
+    def test_from_dict_missing_version_defaults_to_1(self):
+        data = {"name": "e", "service": "s", "timestamp": "2024-01-01T00:00:00+00:00"}
+        evt = StructuredEvent.from_dict(data)
+        assert evt.schema_version == 1
+
+    def test_from_dict_rejects_future_version(self):
+        data = {
+            "schema_version": CURRENT_SCHEMA_VERSION + 1,
+            "name": "e",
+            "service": "s",
+            "timestamp": "2024-01-01T00:00:00+00:00",
+        }
+        with pytest.raises(SchemaVersionError):
+            StructuredEvent.from_dict(data)
+
+    def test_schema_version_error_message_mentions_version(self):
+        future = CURRENT_SCHEMA_VERSION + 5
+        data = {
+            "schema_version": future,
+            "name": "e",
+            "service": "s",
+            "timestamp": "2024-01-01T00:00:00+00:00",
+        }
+        with pytest.raises(SchemaVersionError, match=str(future)):
+            StructuredEvent.from_dict(data)
+
+    def test_explicit_schema_version_preserved(self):
+        evt = StructuredEvent(name="x", service="y", schema_version=1)
+        assert evt.schema_version == 1

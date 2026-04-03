@@ -35,9 +35,7 @@ class Repository(abc.ABC, Generic[TAggregate]):
     async def find_all(self) -> list[TAggregate]: ...
 
     @abc.abstractmethod
-    async def find_by(
-        self, spec: "Specification[TAggregate]"
-    ) -> list[TAggregate]: ...
+    async def find_by(self, spec: Specification[TAggregate]) -> list[TAggregate]: ...
 
 
 __all__ = ["Repository"]

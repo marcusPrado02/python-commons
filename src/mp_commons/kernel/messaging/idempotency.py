@@ -1,13 +1,14 @@
 """Kernel messaging – idempotency ports."""
+
 from __future__ import annotations
 
 import abc
 import dataclasses
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 
 
-class DeduplicationPolicy(str, Enum):
+class DeduplicationPolicy(StrEnum):
     """How to handle duplicate requests."""
 
     RETURN_CACHED = "RETURN_CACHED"
@@ -41,13 +42,19 @@ class IdempotencyStore(abc.ABC):
     """Port: store / retrieve idempotency records."""
 
     @abc.abstractmethod
-    async def get(self, key: IdempotencyKey) -> IdempotencyRecord | None: ...
+    async def get(self, key: IdempotencyKey) -> IdempotencyRecord | None:
+        """Return the record for *key* if it exists, otherwise ``None``."""
+        ...
 
     @abc.abstractmethod
-    async def save(self, key: IdempotencyKey, record: IdempotencyRecord) -> None: ...
+    async def save(self, key: IdempotencyKey, record: IdempotencyRecord) -> None:
+        """Persist *record* under *key* for future duplicate detection."""
+        ...
 
     @abc.abstractmethod
-    async def complete(self, key: IdempotencyKey, response: bytes) -> None: ...
+    async def complete(self, key: IdempotencyKey, response: bytes) -> None:
+        """Mark *key* as successfully completed and cache the *response* bytes."""
+        ...
 
 
 __all__ = [

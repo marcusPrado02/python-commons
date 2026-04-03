@@ -1,8 +1,8 @@
 """Application email – InMemoryEmailSender for unit tests."""
+
 from __future__ import annotations
 
 import uuid
-from typing import Any
 
 from mp_commons.application.email.message import EmailMessage
 

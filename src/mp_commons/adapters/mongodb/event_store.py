@@ -73,9 +73,7 @@ class MongoEventStore(EventStore):
             # DuplicateKeyError from a concurrent writer
             if "duplicate key" in str(exc).lower() or "E11000" in str(exc):
                 actual = await self._col.count_documents({"stream_id": stream_id})
-                raise OptimisticConcurrencyError(
-                    stream_id, expected_version, actual
-                ) from None
+                raise OptimisticConcurrencyError(stream_id, expected_version, actual) from None
             raise
 
     async def load(

@@ -3,6 +3,7 @@
 Uses testcontainers to spawn a real PostgreSQL instance.
 Run with: PYTHONPATH=src pytest tests/integration/test_postgres.py -m integration -v
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -16,12 +17,12 @@ from mp_commons.adapters.sqlalchemy import (
     SqlAlchemySessionFactory,
     SqlAlchemyUnitOfWork,
 )
-from mp_commons.kernel.messaging import OutboxRecord, OutboxStatus
-
+from mp_commons.kernel.messaging import OutboxRecord
 
 # ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------
+
 
 def _run(coro):  # type: ignore[no-untyped-def]
     return asyncio.run(coro)
@@ -38,16 +39,17 @@ def _pg_url(container: Any) -> str:
 # Outbox model factory (Core Table approach, no ORM dependency)
 # ---------------------------------------------------------------------------
 
-def _make_outbox_model() -> Any:  # noqa: ANN401
+
+def _make_outbox_model() -> Any:
     """
     Dynamically create a SQLAlchemy ORM model for the outbox table.
     Uses the classic Column approach (no Mapped[] annotations) to avoid
     annotation-resolution issues inside function scope.
     """
     from sqlalchemy import (  # type: ignore[import-untyped]
+        JSON,
         Column,
         DateTime,
-        JSON,
         LargeBinary,
         String,
         Text,
@@ -84,6 +86,7 @@ async def _create_tables(engine: Any, base: Any) -> None:
 # §27.7 – SqlAlchemyUnitOfWork commit / rollback
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.integration
 class TestSqlAlchemyUoWIntegration:
     """Real Postgres UnitOfWork tests."""
@@ -95,7 +98,7 @@ class TestSqlAlchemyUoWIntegration:
             async def run() -> None:
                 factory = SqlAlchemySessionFactory(url)
                 Base, Model = _make_outbox_model()
-                await _create_tables(factory._engine, Base)  # noqa: SLF001
+                await _create_tables(factory._engine, Base)
 
                 record = OutboxRecord(
                     aggregate_id="agg-1",
@@ -116,7 +119,7 @@ class TestSqlAlchemyUoWIntegration:
                     assert len(pending) == 1
                     assert pending[0].aggregate_id == "agg-1"
 
-                await factory._engine.dispose()  # noqa: SLF001
+                await factory._engine.dispose()
 
             _run(run())
 
@@ -127,7 +130,7 @@ class TestSqlAlchemyUoWIntegration:
             async def run() -> None:
                 factory = SqlAlchemySessionFactory(url)
                 Base, Model = _make_outbox_model()
-                await _create_tables(factory._engine, Base)  # noqa: SLF001
+                await _create_tables(factory._engine, Base)
 
                 record = OutboxRecord(
                     aggregate_id="agg-2",
@@ -149,7 +152,7 @@ class TestSqlAlchemyUoWIntegration:
                     pending = await repo2.get_pending()
                     assert len(pending) == 0
 
-                await factory._engine.dispose()  # noqa: SLF001
+                await factory._engine.dispose()
 
             _run(run())
 
@@ -160,7 +163,7 @@ class TestSqlAlchemyUoWIntegration:
             async def run() -> None:
                 factory = SqlAlchemySessionFactory(url)
                 Base, Model = _make_outbox_model()
-                await _create_tables(factory._engine, Base)  # noqa: SLF001
+                await _create_tables(factory._engine, Base)
 
                 for i in range(3):
                     async with SqlAlchemyUnitOfWork(factory) as uow:
@@ -179,7 +182,7 @@ class TestSqlAlchemyUoWIntegration:
                     pending = await repo2.get_pending()
                     assert len(pending) == 3
 
-                await factory._engine.dispose()  # noqa: SLF001
+                await factory._engine.dispose()
 
             _run(run())
 
@@ -187,6 +190,7 @@ class TestSqlAlchemyUoWIntegration:
 # ---------------------------------------------------------------------------
 # §27.7 – SqlAlchemyOutboxRepository lifecycle
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.integration
 class TestSqlAlchemyOutboxRepositoryIntegration:
@@ -199,11 +203,15 @@ class TestSqlAlchemyOutboxRepositoryIntegration:
             async def run() -> None:
                 factory = SqlAlchemySessionFactory(url)
                 Base, Model = _make_outbox_model()
-                await _create_tables(factory._engine, Base)  # noqa: SLF001
+                await _create_tables(factory._engine, Base)
 
                 # Save two records, then dispatch one
-                rec1 = OutboxRecord(aggregate_id="a1", aggregate_type="X", event_type="E", topic="t", payload=b"{}")
-                rec2 = OutboxRecord(aggregate_id="a2", aggregate_type="X", event_type="E", topic="t", payload=b"{}")
+                rec1 = OutboxRecord(
+                    aggregate_id="a1", aggregate_type="X", event_type="E", topic="t", payload=b"{}"
+                )
+                rec2 = OutboxRecord(
+                    aggregate_id="a2", aggregate_type="X", event_type="E", topic="t", payload=b"{}"
+                )
 
                 async with SqlAlchemyUnitOfWork(factory) as uow:
                     repo = SqlAlchemyOutboxRepository(uow.session, Model)
@@ -220,7 +228,7 @@ class TestSqlAlchemyOutboxRepositoryIntegration:
                     assert len(pending) == 1
                     assert pending[0].aggregate_id == "a2"
 
-                await factory._engine.dispose()  # noqa: SLF001
+                await factory._engine.dispose()
 
             _run(run())
 
@@ -231,9 +239,11 @@ class TestSqlAlchemyOutboxRepositoryIntegration:
             async def run() -> None:
                 factory = SqlAlchemySessionFactory(url)
                 Base, Model = _make_outbox_model()
-                await _create_tables(factory._engine, Base)  # noqa: SLF001
+                await _create_tables(factory._engine, Base)
 
-                rec = OutboxRecord(aggregate_id="a3", aggregate_type="X", event_type="E", topic="t", payload=b"{}")
+                rec = OutboxRecord(
+                    aggregate_id="a3", aggregate_type="X", event_type="E", topic="t", payload=b"{}"
+                )
 
                 async with SqlAlchemyUnitOfWork(factory) as uow:
                     repo = SqlAlchemyOutboxRepository(uow.session, Model)
@@ -249,7 +259,7 @@ class TestSqlAlchemyOutboxRepositoryIntegration:
                     pending = await repo.get_pending()
                     assert len(pending) == 0
 
-                await factory._engine.dispose()  # noqa: SLF001
+                await factory._engine.dispose()
 
             _run(run())
 
@@ -260,9 +270,11 @@ class TestSqlAlchemyOutboxRepositoryIntegration:
             async def run() -> None:
                 factory = SqlAlchemySessionFactory(url)
                 Base, Model = _make_outbox_model()
-                await _create_tables(factory._engine, Base)  # noqa: SLF001
+                await _create_tables(factory._engine, Base)
 
-                rec = OutboxRecord(aggregate_id="a4", aggregate_type="X", event_type="E", topic="t", payload=b"{}")
+                rec = OutboxRecord(
+                    aggregate_id="a4", aggregate_type="X", event_type="E", topic="t", payload=b"{}"
+                )
 
                 async with SqlAlchemyUnitOfWork(factory) as uow:
                     repo = SqlAlchemyOutboxRepository(uow.session, Model)
@@ -277,7 +289,7 @@ class TestSqlAlchemyOutboxRepositoryIntegration:
                     pending = await repo.get_pending()
                     assert len(pending) == 0
 
-                await factory._engine.dispose()  # noqa: SLF001
+                await factory._engine.dispose()
 
             _run(run())
 
@@ -288,18 +300,26 @@ class TestSqlAlchemyOutboxRepositoryIntegration:
             async def run() -> None:
                 factory = SqlAlchemySessionFactory(url)
                 Base, Model = _make_outbox_model()
-                await _create_tables(factory._engine, Base)  # noqa: SLF001
+                await _create_tables(factory._engine, Base)
 
                 async with SqlAlchemyUnitOfWork(factory) as uow:
                     repo = SqlAlchemyOutboxRepository(uow.session, Model)
                     for i in range(5):
-                        await repo.save(OutboxRecord(aggregate_id=f"a{i}", aggregate_type="X", event_type="E", topic="t", payload=b"{}"))
+                        await repo.save(
+                            OutboxRecord(
+                                aggregate_id=f"a{i}",
+                                aggregate_type="X",
+                                event_type="E",
+                                topic="t",
+                                payload=b"{}",
+                            )
+                        )
 
                 async with SqlAlchemyUnitOfWork(factory) as uow:
                     repo = SqlAlchemyOutboxRepository(uow.session, Model)
                     pending = await repo.get_pending(limit=3)
                     assert len(pending) == 3
 
-                await factory._engine.dispose()  # noqa: SLF001
+                await factory._engine.dispose()
 
             _run(run())

@@ -10,25 +10,18 @@ import pytest
 from mp_commons.kernel.messaging import (
     DeadLetterEntry,
     DeadLetterStore,
-    DeduplicationPolicy,
-    IdempotencyKey,
-    IdempotencyRecord,
-    IdempotencyStore,
     InboxRecord,
     InboxRepository,
     InboxStatus,
     InboxStore,
-    Message,
     MessageEnvelope,
     MessageHeaders,
-    OutboxDispatcher,
     OutboxRecord,
     OutboxRepository,
     OutboxStatus,
     ScheduledMessage,
     ScheduledMessageStore,
 )
-
 
 # ---------------------------------------------------------------------------
 # OutboxRecord lifecycle (5.2)
@@ -59,10 +52,7 @@ class InMemoryOutboxRepository(OutboxRepository):
         self._records[record.id] = record
 
     async def get_pending(self, limit: int = 100) -> list[OutboxRecord]:
-        return [
-            r for r in self._records.values()
-            if r.status == OutboxStatus.PENDING
-        ][:limit]
+        return [r for r in self._records.values() if r.status == OutboxStatus.PENDING][:limit]
 
     async def mark_dispatched(self, record_id: str) -> None:
         self._records[record_id].status = OutboxStatus.DISPATCHED

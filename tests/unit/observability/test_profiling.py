@@ -1,4 +1,5 @@
 """Unit tests for §83 – Observability Profiling."""
+
 import pytest
 
 from mp_commons.observability.profiling import (

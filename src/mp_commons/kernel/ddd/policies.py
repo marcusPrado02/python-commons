@@ -13,6 +13,7 @@ Example::
         def evaluate(self, ctx: User) -> PolicyResult:
             return PolicyResult(ctx.age >= 18, reason="must be adult")
 
+
     policy = AllOf(AgePolicy(), VerifiedEmailPolicy())
     result = policy.evaluate(user)
     if not result.allowed:
@@ -23,7 +24,7 @@ from __future__ import annotations
 
 import abc
 import dataclasses
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Generic, TypeVar
 
 TContext = TypeVar("TContext")
@@ -49,11 +50,11 @@ class PolicyResult:
     # Convenience factories -----------------------------------------------
 
     @classmethod
-    def permit(cls, reason: str | None = None) -> "PolicyResult":
+    def permit(cls, reason: str | None = None) -> PolicyResult:
         return cls(allowed=True, reason=reason)
 
     @classmethod
-    def deny(cls, reason: str = "denied") -> "PolicyResult":
+    def deny(cls, reason: str = "denied") -> PolicyResult:
         return cls(allowed=False, reason=reason)
 
     def __bool__(self) -> bool:  # allows ``if policy.evaluate(ctx):``
@@ -123,9 +124,7 @@ class NoneOf(Policy[TContext]):
         for p in self._policies:
             result = p.evaluate(context)
             if result.allowed:
-                return PolicyResult.deny(
-                    f"policy was allowed but NoneOf forbids: {result.reason}"
-                )
+                return PolicyResult.deny(f"policy was allowed but NoneOf forbids: {result.reason}")
         return PolicyResult.permit()
 
 
@@ -173,6 +172,53 @@ class ExpiryPolicy(Policy[_TimestampedContext]):
         return PolicyResult.permit()
 
 
+# ---------------------------------------------------------------------------
+# §59.4 – QuotaPolicy
+# ---------------------------------------------------------------------------
+
+
+class QuotaPolicy(Policy["_RateLimitResult"]):
+    """Evaluates whether a :class:`~mp_commons.application.rate_limit.RateLimitResult`
+    reports remaining capacity.
+
+    Delegates the decision to the ``RateLimitResult`` already obtained from a
+    :class:`~mp_commons.application.rate_limit.RateLimiter`.  The async
+    ``RateLimiter.check()`` call must be performed by the calling layer; the
+    result is then handed to ``evaluate`` as the *context*.
+
+    Example::
+
+        result = await rate_limiter.check(quota, user_id)
+        policy_result = QuotaPolicy().evaluate(result)
+        if not policy_result:
+            raise QuotaExceededError(policy_result.reason)
+    """
+
+    def evaluate(self, context: _RateLimitResult) -> PolicyResult:  # type: ignore[override]
+        if context.allowed:
+            return PolicyResult.permit(
+                f"quota has {context.remaining} request(s) remaining "
+                f"(window: {context.quota.window_label})"
+            )
+        retry = context.retry_after_seconds
+        return PolicyResult.deny(
+            f"quota exceeded for '{context.quota.key}'; "
+            f"retry after {retry:.0f}s (limit: {context.quota.window_label})"
+        )
+
+
+# ---------------------------------------------------------------------------
+# Local type alias (avoid circular import — RateLimitResult imported lazily)
+# ---------------------------------------------------------------------------
+
+try:
+    from mp_commons.application.rate_limit.rate_limiter import (
+        RateLimitResult as _RateLimitResult,
+    )
+except ImportError:  # pragma: no cover  — library not installed in minimal envs
+    _RateLimitResult = object  # type: ignore[assignment,misc]
+
+
 __all__ = [
     "AllOf",
     "AnyOf",
@@ -180,4 +226,5 @@ __all__ = [
     "NoneOf",
     "Policy",
     "PolicyResult",
+    "QuotaPolicy",
 ]

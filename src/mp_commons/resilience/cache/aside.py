@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Awaitable, Callable
 import functools
-from typing import Any, Awaitable, Callable, Generic, Protocol, TypeVar
+from typing import Any, Generic, Protocol, TypeVar
 
 __all__ = [
     "CacheAsidePolicy",
@@ -70,7 +71,7 @@ def cache_aside(
 
     def decorator(fn: Callable[..., Awaitable[T]]) -> Callable[..., Awaitable[T]]:
         _store = _AdapterCache(cache if cache is not None else InMemoryTaggedCacheStore())
-        policy = CacheAsidePolicy(_store, ttl=ttl, key_fn=key_fn)
+        policy = CacheAsidePolicy(_store, ttl=ttl, key_fn=key_fn)  # type: ignore[var-annotated]
 
         @functools.wraps(fn)
         async def wrapper(*args: Any, **kwargs: Any) -> T:

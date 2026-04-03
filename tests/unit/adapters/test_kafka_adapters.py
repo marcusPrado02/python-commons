@@ -1,23 +1,24 @@
 """Unit tests for Kafka adapter – §29.1–29.4 (mocked, no aiokafka required)."""
+
 from __future__ import annotations
 
 import asyncio
 import json
-from unittest.mock import AsyncMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from mp_commons.adapters.kafka.serializer import KafkaMessageSerializer
-from mp_commons.adapters.kafka.producer import KafkaProducer
 from mp_commons.adapters.kafka.consumer import KafkaConsumer
 from mp_commons.adapters.kafka.outbox_dispatcher import KafkaOutboxDispatcher
+from mp_commons.adapters.kafka.producer import KafkaProducer
+from mp_commons.adapters.kafka.serializer import KafkaMessageSerializer
 from mp_commons.kernel.messaging import Message, MessageHeaders
 from mp_commons.kernel.messaging.outbox import OutboxRecord
-
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _mock_aiokafka_producer():
     """Return (mock_module, mock_producer_instance)."""
@@ -57,6 +58,7 @@ def _make_consumer(topics: list[str] | None = None) -> tuple[KafkaConsumer, Magi
 # ===========================================================================
 # §29.3 – KafkaMessageSerializer
 # ===========================================================================
+
 
 class TestKafkaMessageSerializer:
     def test_serialize_dict_returns_bytes(self):
@@ -106,14 +108,17 @@ class TestKafkaMessageSerializer:
 # §29.1 – KafkaProducer
 # ===========================================================================
 
+
 class TestKafkaProducerImportError:
     def test_raises_import_error_without_lib(self):
-        with patch(
-            "mp_commons.adapters.kafka.producer._require_aiokafka",
-            side_effect=ImportError("mp-commons[kafka]"),
+        with (
+            patch(
+                "mp_commons.adapters.kafka.producer._require_aiokafka",
+                side_effect=ImportError("mp-commons[kafka]"),
+            ),
+            pytest.raises(ImportError, match="kafka"),
         ):
-            with pytest.raises(ImportError, match="kafka"):
-                KafkaProducer("localhost:9092")
+            KafkaProducer("localhost:9092")
 
 
 class TestKafkaProducer:
@@ -220,14 +225,17 @@ class TestKafkaProducer:
 # §29.2 – KafkaConsumer
 # ===========================================================================
 
+
 class TestKafkaConsumerImportError:
     def test_raises_import_error_without_lib(self):
-        with patch(
-            "mp_commons.adapters.kafka.consumer._require_aiokafka",
-            side_effect=ImportError("mp-commons[kafka]"),
+        with (
+            patch(
+                "mp_commons.adapters.kafka.consumer._require_aiokafka",
+                side_effect=ImportError("mp-commons[kafka]"),
+            ),
+            pytest.raises(ImportError, match="kafka"),
         ):
-            with pytest.raises(ImportError, match="kafka"):
-                KafkaConsumer("localhost:9092", group_id="g1", topics=["t1"])
+            KafkaConsumer("localhost:9092", group_id="g1", topics=["t1"])
 
 
 class TestKafkaConsumer:
@@ -253,7 +261,7 @@ class TestKafkaConsumer:
         mock_cons.stop.assert_called_once()
 
     def test_subscribers_for_multiple_topics(self):
-        mock_ak, mock_cons = _mock_aiokafka_consumer()
+        mock_ak, _mock_cons = _mock_aiokafka_consumer()
         with patch("mp_commons.adapters.kafka.consumer._require_aiokafka", return_value=mock_ak):
             KafkaConsumer("localhost:9092", group_id="g", topics=["t1", "t2", "t3"])
         # AIOKafkaConsumer(*topics, ...) – topics passed as positional args
@@ -273,6 +281,7 @@ class TestKafkaConsumer:
 # ===========================================================================
 # §29.4 – KafkaOutboxDispatcher
 # ===========================================================================
+
 
 def _make_dispatcher(records: list[OutboxRecord]):
     mock_ak, mock_prod = _mock_aiokafka_producer()

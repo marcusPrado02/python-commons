@@ -7,8 +7,8 @@ from datetime import UTC, datetime, timedelta
 from mp_commons.application.rate_limit.rate_limiter import (
     Quota,
     RateLimitDecision,
-    RateLimitResult,
     RateLimiter,
+    RateLimitResult,
 )
 
 

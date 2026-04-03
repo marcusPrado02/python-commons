@@ -164,7 +164,7 @@ class TestInfrastructureErrors:
         assert err.code == "infrastructure_timeout"
 
     def test_cause_chaining_across_hierarchy(self) -> None:
-        root = IOError("disk full")
+        root = OSError("disk full")
         infra = InfrastructureError("storage failed", cause=root)
         domain = DomainError("order save failed", cause=infra)
         assert domain.__cause__ is infra

@@ -1,4 +1,5 @@
 """Observability – NoopMetrics implementation."""
+
 from __future__ import annotations
 
 from mp_commons.observability.metrics.ports import Counter, Gauge, Histogram, Metrics
@@ -31,7 +32,13 @@ class NoopMetrics(Metrics):
     def counter(self, name: str, description: str = "", unit: str = "") -> Counter:
         return _NoopCounter()
 
-    def histogram(self, name: str, description: str = "", unit: str = "ms", boundaries: list[float] | None = None) -> Histogram:
+    def histogram(
+        self,
+        name: str,
+        description: str = "",
+        unit: str = "ms",
+        boundaries: list[float] | None = None,
+    ) -> Histogram:
         return _NoopHistogram()
 
     def gauge(self, name: str, description: str = "", unit: str = "") -> Gauge:

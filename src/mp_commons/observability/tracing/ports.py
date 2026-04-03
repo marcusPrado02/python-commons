@@ -1,13 +1,15 @@
 """Observability – Tracer, Span, SpanKind, TracePropagator ports."""
+
 from __future__ import annotations
 
 import abc
+from collections.abc import AsyncIterator, Iterator
 import contextlib
-from enum import Enum
-from typing import Any, AsyncIterator, Iterator, Protocol
+from enum import StrEnum
+from typing import Any, Protocol
 
 
-class SpanKind(str, Enum):
+class SpanKind(StrEnum):
     INTERNAL = "INTERNAL"
     SERVER = "SERVER"
     CLIENT = "CLIENT"
@@ -30,7 +32,7 @@ class Span(abc.ABC):
     @abc.abstractmethod
     def end(self) -> None: ...
 
-    def __enter__(self) -> "Span":
+    def __enter__(self) -> Span:
         return self
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
@@ -46,11 +48,21 @@ class Tracer(abc.ABC):
 
     @abc.abstractmethod
     @contextlib.contextmanager
-    def start_span(self, name: str, kind: SpanKind = SpanKind.INTERNAL, attributes: dict[str, Any] | None = None) -> Iterator[Span]: ...
+    def start_span(
+        self,
+        name: str,
+        kind: SpanKind = SpanKind.INTERNAL,
+        attributes: dict[str, Any] | None = None,
+    ) -> Iterator[Span]: ...
 
     @abc.abstractmethod
-    @contextlib.asynccontextmanager
-    async def start_async_span(self, name: str, kind: SpanKind = SpanKind.INTERNAL, attributes: dict[str, Any] | None = None) -> AsyncIterator[Span]: ...
+    @contextlib.asynccontextmanager  # type: ignore[arg-type]
+    async def start_async_span(
+        self,
+        name: str,
+        kind: SpanKind = SpanKind.INTERNAL,
+        attributes: dict[str, Any] | None = None,
+    ) -> AsyncIterator[Span]: ...
 
 
 class TracePropagator(Protocol):

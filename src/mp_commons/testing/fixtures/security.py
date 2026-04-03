@@ -1,4 +1,5 @@
 """Testing fixtures – fake_policy_engine."""
+
 from __future__ import annotations
 
 try:
@@ -7,6 +8,7 @@ try:
     @pytest.fixture
     def fake_policy_engine():
         from mp_commons.testing.fakes import FakePolicyEngine
+
         return FakePolicyEngine()
 
 except ImportError:

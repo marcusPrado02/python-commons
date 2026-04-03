@@ -1,14 +1,7 @@
 """Kernel value-object types — public re-export surface.
 
-Modules:
-  ids.py    — EntityId, TenantId, CorrelationId, TraceId, UserId
-  uid.py    — ULID, UUIDv7
-  money.py  — Money
-  email.py  — Email
-  phone.py  — PhoneNumber
-  slug.py   — Slug
-  result.py — Ok, Err, Result
-  option.py — Some, Nothing, Option
+Provides EntityId, TenantId, CorrelationId, TraceId, UserId, ULID, UUIDv7,
+Money, Email, PhoneNumber, Slug, Ok, Err, Result, Some, Nothing, Option.
 """
 
 from mp_commons.kernel.types.email import Email
@@ -24,9 +17,11 @@ from mp_commons.kernel.types.option import Nothing, Option, Some
 from mp_commons.kernel.types.phone import PhoneNumber
 from mp_commons.kernel.types.result import Err, Ok, Result
 from mp_commons.kernel.types.slug import Slug
-from mp_commons.kernel.types.uid import ULID, UID, UUIDv7
+from mp_commons.kernel.types.uid import UID, ULID, UUIDv7
 
 __all__ = [
+    "UID",
+    "ULID",
     "CorrelationId",
     "Email",
     "EntityId",
@@ -41,8 +36,6 @@ __all__ = [
     "Some",
     "TenantId",
     "TraceId",
-    "UID",
-    "ULID",
     "UUIDv7",
     "UserId",
 ]

@@ -1,17 +1,21 @@
 """HTTP adapter – RetryingHttpClient."""
+
 from __future__ import annotations
 
 from typing import Any
 
-from mp_commons.kernel.errors import ExternalServiceError, TimeoutError as AppTimeoutError
-from mp_commons.resilience.retry import ExponentialBackoff, FullJitter, RetryPolicy
 from mp_commons.adapters.http.client import HttpxHttpClient
+from mp_commons.kernel.errors import ExternalServiceError
+from mp_commons.kernel.errors import TimeoutError as AppTimeoutError
+from mp_commons.resilience.retry import ExponentialBackoff, FullJitter, RetryPolicy
 
 
 class RetryingHttpClient(HttpxHttpClient):
     """HTTP client with automatic retry on transient failures."""
 
-    def __init__(self, base_url: str = "", timeout: float = 10.0, max_attempts: int = 3, **kwargs: Any) -> None:
+    def __init__(
+        self, base_url: str = "", timeout: float = 10.0, max_attempts: int = 3, **kwargs: Any
+    ) -> None:
         super().__init__(base_url, timeout, **kwargs)
         self._retry = RetryPolicy(
             max_attempts=max_attempts,

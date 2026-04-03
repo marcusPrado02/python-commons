@@ -9,7 +9,6 @@ import pytest
 
 from mp_commons.testing.chaos import FailureInjector, LatencyInjector, ToxiproxyHarness
 
-
 # ---------------------------------------------------------------------------
 # §39.1  LatencyInjector
 # ---------------------------------------------------------------------------
@@ -161,14 +160,17 @@ class TestToxiproxyHarness:
     def test_latency_is_async_context_manager(self) -> None:
         harness = ToxiproxyHarness()
         cm = harness.latency("my-proxy")
-        assert hasattr(cm, "__aenter__") and hasattr(cm, "__aexit__")
+        assert hasattr(cm, "__aenter__")
+        assert hasattr(cm, "__aexit__")
 
     def test_bandwidth_is_async_context_manager(self) -> None:
         harness = ToxiproxyHarness()
         cm = harness.bandwidth("my-proxy")
-        assert hasattr(cm, "__aenter__") and hasattr(cm, "__aexit__")
+        assert hasattr(cm, "__aenter__")
+        assert hasattr(cm, "__aexit__")
 
     def test_timeout_is_async_context_manager(self) -> None:
         harness = ToxiproxyHarness()
         cm = harness.timeout("my-proxy")
-        assert hasattr(cm, "__aenter__") and hasattr(cm, "__aexit__")
+        assert hasattr(cm, "__aenter__")
+        assert hasattr(cm, "__aexit__")

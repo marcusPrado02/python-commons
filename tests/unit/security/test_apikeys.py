@@ -1,8 +1,6 @@
 """Unit tests for §85 – API Keys."""
-import asyncio
-from datetime import datetime, timezone
 
-import pytest
+import asyncio
 
 from mp_commons.security.apikeys import (
     ApiKey,
@@ -38,18 +36,18 @@ class TestApiKeyGenerator:
 
     def test_key_not_expired_by_default(self):
         _, gen = make_store_and_gen()
-        raw, api_key = gen.generate("user-1")
+        _raw, api_key = gen.generate("user-1")
         assert not api_key.is_expired()
 
     def test_key_with_ttl(self):
         _, gen = make_store_and_gen()
-        raw, api_key = gen.generate("user-1", ttl_days=30)
+        _raw, api_key = gen.generate("user-1", ttl_days=30)
         assert api_key.expires_at is not None
         assert not api_key.is_expired()
 
     def test_scopes_stored(self):
         _, gen = make_store_and_gen()
-        raw, api_key = gen.generate("user-1", scopes=["read", "write"])
+        _raw, api_key = gen.generate("user-1", scopes=["read", "write"])
         assert "read" in api_key.scopes
         assert "write" in api_key.scopes
 
@@ -78,7 +76,7 @@ class TestApiKeyVerifier:
         assert result is None
 
     def test_verify_nonexistent_key_id_returns_none(self):
-        store, gen = make_store_and_gen()
+        store, _gen = make_store_and_gen()
         verifier = ApiKeyVerifier(store)
         result = asyncio.run(verifier.verify("XYZXYZXZ_not_there"))
         assert result is None

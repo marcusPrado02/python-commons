@@ -1,4 +1,5 @@
 """Testing fakes – FakePolicyEngine."""
+
 from __future__ import annotations
 
 from mp_commons.kernel.security import PolicyContext, PolicyDecision, PolicyEngine

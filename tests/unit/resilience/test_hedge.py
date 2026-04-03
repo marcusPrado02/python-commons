@@ -1,4 +1,5 @@
 """Unit tests for §75 – Hedge Policy."""
+
 import asyncio
 
 import pytest
@@ -18,6 +19,7 @@ class TestHedgePolicy:
 
     def test_winner_is_fastest(self):
         """Original always succeeds so winner_index should be 0."""
+
         async def fn():
             return "ok"
 

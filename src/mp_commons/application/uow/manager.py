@@ -1,4 +1,5 @@
 """Application UoW – TransactionManager port."""
+
 from __future__ import annotations
 
 import abc

@@ -4,12 +4,11 @@ A non-blocking :class:`logging.Handler` backed by :class:`asyncio.Queue`.
 Log records are placed in the queue without blocking the caller;
 a background task drains the queue and forwards records to a delegate handler.
 """
+
 from __future__ import annotations
 
 import asyncio
 import logging
-import threading
-from typing import Any
 
 
 class AsyncLogHandler(logging.Handler):
@@ -75,7 +74,7 @@ class AsyncLogHandler(logging.Handler):
         """Signal the drain task to stop, then close."""
         try:
             self._queue.put_nowait(None)  # sentinel
-        except Exception:  # noqa: BLE001
+        except Exception:
             pass
         super().close()
 
@@ -105,7 +104,7 @@ class AsyncLogHandler(logging.Handler):
         """
         try:
             await asyncio.wait_for(self._queue.join(), timeout=timeout)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             pass
         self.close()
         if self._task is not None:

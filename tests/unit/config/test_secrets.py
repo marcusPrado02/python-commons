@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 import pathlib
-import tempfile
 
 import pytest
 
@@ -13,7 +12,6 @@ from mp_commons.config.secrets import (
     SecretRef,
     SecretStore,
 )
-
 
 # ---------------------------------------------------------------------------
 # §24.1  SecretRef dataclass
@@ -72,7 +70,7 @@ class TestKubernetesSecretStore:
         assert result == "value"
 
     def test_get_missing_key_raises(self, tmp_path: pathlib.Path) -> None:
-        store, base = self._make_store(tmp_path)
+        store, _base = self._make_store(tmp_path)
         (tmp_path / "app").mkdir()
         with pytest.raises(FileNotFoundError):
             asyncio.run(store.get(SecretRef(path="app", key="missing-key")))
@@ -85,7 +83,7 @@ class TestKubernetesSecretStore:
         assert result == {"alpha": "AAA", "beta": "BBB"}
 
     def test_get_all_empty_dir(self, tmp_path: pathlib.Path) -> None:
-        store, base = self._make_store(tmp_path)
+        store, _base = self._make_store(tmp_path)
         (tmp_path / "empty-bundle").mkdir()
         result = asyncio.run(store.get_all("empty-bundle"))
         assert result == {}

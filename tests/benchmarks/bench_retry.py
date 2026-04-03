@@ -11,12 +11,7 @@ Goal: quantify the bookkeeping overhead of the retry wrapper itself.
 
 from __future__ import annotations
 
-import asyncio
-
-import pytest
-
 from mp_commons.resilience.retry import RetryPolicy
-
 
 # ---------------------------------------------------------------------------
 # Shared coroutine factories

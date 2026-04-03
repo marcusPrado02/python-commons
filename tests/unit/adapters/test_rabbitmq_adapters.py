@@ -1,4 +1,5 @@
 """Unit tests for RabbitMQ adapter – §31.1–31.2 (mocked, no aio-pika required)."""
+
 from __future__ import annotations
 
 import asyncio
@@ -9,14 +10,14 @@ import pytest
 
 from mp_commons.adapters.rabbitmq.bus import RabbitMQMessageBus
 from mp_commons.kernel.messaging import Message, MessageHeaders
-from mp_commons.resilience.retry.policy import RetryPolicy
 from mp_commons.resilience.retry.backoff import ConstantBackoff
 from mp_commons.resilience.retry.jitter import NoJitter
-
+from mp_commons.resilience.retry.policy import RetryPolicy
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _make_mock_aio_pika():
     mock_exchange = MagicMock()
@@ -41,19 +42,23 @@ def _make_mock_aio_pika():
 # Import guard
 # ===========================================================================
 
+
 class TestRabbitMQImportError:
     def test_raises_import_error_without_lib(self):
-        with patch(
-            "mp_commons.adapters.rabbitmq.bus._require_aio_pika",
-            side_effect=ImportError("mp-commons[rabbitmq]"),
+        with (
+            patch(
+                "mp_commons.adapters.rabbitmq.bus._require_aio_pika",
+                side_effect=ImportError("mp-commons[rabbitmq]"),
+            ),
+            pytest.raises(ImportError, match="rabbitmq"),
         ):
-            with pytest.raises(ImportError, match="rabbitmq"):
-                RabbitMQMessageBus()
+            RabbitMQMessageBus()
 
 
 # ===========================================================================
 # §31.1 – RabbitMQMessageBus core
 # ===========================================================================
+
 
 class TestRabbitMQMessageBusConnect:
     def setup_method(self):
@@ -95,6 +100,7 @@ class TestRabbitMQMessageBusConnect:
         async def run():
             async with self.bus:
                 pass
+
         asyncio.run(run())
         self.mock_ap.connect_robust.assert_called_once()
         self.mock_conn.close.assert_called_once()
@@ -159,12 +165,14 @@ class TestRabbitMQMessageBusPublish:
 
     def test_implements_message_bus_interface(self):
         from mp_commons.kernel.messaging import MessageBus
+
         assert issubclass(RabbitMQMessageBus, MessageBus)
 
 
 # ===========================================================================
 # §31.2 – Connection retry with RetryPolicy
 # ===========================================================================
+
 
 class TestRabbitMQRetryPolicy:
     def test_connect_with_retry_policy_retries_on_failure(self):

@@ -1,14 +1,13 @@
 """Unit tests for Builder[T] generic base (§38.5)."""
+
 from __future__ import annotations
 
-import copy
 import dataclasses
 from typing import Any
 
 import pytest
 
 from mp_commons.testing.generators.builder import Builder, DataclassBuilder
-
 
 # ---------------------------------------------------------------------------
 # Test domain objects
@@ -164,16 +163,19 @@ class TestDataclassBuilder:
 
     def test_call_convenience(self) -> None:
         p = PointBuilder()(x=5.0, y=6.0)
-        assert p.x == 5.0 and p.y == 6.0
+        assert p.x == 5.0
+        assert p.y == 6.0
 
     def test_exported_from_generators_package(self) -> None:
-        from mp_commons.testing.generators import Builder as B, DataclassBuilder as DCB
+        from mp_commons.testing.generators import Builder as B
+        from mp_commons.testing.generators import DataclassBuilder as DCB
 
         assert B is Builder
         assert DCB is DataclassBuilder
 
     def test_exported_from_testing_package(self) -> None:
-        from mp_commons.testing import Builder as B, DataclassBuilder as DCB
+        from mp_commons.testing import Builder as B
+        from mp_commons.testing import DataclassBuilder as DCB
 
         assert B is Builder
         assert DCB is DataclassBuilder

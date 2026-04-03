@@ -1,4 +1,5 @@
 """SQLAlchemy adapter – SqlAlchemyUnitOfWork."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -13,7 +14,7 @@ class SqlAlchemyUnitOfWork(UnitOfWork):
         self._factory = session_factory
         self.session: Any = None
 
-    async def __aenter__(self) -> "SqlAlchemyUnitOfWork":
+    async def __aenter__(self) -> SqlAlchemyUnitOfWork:
         self.session = self._factory()
         return self
 

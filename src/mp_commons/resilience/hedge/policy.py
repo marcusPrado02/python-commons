@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import asyncio
-import time
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import Any, Awaitable, Callable, Generic, TypeVar
+import time
+from typing import Any, Generic, TypeVar
 
 __all__ = [
     "HedgePolicy",
@@ -16,7 +17,7 @@ T = TypeVar("T")
 @dataclass
 class HedgeResult(Generic[T]):
     value: T
-    winner_index: int   # 0 = original, 1..N = hedge index
+    winner_index: int  # 0 = original, 1..N = hedge index
     latency_ms: float
 
 
@@ -41,7 +42,7 @@ class HedgePolicy(Generic[T]):
             try:
                 result = await fn()
                 await queue.put((index, result, None))
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 await queue.put((index, None, exc))
 
         total = 1 + self.max_hedges

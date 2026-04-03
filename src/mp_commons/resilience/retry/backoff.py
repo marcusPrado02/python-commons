@@ -1,4 +1,5 @@
 """Resilience – backoff strategies."""
+
 from __future__ import annotations
 
 import abc
@@ -17,7 +18,7 @@ class ConstantBackoff(BackoffStrategy):
     def __init__(self, delay: float = 1.0) -> None:
         self._delay = delay
 
-    def compute(self, attempt: int) -> float:  # noqa: ARG002
+    def compute(self, attempt: int) -> float:
         return self._delay
 
 
@@ -40,7 +41,7 @@ class ExponentialBackoff(BackoffStrategy):
         self._max = max_delay
 
     def compute(self, attempt: int) -> float:
-        return min(self._base * (2 ** attempt), self._max)
+        return min(self._base * (2**attempt), self._max)
 
 
 __all__ = ["BackoffStrategy", "ConstantBackoff", "ExponentialBackoff", "LinearBackoff"]

@@ -1,13 +1,19 @@
 from __future__ import annotations
 
-import hashlib
-import os
-import secrets
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
-from typing import Protocol
+from datetime import UTC, datetime, timedelta
+import secrets
+from typing import Any, Protocol
 
-import bcrypt
+
+def _require_bcrypt() -> Any:
+    try:
+        import bcrypt  # type: ignore[import-untyped]
+
+        return bcrypt
+    except ImportError as exc:
+        raise ImportError("Install 'bcrypt' to use the API key security module") from exc
+
 
 __all__ = [
     "ApiKey",
@@ -24,8 +30,8 @@ _PREFIX_LEN = 8
 class ApiKey:
     """Stored API key record — never stores the raw key."""
 
-    key_id: str            # public prefix shown to user for identification
-    key_hash: bytes        # bcrypt hash of full key
+    key_id: str  # public prefix shown to user for identification
+    key_hash: bytes  # bcrypt hash of full key
     principal_id: str
     scopes: frozenset[str] = field(default_factory=frozenset)
     expires_at: datetime | None = None
@@ -34,7 +40,7 @@ class ApiKey:
     def is_expired(self) -> bool:
         if self.expires_at is None:
             return False
-        return datetime.now(timezone.utc) >= self.expires_at
+        return datetime.now(UTC) >= self.expires_at
 
     def is_valid(self) -> bool:
         return not self.revoked and not self.is_expired()
@@ -76,12 +82,9 @@ class ApiKeyGenerator:
     ) -> tuple[str, ApiKey]:
         raw_key = secrets.token_urlsafe(32)
         key_id = raw_key[:_PREFIX_LEN]
-        key_hash = bcrypt.hashpw(raw_key.encode(), bcrypt.gensalt(rounds=self._rounds))
-        expires_at = (
-            datetime.now(timezone.utc) + timedelta(days=ttl_days)
-            if ttl_days is not None
-            else None
-        )
+        _bcrypt = _require_bcrypt()
+        key_hash = _bcrypt.hashpw(raw_key.encode(), _bcrypt.gensalt(rounds=self._rounds))
+        expires_at = datetime.now(UTC) + timedelta(days=ttl_days) if ttl_days is not None else None
         record = ApiKey(
             key_id=key_id,
             key_hash=key_hash,
@@ -105,6 +108,6 @@ class ApiKeyVerifier:
         record = await self._store.find_by_id(key_id)
         if record is None or not record.is_valid():
             return None
-        if bcrypt.checkpw(raw_key.encode(), record.key_hash):
+        if _require_bcrypt().checkpw(raw_key.encode(), record.key_hash):
             return record
         return None

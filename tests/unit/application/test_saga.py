@@ -19,7 +19,6 @@ from mp_commons.application.saga import (
     SagaStore,
 )
 
-
 # ---------------------------------------------------------------------------
 # Helpers — concrete step implementations
 # ---------------------------------------------------------------------------
@@ -234,19 +233,27 @@ class TestSagaOrchestratorHappyPath:
 
     def test_steps_share_context(self) -> None:
         """Later steps can read data written by earlier steps."""
+
         class WriterStep(SagaStep):
             @property
-            def name(self) -> str: return "writer"
+            def name(self) -> str:
+                return "writer"
+
             async def action(self, ctx: SagaContext) -> None:
                 ctx.set("shared_value", 42)
+
             async def compensate(self, ctx: SagaContext) -> None: ...
 
         class ReaderStep(SagaStep):
             read_value: int | None = None
+
             @property
-            def name(self) -> str: return "reader"
+            def name(self) -> str:
+                return "reader"
+
             async def action(self, ctx: SagaContext) -> None:
                 ReaderStep.read_value = ctx.get("shared_value")
+
             async def compensate(self, ctx: SagaContext) -> None: ...
 
         asyncio.run(SagaOrchestrator([WriterStep(), ReaderStep()]).run("saga-3"))
@@ -262,16 +269,17 @@ class TestSagaOrchestratorHappyPath:
 
         class ReadInitialStep(SagaStep):
             @property
-            def name(self) -> str: return "read-initial"
+            def name(self) -> str:
+                return "read-initial"
+
             async def action(self, ctx: SagaContext) -> None:
                 nonlocal initial_value
                 initial_value = ctx.get("order_id")
+
             async def compensate(self, ctx: SagaContext) -> None: ...
 
         asyncio.run(
-            SagaOrchestrator([ReadInitialStep()]).run(
-                "saga-5", initial={"order_id": "order-99"}
-            )
+            SagaOrchestrator([ReadInitialStep()]).run("saga-5", initial={"order_id": "order-99"})
         )
         assert initial_value == "order-99"
 
@@ -321,7 +329,8 @@ class TestSagaOrchestratorFailure:
                 self._fail = fail
 
             @property
-            def name(self) -> str: return self._n
+            def name(self) -> str:
+                return self._n
 
             async def action(self, ctx: SagaContext) -> None:
                 if self._fail:
@@ -381,9 +390,7 @@ class TestSagaOrchestratorFailure:
         step_b.fail_action(RuntimeError())
 
         with pytest.raises(SagaFailedError):
-            asyncio.run(
-                SagaOrchestrator([step_a, step_b], store=SpyStore()).run("saga-12")
-            )
+            asyncio.run(SagaOrchestrator([step_a, step_b], store=SpyStore()).run("saga-12"))
 
         assert SagaState.COMPENSATING in stored_states
         assert SagaState.FAILED in stored_states
@@ -412,9 +419,7 @@ class TestSagaOrchestratorFailure:
         step_b.fail_action(RuntimeError("action fail"))
 
         with pytest.raises(SagaCompensationFailedError):
-            asyncio.run(
-                SagaOrchestrator([step_a, step_b], store=store).run("saga-14")
-            )
+            asyncio.run(SagaOrchestrator([step_a, step_b], store=store).run("saga-14"))
         record = asyncio.run(store.load("saga-14"))
         assert record is not None
         assert record.state == SagaState.COMPENSATION_FAILED
@@ -451,6 +456,7 @@ class TestSagaInit:
             SagaStep,
             SagaStore,
         )
+
         for obj in (
             InMemorySagaStore,
             SagaCompensationFailedError,

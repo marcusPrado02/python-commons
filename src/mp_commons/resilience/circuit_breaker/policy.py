@@ -1,4 +1,5 @@
 """Resilience – CircuitBreakerPolicy."""
+
 from __future__ import annotations
 
 import dataclasses
@@ -7,6 +8,7 @@ import dataclasses
 @dataclasses.dataclass
 class CircuitBreakerPolicy:
     """Configuration for a circuit breaker."""
+
     failure_threshold: int = 5
     success_threshold: int = 2
     timeout_seconds: float = 30.0

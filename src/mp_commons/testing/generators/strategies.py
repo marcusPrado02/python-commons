@@ -6,6 +6,7 @@ Requires the ``hypothesis`` package:
     # or
     pip install "mp-commons[testing-pbt]"
 """
+
 from __future__ import annotations
 
 from decimal import Decimal
@@ -21,20 +22,18 @@ def _require_hypothesis() -> Any:
     """Lazy import guard – raises a clear error when hypothesis is absent."""
     try:
         import hypothesis.strategies as st  # type: ignore[import-untyped]
+
         return st
     except ImportError as exc:
         raise ImportError(
-            "Install 'hypothesis' to use property-based testing strategies: "
-            "pip install hypothesis"
+            "Install 'hypothesis' to use property-based testing strategies: pip install hypothesis"
         ) from exc
 
 
-_COMMON_CURRENCIES: tuple[str, ...] = (
-    "BRL", "USD", "EUR", "GBP", "JPY", "CAD", "AUD", "CHF"
-)
+_COMMON_CURRENCIES: tuple[str, ...] = ("BRL", "USD", "EUR", "GBP", "JPY", "CAD", "AUD", "CHF")
 
 
-def entity_id_strategy() -> "SearchStrategy[EntityId]":
+def entity_id_strategy() -> SearchStrategy[EntityId]:
     """Hypothesis strategy that generates random :class:`EntityId` instances.
 
     Each drawn value is a valid, non-empty UUID-backed string identifier.
@@ -56,7 +55,7 @@ def money_strategy(
     *,
     min_amount: str | int | Decimal = "0",
     max_amount: str | int | Decimal = "9999.99",
-) -> "SearchStrategy[Money]":
+) -> SearchStrategy[Money]:
     """Hypothesis strategy that generates random :class:`Money` instances.
 
     Args:
@@ -86,7 +85,7 @@ def money_strategy(
     return st.builds(Money, amount=amount_st, currency=currency_st)
 
 
-def email_strategy() -> "SearchStrategy[Email]":
+def email_strategy() -> SearchStrategy[Email]:
     """Hypothesis strategy that generates valid :class:`Email` instances.
 
     Produces ``user@domain.tld`` strings that pass :class:`Email` validation.

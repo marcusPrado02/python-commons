@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Callable, Generic, Iterator, NoReturn, TypeVar
+from collections.abc import Callable
+from typing import Generic, NoReturn, TypeVar
 
 T = TypeVar("T")
 E = TypeVar("E", bound=Exception)
@@ -21,21 +22,27 @@ class Ok(Generic[T]):
         return self._value
 
     def is_ok(self) -> bool:
+        """Return ``True`` — this is a successful result."""
         return True
 
     def is_err(self) -> bool:
+        """Return ``False`` — this is not an error."""
         return False
 
     def unwrap(self) -> T:
+        """Return the contained value."""
         return self._value
 
-    def unwrap_or(self, default: T) -> T:  # noqa: ARG002
+    def unwrap_or(self, default: T) -> T:
+        """Return the contained value, ignoring *default*."""
         return self._value
 
-    def map(self, func: Callable[[T], "T"]) -> "Ok[T]":
+    def map(self, func: Callable[[T], T]) -> Ok[T]:
+        """Apply *func* to the value and wrap the result in a new ``Ok``."""
         return Ok(func(self._value))
 
-    def flat_map(self, func: "Callable[[T], Result[T, E]]"  ) -> "Result[T, E]":
+    def flat_map(self, func: Callable[[T], Result[T, E]]) -> Result[T, E]:
+        """Apply *func* (which returns a ``Result``) to the contained value."""
         return func(self._value)
 
     def __repr__(self) -> str:
@@ -55,21 +62,27 @@ class Err(Generic[E]):
         return self._error
 
     def is_ok(self) -> bool:
+        """Return ``False`` — this is an error result."""
         return False
 
     def is_err(self) -> bool:
+        """Return ``True`` — this is an error."""
         return True
 
     def unwrap(self) -> NoReturn:
+        """Raise the contained error."""
         raise self._error
 
     def unwrap_or(self, default: T) -> T:
+        """Return *default* because this result is an error."""
         return default
 
-    def map(self, func: Callable[[T], T]) -> "Err[E]":  # noqa: ARG002
+    def map(self, func: Callable[[T], T]) -> Err[E]:
+        """Return ``self`` unchanged — mapping over an error is a no-op."""
         return self
 
-    def flat_map(self, func: "Callable[[T], Result[T, E]]"  ) -> "Err[E]":  # noqa: ARG002
+    def flat_map(self, func: Callable[[T], Result[T, E]]) -> Err[E]:
+        """Return ``self`` unchanged — chaining over an error is a no-op."""
         return self
 
     def __repr__(self) -> str:

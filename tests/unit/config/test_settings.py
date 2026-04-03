@@ -1,6 +1,5 @@
 """Unit tests for config settings & validation (§23)."""
 
-import os
 from dataclasses import dataclass, field
 from typing import ClassVar
 
@@ -12,7 +11,6 @@ from mp_commons.config.settings import (
     SettingsValidator,
 )
 from mp_commons.config.validation import ConfigError, MissingRequiredSettingError
-
 
 # ---------------------------------------------------------------------------
 # Concrete settings class used across tests
@@ -62,9 +60,7 @@ class TestEnvSettingsLoader:
         settings = EnvSettingsLoader().load(AppSettings)
         assert settings.allowed_origins == ["http://a.com", "http://b.com"]
 
-    def test_defaults_preserved_when_env_absent(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_defaults_preserved_when_env_absent(self, monkeypatch: pytest.MonkeyPatch) -> None:
         for key in ("APP_HOST", "APP_PORT", "APP_DEBUG", "APP_ALLOWED_ORIGINS"):
             monkeypatch.delenv(key, raising=False)
         settings = EnvSettingsLoader().load(AppSettings)

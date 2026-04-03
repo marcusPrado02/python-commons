@@ -6,9 +6,8 @@ import asyncio
 
 import pytest
 
-from mp_commons.application.uow import TransactionManager, UnitOfWork, transactional
+from mp_commons.application.uow import TransactionManager, transactional
 from mp_commons.kernel.errors import DomainError
-
 
 # ---------------------------------------------------------------------------
 # TransactionManager stub (14.1)
@@ -70,7 +69,7 @@ class InMemoryUnitOfWork:
         self.committed = False
         self.rolled_back = False
 
-    async def __aenter__(self) -> "InMemoryUnitOfWork":
+    async def __aenter__(self) -> InMemoryUnitOfWork:
         self.entered = True
         return self
 

@@ -1,4 +1,5 @@
 """OpenTelemetry adapter – OtelMetrics."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -49,13 +50,22 @@ class OtelMetrics(Metrics):
     def __init__(self, meter_name: str = "mp_commons") -> None:
         _require_otel()
         from opentelemetry import metrics  # type: ignore[import-untyped]
+
         self._meter = metrics.get_meter(meter_name)
 
     def counter(self, name: str, description: str = "", unit: str = "") -> Counter:
         return _OtelCounter(self._meter.create_counter(name, description=description, unit=unit))
 
-    def histogram(self, name: str, description: str = "", unit: str = "ms", boundaries: list[float] | None = None) -> Histogram:
-        return _OtelHistogram(self._meter.create_histogram(name, description=description, unit=unit))
+    def histogram(
+        self,
+        name: str,
+        description: str = "",
+        unit: str = "ms",
+        boundaries: list[float] | None = None,
+    ) -> Histogram:
+        return _OtelHistogram(
+            self._meter.create_histogram(name, description=description, unit=unit)
+        )
 
     def gauge(self, name: str, description: str = "", unit: str = "") -> Gauge:
         return _OtelGauge()

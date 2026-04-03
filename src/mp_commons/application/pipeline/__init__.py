@@ -1,6 +1,7 @@
 """Application pipeline – use-case middleware chain."""
+
+from mp_commons.application.pipeline.audit_middleware import AuditMiddleware
 from mp_commons.application.pipeline.middleware import Handler, Middleware, Next
-from mp_commons.application.pipeline.pipeline import Pipeline
 from mp_commons.application.pipeline.middlewares import (
     AuthzMiddleware,
     CachingMiddleware,
@@ -15,7 +16,7 @@ from mp_commons.application.pipeline.middlewares import (
     UnitOfWorkMiddleware,
     ValidationMiddleware,
 )
-from mp_commons.application.pipeline.audit_middleware import AuditMiddleware
+from mp_commons.application.pipeline.pipeline import Pipeline
 
 __all__ = [
     "AuditMiddleware",

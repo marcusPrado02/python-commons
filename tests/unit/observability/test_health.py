@@ -1,12 +1,10 @@
 """Unit tests for §80 – Observability Health Checks."""
-import asyncio
 
-import pytest
+import asyncio
 
 from mp_commons.observability.health import (
     HealthCheck,
     HealthRegistry,
-    HealthReport,
     HealthStatus,
     LambdaHealthCheck,
 )

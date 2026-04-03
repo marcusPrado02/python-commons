@@ -1,4 +1,5 @@
 """Resilience – jitter strategies."""
+
 from __future__ import annotations
 
 import abc
@@ -21,7 +22,7 @@ class FullJitter(JitterStrategy):
     """Uniform random in [0, delay]."""
 
     def apply(self, delay: float) -> float:
-        return random.uniform(0, delay)
+        return random.uniform(0, delay)  # noqa: S311
 
 
 class EqualJitter(JitterStrategy):
@@ -29,7 +30,7 @@ class EqualJitter(JitterStrategy):
 
     def apply(self, delay: float) -> float:
         half = delay / 2
-        return half + random.uniform(0, half)
+        return half + random.uniform(0, half)  # noqa: S311
 
 
 __all__ = ["EqualJitter", "FullJitter", "JitterStrategy", "NoJitter"]

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from typing import Any, Awaitable, Callable
+from datetime import UTC, datetime
 
 __all__ = [
     "BurnRateAlert",
@@ -17,7 +17,7 @@ __all__ = [
 @dataclass(frozen=True)
 class SLODefinition:
     name: str
-    target: float         # 0.0–1.0, e.g. 0.999 for 99.9 %
+    target: float  # 0.0–1.0, e.g. 0.999 for 99.9 %
     window_days: int = 30
     metric_name: str = ""
 
@@ -58,7 +58,7 @@ class SLOAlertEvent:
     slo_name: str
     burn_rate: float
     threshold: float
-    occurred_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    occurred_at: datetime = field(default_factory=lambda: datetime.now(UTC))
 
 
 class InMemorySLOTracker:

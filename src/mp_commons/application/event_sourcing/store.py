@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import abc
-from typing import Any
 
 from mp_commons.application.event_sourcing.stored_event import StoredEvent
 

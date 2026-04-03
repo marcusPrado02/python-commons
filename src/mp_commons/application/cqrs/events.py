@@ -22,9 +22,7 @@ class EventBus(abc.ABC):
     """Port: publish domain events to all registered handlers."""
 
     @abc.abstractmethod
-    def register(
-        self, event_type: type[DomainEvent], handler: EventHandler[Any]
-    ) -> None: ...
+    def register(self, event_type: type[DomainEvent], handler: EventHandler[Any]) -> None: ...
 
     @abc.abstractmethod
     async def publish(self, event: DomainEvent) -> None: ...
@@ -36,12 +34,12 @@ class InProcessEventBus(EventBus):
     def __init__(self) -> None:
         self._handlers: dict[type[DomainEvent], list[EventHandler[Any]]] = {}
 
-    def register(
-        self, event_type: type[DomainEvent], handler: EventHandler[Any]
-    ) -> None:
+    def register(self, event_type: type[DomainEvent], handler: EventHandler[Any]) -> None:
+        """Append *handler* to the list of subscribers for *event_type*."""
         self._handlers.setdefault(event_type, []).append(handler)
 
     async def publish(self, event: DomainEvent) -> None:
+        """Broadcast *event* concurrently to all registered handlers for its type."""
         handlers = self._handlers.get(type(event), [])
         if handlers:
             await asyncio.gather(*(h.handle(event) for h in handlers))

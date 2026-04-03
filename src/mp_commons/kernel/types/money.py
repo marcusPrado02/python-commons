@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import dataclasses
-import re
 from decimal import Decimal
+import re
 from typing import Any, Final
 
 from mp_commons.kernel.errors.domain import ValidationError
@@ -25,28 +25,27 @@ class Money:
         if self.amount < 0:
             raise ValidationError("Money amount must be non-negative")
 
-    def __add__(self, other: "Money") -> "Money":
+    def __add__(self, other: Money) -> Money:
         self._assert_same_currency(other)
         return Money(self.amount + other.amount, self.currency)
 
-    def __sub__(self, other: "Money") -> "Money":
+    def __sub__(self, other: Money) -> Money:
         self._assert_same_currency(other)
         result = self.amount - other.amount
         if result < 0:
             raise ValidationError("Subtraction would produce negative Money")
         return Money(result, self.currency)
 
-    def _assert_same_currency(self, other: "Money") -> None:
+    def _assert_same_currency(self, other: Money) -> None:
         if self.currency != other.currency:
-            raise ValidationError(
-                f"Currency mismatch: {self.currency} vs {other.currency}"
-            )
+            raise ValidationError(f"Currency mismatch: {self.currency} vs {other.currency}")
 
     @classmethod
-    def of(cls, amount: "str | int | float | Decimal", currency: str) -> "Money":
+    def of(cls, amount: str | int | float | Decimal, currency: str) -> Money:
+        """Construct from a loose numeric type and an ISO 4217 currency string."""
         return cls(Decimal(str(amount)), currency.upper())
 
-    def multiply(self, factor: "int | float | Decimal") -> "Money":
+    def multiply(self, factor: int | float | Decimal) -> Money:
         """Return a new ``Money`` scaled by *factor* (must keep amount non-negative)."""
         result = self.amount * Decimal(str(factor))
         if result < 0:
@@ -62,7 +61,7 @@ class Money:
         try:
             from pydantic_core import core_schema
 
-            def _validate(v: Any) -> "Money":
+            def _validate(v: Any) -> Money:
                 if isinstance(v, cls):
                     return v
                 if isinstance(v, dict):

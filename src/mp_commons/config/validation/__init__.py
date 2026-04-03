@@ -1,4 +1,5 @@
 """Config validation errors."""
+
 from mp_commons.config.validation.errors import (
     ConfigError,
     InvalidSettingValueError,

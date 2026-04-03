@@ -1,17 +1,18 @@
 """Unit tests for §16.4, §15.6, §20.3, §20.5, §20.7, §20.8, §20.9."""
+
 from __future__ import annotations
 
 import asyncio
 import logging
 from typing import Any
-from unittest.mock import MagicMock, call
+from unittest.mock import MagicMock
 
 import pytest
-
 
 # ---------------------------------------------------------------------------
 # §16.4  CircuitOpenError
 # ---------------------------------------------------------------------------
+
 
 class TestCircuitOpenError:
     """§16.4 – CircuitOpenError is an InfrastructureError."""
@@ -74,7 +75,10 @@ class TestCircuitOpenError:
             assert exc_info.value.circuit_name == "my-service"
 
         asyncio.run(run())
+
+
 # ---------------------------------------------------------------------------
+
 
 class TestTenacityRetryPolicy:
     """§15.6 – TenacityRetryPolicy mirrors RetryPolicy interface."""
@@ -94,15 +98,16 @@ class TestTenacityRetryPolicy:
         assert len(calls) == 1
 
     def test_retries_on_failure_then_succeeds(self) -> None:
-        from mp_commons.resilience.retry import TenacityRetryPolicy
         import tenacity
+
+        from mp_commons.resilience.retry import TenacityRetryPolicy
 
         calls: list[int] = []
 
         def fn() -> str:
             calls.append(1)
             if len(calls) < 3:
-                raise IOError("transient")
+                raise OSError("transient")
             return "recovered"
 
         policy = TenacityRetryPolicy(
@@ -115,8 +120,9 @@ class TestTenacityRetryPolicy:
         assert len(calls) == 3
 
     def test_raises_after_max_attempts(self) -> None:
-        from mp_commons.resilience.retry import TenacityRetryPolicy
         import tenacity
+
+        from mp_commons.resilience.retry import TenacityRetryPolicy
 
         policy = TenacityRetryPolicy(
             max_attempts=2,
@@ -128,15 +134,16 @@ class TestTenacityRetryPolicy:
             policy.execute(lambda: (_ for _ in ()).throw(RuntimeError("fail")))
 
     def test_execute_async_retries(self) -> None:
-        from mp_commons.resilience.retry import TenacityRetryPolicy
         import tenacity
+
+        from mp_commons.resilience.retry import TenacityRetryPolicy
 
         calls: list[int] = []
 
         async def fn() -> str:
             calls.append(1)
             if len(calls) < 2:
-                raise IOError("transient")
+                raise OSError("transient")
             return "async_ok"
 
         policy = TenacityRetryPolicy(
@@ -154,8 +161,8 @@ class TestTenacityRetryPolicy:
 
     def test_missing_tenacity_raises_import_error(self) -> None:
         """TenacityRetryPolicy raises ImportError when tenacity unavailable."""
-        from unittest.mock import patch
         import builtins
+        from unittest.mock import patch
 
         real_import = builtins.__import__
 
@@ -165,6 +172,7 @@ class TestTenacityRetryPolicy:
             return real_import(name, *args, **kwargs)
 
         from mp_commons.resilience.retry.tenacity_adapter import TenacityRetryPolicy
+
         with patch("builtins.__import__", side_effect=fake_import):
             with pytest.raises(ImportError, match="tenacity"):
                 TenacityRetryPolicy(max_attempts=1)
@@ -173,6 +181,7 @@ class TestTenacityRetryPolicy:
 # ---------------------------------------------------------------------------
 # §20.3  CorrelationProcessor
 # ---------------------------------------------------------------------------
+
 
 class TestCorrelationProcessor:
     """§20.3 – injects correlation context into log event dicts."""
@@ -218,12 +227,14 @@ class TestCorrelationProcessor:
         from mp_commons.observability.correlation import CorrelationContext, RequestContext
         from mp_commons.observability.logging import CorrelationProcessor
 
-        CorrelationContext.set(RequestContext(
-            correlation_id="cid",
-            tenant_id=None,
-            user_id="u-42",
-            trace_id="t-trace",
-        ))
+        CorrelationContext.set(
+            RequestContext(
+                correlation_id="cid",
+                tenant_id=None,
+                user_id="u-42",
+                trace_id="t-trace",
+            )
+        )
         try:
             proc = CorrelationProcessor()
             result = proc(None, "info", {"event": "x"})
@@ -237,6 +248,7 @@ class TestCorrelationProcessor:
 # ---------------------------------------------------------------------------
 # §20.5  get_logger
 # ---------------------------------------------------------------------------
+
 
 class TestGetLogger:
     """§20.5 – get_logger returns a usable logger."""
@@ -264,6 +276,7 @@ class TestGetLogger:
 # ---------------------------------------------------------------------------
 # §20.7  AuditLogger
 # ---------------------------------------------------------------------------
+
 
 class TestAuditLogger:
     """§20.7 – AuditLogger emits structured audit entries."""
@@ -344,6 +357,7 @@ class TestAuditLogger:
 # §20.8  AsyncLogHandler
 # ---------------------------------------------------------------------------
 
+
 class TestAsyncLogHandler:
     """§20.8 – AsyncLogHandler enqueues records without blocking."""
 
@@ -363,8 +377,13 @@ class TestAsyncLogHandler:
     def test_emitted_record_eventually_delivered(self) -> None:
         handler, records = self._make_handler()
         record = logging.LogRecord(
-            name="test", level=logging.INFO, pathname="", lineno=0,
-            msg="hello", args=(), exc_info=None,
+            name="test",
+            level=logging.INFO,
+            pathname="",
+            lineno=0,
+            msg="hello",
+            args=(),
+            exc_info=None,
         )
         handler.emit(record)
         handler.drain_sync()
@@ -375,8 +394,13 @@ class TestAsyncLogHandler:
         handler, records = self._make_handler()
         for i in range(5):
             r = logging.LogRecord(
-                name="test", level=logging.DEBUG, pathname="", lineno=0,
-                msg=f"msg-{i}", args=(), exc_info=None,
+                name="test",
+                level=logging.DEBUG,
+                pathname="",
+                lineno=0,
+                msg=f"msg-{i}",
+                args=(),
+                exc_info=None,
             )
             handler.emit(r)
         handler.drain_sync()
@@ -395,8 +419,13 @@ class TestAsyncLogHandler:
         handler = AsyncLogHandler(delegate=CollectHandler(), maxsize=1)
         for i in range(10):
             r = logging.LogRecord(
-                name="t", level=logging.INFO, pathname="", lineno=0,
-                msg=f"m{i}", args=(), exc_info=None,
+                name="t",
+                level=logging.INFO,
+                pathname="",
+                lineno=0,
+                msg=f"m{i}",
+                args=(),
+                exc_info=None,
             )
             handler.emit(r)  # should not raise
 
@@ -405,8 +434,13 @@ class TestAsyncLogHandler:
             handler, records = self._make_handler()
             await handler.start()
             r = logging.LogRecord(
-                name="test", level=logging.INFO, pathname="", lineno=0,
-                msg="async-msg", args=(), exc_info=None,
+                name="test",
+                level=logging.INFO,
+                pathname="",
+                lineno=0,
+                msg="async-msg",
+                args=(),
+                exc_info=None,
             )
             handler.emit(r)
             await handler.stop(timeout=2.0)
@@ -418,6 +452,7 @@ class TestAsyncLogHandler:
 # ---------------------------------------------------------------------------
 # §20.9  SampledLogger
 # ---------------------------------------------------------------------------
+
 
 class TestSampledLogger:
     """§20.9 – SampledLogger emits only 1-in-N records per level."""

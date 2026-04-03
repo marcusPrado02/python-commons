@@ -1,4 +1,5 @@
 """Unit tests for §72 – Workflow Engine."""
+
 import asyncio
 
 import pytest
@@ -70,7 +71,9 @@ class TestWorkflowEngine:
             return False
 
         transitions = [
-            WorkflowTransition(from_state="open", to_state="closed", trigger="close", guard=always_block),
+            WorkflowTransition(
+                from_state="open", to_state="closed", trigger="close", guard=always_block
+            ),
         ]
         engine.define("ticket", states, transitions)
         instance = asyncio.run(engine.start("ticket"))

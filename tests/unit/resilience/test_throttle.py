@@ -1,9 +1,10 @@
 """Unit tests for §79 – Token Bucket / Throttle."""
+
 import asyncio
 
 import pytest
 
-from mp_commons.resilience.throttle import ThrottlePolicy, ThrottledError, TokenBucket
+from mp_commons.resilience.throttle import ThrottledError, ThrottlePolicy, TokenBucket
 
 
 class TestTokenBucket:
@@ -31,7 +32,9 @@ class TestTokenBucket:
         bucket = TokenBucket(capacity=1, refill_rate=1000)  # 1000 t/s
         asyncio.run(bucket.acquire())
         # Wait a tiny bit for refill
-        import time; time.sleep(0.002)  # noqa: E401, E702
+        import time
+
+        time.sleep(0.002)
         ok = asyncio.run(bucket.acquire())
         assert ok is True
 

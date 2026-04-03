@@ -1,4 +1,5 @@
 """SQLAlchemy adapter – SqlAlchemyOutboxRepository."""
+
 from __future__ import annotations
 
 from datetime import UTC, datetime
@@ -23,34 +24,51 @@ class SqlAlchemyOutboxRepository(OutboxRepository):
         if self._model is None:
             raise RuntimeError("OutboxRecordModel not configured")
         from sqlalchemy import select  # type: ignore[import-untyped]
+
         result = await self._session.execute(
             select(self._model).where(self._model.status == OutboxStatus.PENDING.value).limit(limit)
         )
         return [self._row_to_record(row) for row in result.scalars().all()]
 
     async def mark_dispatched(self, record_id: str) -> None:
-        await self._update(record_id, {"status": OutboxStatus.DISPATCHED.value, "dispatched_at": datetime.now(UTC)})
+        await self._update(
+            record_id, {"status": OutboxStatus.DISPATCHED.value, "dispatched_at": datetime.now(UTC)}
+        )
 
     async def mark_failed(self, record_id: str, error: str) -> None:
         await self._update(record_id, {"status": OutboxStatus.FAILED.value, "last_error": error})
 
     async def _update(self, record_id: str, values: dict[str, Any]) -> None:
         from sqlalchemy import update  # type: ignore[import-untyped]
-        await self._session.execute(update(self._model).where(self._model.id == record_id).values(**values))
+
+        await self._session.execute(
+            update(self._model).where(self._model.id == record_id).values(**values)  # type: ignore[arg-type, union-attr]
+        )
 
     def _record_to_dict(self, record: OutboxRecord) -> dict[str, Any]:
         return {
-            "id": record.id, "aggregate_id": record.aggregate_id,
-            "aggregate_type": record.aggregate_type, "event_type": record.event_type,
-            "topic": record.topic, "payload": record.payload, "headers": record.headers,
-            "status": record.status.value, "created_at": record.created_at,
+            "id": record.id,
+            "aggregate_id": record.aggregate_id,
+            "aggregate_type": record.aggregate_type,
+            "event_type": record.event_type,
+            "topic": record.topic,
+            "payload": record.payload,
+            "headers": record.headers,
+            "status": record.status.value,
+            "created_at": record.created_at,
         }
 
     def _row_to_record(self, row: Any) -> OutboxRecord:
         return OutboxRecord(
-            id=row.id, aggregate_id=row.aggregate_id, aggregate_type=row.aggregate_type,
-            event_type=row.event_type, topic=row.topic, payload=row.payload,
-            headers=row.headers or {}, status=OutboxStatus(row.status), created_at=row.created_at,
+            id=row.id,
+            aggregate_id=row.aggregate_id,
+            aggregate_type=row.aggregate_type,
+            event_type=row.event_type,
+            topic=row.topic,
+            payload=row.payload,
+            headers=row.headers or {},
+            status=OutboxStatus(row.status),
+            created_at=row.created_at,
         )
 
 

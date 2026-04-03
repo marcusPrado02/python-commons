@@ -1,4 +1,5 @@
 """Redis adapter – RedisLock."""
+
 from __future__ import annotations
 
 from mp_commons.adapters.redis.cache import RedisCache
@@ -15,8 +16,9 @@ class RedisLock:
 
     async def acquire(self) -> bool:
         import uuid
+
         token = str(uuid.uuid4())
-        client = self._cache._client  # noqa: SLF001
+        client = self._cache._client
         result = await client.set(self._name, token, nx=True, px=self._ttl_ms)
         if result:
             self._token = token
@@ -33,14 +35,15 @@ class RedisLock:
             return 0
         end
         """
-        client = self._cache._client  # noqa: SLF001
+        client = self._cache._client
         await client.eval(script, 1, self._name, self._token)
         self._token = None
 
-    async def __aenter__(self) -> "RedisLock":
+    async def __aenter__(self) -> RedisLock:
         acquired = await self.acquire()
         if not acquired:
             from mp_commons.kernel.errors import ConflictError
+
             raise ConflictError(f"Could not acquire lock '{self._name}'")
         return self
 

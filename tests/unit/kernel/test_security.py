@@ -3,26 +3,20 @@
 from __future__ import annotations
 
 import asyncio
-import contextvars
 
 import pytest
 
+from mp_commons.kernel.errors import UnauthorizedError
 from mp_commons.kernel.security import (
     DEFAULT_SENSITIVE_FIELDS,
-    CryptoProvider,
-    PIIRedactor,
-    PasswordHasher,
     Permission,
     PolicyContext,
     PolicyDecision,
-    PolicyEngine,
     Principal,
     RegexPIIRedactor,
     Role,
     SecurityContext,
 )
-from mp_commons.kernel.errors import UnauthorizedError
-
 
 # ---------------------------------------------------------------------------
 # Principal (8.1)
@@ -414,7 +408,12 @@ class TestRequirePermissionDecorator:
     def test_async_allowed(self) -> None:
         import asyncio
 
-        from mp_commons.kernel.security import Permission, Principal, SecurityContext, require_permission
+        from mp_commons.kernel.security import (
+            Permission,
+            Principal,
+            SecurityContext,
+            require_permission,
+        )
 
         @require_permission("orders:read")
         async def handler() -> str:
@@ -454,7 +453,12 @@ class TestRequirePermissionDecorator:
             asyncio.run(handler())
 
     def test_sync_allowed(self) -> None:
-        from mp_commons.kernel.security import Permission, Principal, SecurityContext, require_permission
+        from mp_commons.kernel.security import (
+            Permission,
+            Principal,
+            SecurityContext,
+            require_permission,
+        )
 
         @require_permission("data:read")
         def sync_handler() -> str:

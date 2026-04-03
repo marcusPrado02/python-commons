@@ -9,7 +9,6 @@ from typing import Literal
 
 from mp_commons.kernel.types.ids import EntityId
 
-
 # ---------------------------------------------------------------------------
 # AuditEvent
 # ---------------------------------------------------------------------------
@@ -46,12 +45,8 @@ class AuditEvent:
     resource_type: str
     resource_id: str
     outcome: Literal["allow", "deny"]
-    event_id: EntityId = dataclasses.field(
-        default_factory=EntityId.generate
-    )
-    occurred_at: datetime = dataclasses.field(
-        default_factory=lambda: datetime.now(UTC)
-    )
+    event_id: EntityId = dataclasses.field(default_factory=EntityId.generate)
+    occurred_at: datetime = dataclasses.field(default_factory=lambda: datetime.now(UTC))
     metadata: dict = dataclasses.field(default_factory=dict)  # type: ignore[type-arg]
 
     def is_denied(self) -> bool:

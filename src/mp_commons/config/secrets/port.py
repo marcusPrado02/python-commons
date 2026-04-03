@@ -1,4 +1,5 @@
 """Config secrets – SecretRef and SecretStore port."""
+
 from __future__ import annotations
 
 import abc
@@ -8,6 +9,7 @@ import dataclasses
 @dataclasses.dataclass(frozen=True)
 class SecretRef:
     """Reference to a secret stored externally."""
+
     path: str
     key: str
     version: str | None = None

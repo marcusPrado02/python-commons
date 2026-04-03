@@ -2,16 +2,15 @@
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
 import contextlib
 from contextvars import ContextVar
-from typing import AsyncIterator, Protocol, Any
+from typing import Any, Protocol
 
 from mp_commons.kernel.errors.domain import ValidationError
 from mp_commons.kernel.types.ids import TenantId
 
-_TENANT_CTX_VAR: ContextVar[TenantId | None] = ContextVar(
-    "_mp_tenant_ctx", default=None
-)
+_TENANT_CTX_VAR: ContextVar[TenantId | None] = ContextVar("_mp_tenant_ctx", default=None)
 
 
 class TenantContext:
@@ -19,14 +18,17 @@ class TenantContext:
 
     @staticmethod
     def set(tenant_id: TenantId) -> Any:
+        """Set the active tenant and return a reset token for later restoration."""
         return _TENANT_CTX_VAR.set(tenant_id)
 
     @staticmethod
     def get() -> TenantId | None:
+        """Return the current tenant, or ``None`` if no tenant is active."""
         return _TENANT_CTX_VAR.get()
 
     @staticmethod
     def require() -> TenantId:
+        """Return the current tenant or raise ``ValidationError`` if absent."""
         tenant = _TENANT_CTX_VAR.get()
         if tenant is None:
             raise ValidationError("No tenant in context")
@@ -34,10 +36,12 @@ class TenantContext:
 
     @staticmethod
     def reset(token: Any) -> None:
+        """Restore context to the state captured in *token* (from :meth:`set`)."""
         _TENANT_CTX_VAR.reset(token)
 
     @staticmethod
     def clear() -> None:
+        """Remove the active tenant from the current context."""
         _TENANT_CTX_VAR.set(None)
 
     @staticmethod
@@ -69,6 +73,7 @@ class TenantResolver(Protocol):
 # TenantAware mixin
 # ---------------------------------------------------------------------------
 
+
 class TenantAware:
     """Mixin that stores a ``tenant_id`` attribute.
 
@@ -78,7 +83,9 @@ class TenantAware:
     Usage::
 
         class Order(TenantAware, Entity):
-            def __init__(self, id: EntityId, amount: Money, tenant_id: TenantId | None = None) -> None:
+            def __init__(
+                self, id: EntityId, amount: Money, tenant_id: TenantId | None = None
+            ) -> None:
                 super().__init__(id)
                 self._init_tenant(tenant_id)
     """

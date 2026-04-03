@@ -1,17 +1,18 @@
 """Unit tests – FakeMetricsRegistry, FakeFeatureFlagProvider, FakeSecretStore,
 fake_principal fixture, and StepClock (§36.7, §36.9, §36.10, §37.4, §38.4)."""
+
 from __future__ import annotations
 
 import asyncio
 from datetime import UTC, datetime, timedelta
+import itertools
 
 import pytest
 
-from mp_commons.testing.fakes import FakeMetricsRegistry, FakeFeatureFlagProvider, FakeSecretStore
-from mp_commons.testing.generators import StepClock
 from mp_commons.application.feature_flags.feature_flag import FeatureFlag
 from mp_commons.config.secrets.port import SecretRef
-
+from mp_commons.testing.fakes import FakeFeatureFlagProvider, FakeMetricsRegistry, FakeSecretStore
+from mp_commons.testing.generators import StepClock
 
 # ---------------------------------------------------------------------------
 # §36.7 – FakeMetricsRegistry
@@ -273,6 +274,7 @@ class TestFakePrincipalFixture:
 
     def test_security_context_fixture_sets_principal(self, security_context) -> None:
         from mp_commons.kernel.security import SecurityContext
+
         p = SecurityContext.get_current()
         assert p is not None
         assert p.subject == "test-user"
@@ -280,18 +282,21 @@ class TestFakePrincipalFixture:
     def test_security_context_is_cleared_after_test(self) -> None:
         """Context should be clear when no fixture is active (tested independently)."""
         from mp_commons.kernel.security import SecurityContext
+
         SecurityContext.clear()
         assert SecurityContext.get_current() is None
 
     def test_require_raises_when_no_context(self) -> None:
-        from mp_commons.kernel.security import SecurityContext
         from mp_commons.kernel.errors import UnauthorizedError
+        from mp_commons.kernel.security import SecurityContext
+
         SecurityContext.clear()
         with pytest.raises(UnauthorizedError):
             SecurityContext.require()
 
     def test_fake_principal_is_principal_type(self, fake_principal) -> None:
         from mp_commons.kernel.security import Principal
+
         assert isinstance(fake_principal, Principal)
 
 
@@ -329,7 +334,7 @@ class TestStepClock:
     def test_strictly_increasing(self) -> None:
         clock = StepClock()
         times = [clock.now() for _ in range(10)]
-        for a, b in zip(times, times[1:]):
+        for a, b in itertools.pairwise(times):
             assert b > a
 
     def test_call_count_increments(self) -> None:

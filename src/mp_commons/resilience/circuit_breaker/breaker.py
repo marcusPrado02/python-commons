@@ -1,14 +1,16 @@
 """Resilience – CircuitBreaker implementation."""
+
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Awaitable, Callable
 import logging
 import time
-from typing import Awaitable, Callable, TypeVar
+from typing import TypeVar
 
 from mp_commons.resilience.circuit_breaker.errors import CircuitOpenError
-from mp_commons.resilience.circuit_breaker.state import CircuitBreakerState
 from mp_commons.resilience.circuit_breaker.policy import CircuitBreakerPolicy
+from mp_commons.resilience.circuit_breaker.state import CircuitBreakerState
 
 T = TypeVar("T")
 logger = logging.getLogger(__name__)
@@ -31,6 +33,7 @@ class CircuitBreaker:
         return self._state
 
     async def call(self, func: Callable[[], Awaitable[T]]) -> T:
+        """Execute *func* guarded by the circuit breaker; raise :exc:`CircuitOpenError` when OPEN."""
         async with self._lock:
             self._maybe_transition_half_open()
             if self._state == CircuitBreakerState.OPEN:
@@ -49,6 +52,7 @@ class CircuitBreaker:
             raise
 
     def _maybe_transition_half_open(self) -> None:
+        """Move from OPEN to HALF_OPEN once the recovery timeout has elapsed."""
         if (
             self._state == CircuitBreakerState.OPEN
             and self._opened_at is not None
@@ -59,6 +63,7 @@ class CircuitBreaker:
             self._success_count = 0
 
     def _on_success(self) -> None:
+        """Record a successful call; close the circuit once the success threshold is met."""
         if self._state == CircuitBreakerState.HALF_OPEN:
             self._success_count += 1
             if self._success_count >= self._policy.success_threshold:
@@ -69,10 +74,13 @@ class CircuitBreaker:
             self._failure_count = 0
 
     def _on_failure(self) -> None:
+        """Record a failure; open the circuit once the failure threshold is reached."""
         self._failure_count += 1
         logger.warning(
             "circuit_breaker.failure name=%s count=%d threshold=%d",
-            self.name, self._failure_count, self._policy.failure_threshold,
+            self.name,
+            self._failure_count,
+            self._policy.failure_threshold,
         )
         if self._failure_count >= self._policy.failure_threshold:
             logger.error("circuit_breaker.opened name=%s", self.name)

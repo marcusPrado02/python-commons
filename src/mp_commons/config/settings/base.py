@@ -1,14 +1,16 @@
 """Config settings – Settings base class."""
+
 from __future__ import annotations
 
 import dataclasses
+from typing import ClassVar
 
 
 @dataclasses.dataclass
 class Settings:
     """Base class for 12-factor settings."""
 
-    _prefix: dataclasses.ClassVar[str] = ""
+    _prefix: ClassVar[str] = ""
 
     def __post_init__(self) -> None:
         self._validate()

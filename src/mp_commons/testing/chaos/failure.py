@@ -1,4 +1,5 @@
 """Testing chaos – FailureInjector."""
+
 from __future__ import annotations
 
 import random
@@ -17,13 +18,15 @@ class FailureInjector:
     @staticmethod
     def _default_exception() -> Exception:
         from mp_commons.kernel.errors import ExternalServiceError
+
         return ExternalServiceError(service="chaos", message="Injected failure")
 
     async def call(self, coro: object) -> object:
         import inspect
-        if random.random() < self._rate:  # noqa: S311
+
+        if random.random() < self._rate:
             if inspect.isawaitable(coro):
-                coro.close()  # type: ignore[union-attr]
+                coro.close()  # type: ignore[attr-defined]
             raise self._factory()
         if inspect.isawaitable(coro):
             return await coro  # type: ignore[misc]

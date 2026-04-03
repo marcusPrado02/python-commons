@@ -36,6 +36,7 @@ class BaseError(Exception):
     def __str__(self) -> str:
         """Return a JSON-serialisable single-line string representation."""
         import json
+
         return json.dumps(self.to_dict(), ensure_ascii=False, default=str)
 
     def __repr__(self) -> str:

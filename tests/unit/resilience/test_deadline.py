@@ -1,14 +1,15 @@
 """Unit tests for §77 – Deadline Propagation."""
+
 import asyncio
 
 import pytest
 
-from mp_commons.resilience.timeouts.deadline import Deadline
 from mp_commons.resilience.deadline import (
     DeadlineContext,
     DeadlineExceededError,
     deadline_aware,
 )
+from mp_commons.resilience.timeouts.deadline import Deadline
 
 
 class TestDeadlineContext:
@@ -30,6 +31,7 @@ class TestDeadlineContext:
                 assert DeadlineContext.get() is dl
                 assert d is dl
             # After scope: context should be restored (None or prior)
+
         asyncio.run(run())
 
     def test_raise_if_exceeded_expired(self):

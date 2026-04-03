@@ -1,10 +1,11 @@
 """HTTP adapter – CircuitBreakingHttpClient."""
+
 from __future__ import annotations
 
 from typing import Any
 
-from mp_commons.resilience.circuit_breaker import CircuitBreaker, CircuitBreakerPolicy
 from mp_commons.adapters.http.client import HttpxHttpClient
+from mp_commons.resilience.circuit_breaker import CircuitBreaker, CircuitBreakerPolicy
 
 
 class CircuitBreakingHttpClient(HttpxHttpClient):

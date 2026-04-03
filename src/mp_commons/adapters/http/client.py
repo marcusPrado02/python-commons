@@ -1,14 +1,17 @@
 """HTTP adapter – HttpxHttpClient."""
+
 from __future__ import annotations
 
 from typing import Any
 
-from mp_commons.kernel.errors import ExternalServiceError, TimeoutError as AppTimeoutError
+from mp_commons.kernel.errors import ExternalServiceError
+from mp_commons.kernel.errors import TimeoutError as AppTimeoutError
 
 
 def _require_httpx() -> Any:
     try:
         import httpx  # type: ignore[import-untyped]
+
         return httpx
     except ImportError as exc:
         raise ImportError("Install 'mp-commons[httpx]' to use the HTTPX adapter") from exc
@@ -18,6 +21,7 @@ def _correlation_headers() -> dict[str, str]:
     """Extract correlation fields from the current :class:`CorrelationContext`."""
     try:
         from mp_commons.observability.correlation import CorrelationContext
+
         ctx = CorrelationContext.get()
         if ctx is None:
             return {}
@@ -31,7 +35,7 @@ def _correlation_headers() -> dict[str, str]:
         if ctx.trace_id:
             headers["X-Trace-ID"] = ctx.trace_id
         return headers
-    except Exception:  # noqa: BLE001 – never break the request over missing correlation
+    except Exception:
         return {}
 
 
@@ -42,7 +46,7 @@ class HttpxHttpClient:
         httpx = _require_httpx()
         self._client = httpx.AsyncClient(base_url=base_url, timeout=timeout, **kwargs)
 
-    async def __aenter__(self) -> "HttpxHttpClient":
+    async def __aenter__(self) -> HttpxHttpClient:
         await self._client.__aenter__()
         return self
 

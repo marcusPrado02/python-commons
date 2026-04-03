@@ -1,8 +1,10 @@
 """Application email – SesEmailSender (requires 'aiobotocore' extra)."""
+
 from __future__ import annotations
 
-import uuid
+from dataclasses import dataclass
 from typing import Any
+import uuid
 
 from mp_commons.application.email.message import EmailMessage
 
@@ -11,16 +13,14 @@ __all__ = ["SesConfig", "SesEmailSender"]
 
 def _require_aiobotocore() -> Any:  # pragma: no cover
     try:
-        import aiobotocore.session  # noqa: PLC0415
+        import aiobotocore.session
+
         return aiobotocore.session
     except ImportError as exc:
         raise ImportError(
             "aiobotocore is required for SES email sending. "
             "Install it with: pip install aiobotocore"
         ) from exc
-
-
-from dataclasses import dataclass
 
 
 @dataclass
@@ -44,7 +44,9 @@ class SesEmailSender:
         if self._config.aws_access_key_id:
             kwargs["aws_access_key_id"] = self._config.aws_access_key_id
             kwargs["aws_secret_access_key"] = self._config.aws_secret_access_key
-        async with session.create_client("ses", region_name=self._config.region_name, **kwargs) as client:
+        async with session.create_client(
+            "ses", region_name=self._config.region_name, **kwargs
+        ) as client:
             dest: dict[str, Any] = {"ToAddresses": message.to}
             if message.cc:
                 dest["CcAddresses"] = message.cc

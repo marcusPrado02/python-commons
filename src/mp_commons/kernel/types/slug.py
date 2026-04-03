@@ -27,7 +27,7 @@ class Slug:
         return self.value
 
     @classmethod
-    def from_text(cls, text: str) -> "Slug":
+    def from_text(cls, text: str) -> Slug:
         """Normalise arbitrary text into a URL-safe slug.
 
         Rules applied in order:

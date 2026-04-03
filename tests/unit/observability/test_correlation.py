@@ -6,8 +6,8 @@ import asyncio
 
 import pytest
 
-from mp_commons.observability.correlation import CorrelationContext, RequestContext
 from mp_commons.kernel.types import CorrelationId, TenantId
+from mp_commons.observability.correlation import CorrelationContext, RequestContext
 
 
 class TestCorrelationContext:

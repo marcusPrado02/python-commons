@@ -1,4 +1,5 @@
 """Redis adapter – RedisCache."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -7,6 +8,7 @@ from typing import Any
 def _require_redis() -> Any:
     try:
         import redis.asyncio as aioredis
+
         return aioredis
     except ImportError as exc:
         raise ImportError("Install 'mp-commons[redis]' to use the Redis adapter") from exc

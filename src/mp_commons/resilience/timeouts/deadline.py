@@ -1,4 +1,5 @@
 """Resilience – Deadline."""
+
 from __future__ import annotations
 
 import dataclasses
@@ -10,10 +11,11 @@ from mp_commons.kernel.errors import TimeoutError as AppTimeoutError
 @dataclasses.dataclass(frozen=True)
 class Deadline:
     """An absolute deadline derived from a timeout."""
+
     expires_at: datetime
 
     @classmethod
-    def after(cls, seconds: float) -> "Deadline":
+    def after(cls, seconds: float) -> Deadline:
         return cls(expires_at=datetime.now(UTC) + timedelta(seconds=seconds))
 
     @property

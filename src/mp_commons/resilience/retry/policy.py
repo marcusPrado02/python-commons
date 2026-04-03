@@ -1,10 +1,12 @@
 """Resilience – RetryPolicy and RetryExecutor."""
+
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Awaitable, Callable
 import logging
 import time
-from typing import Any, Awaitable, Callable, TypeVar
+from typing import Any, TypeVar
 
 from mp_commons.resilience.retry.backoff import BackoffStrategy, ExponentialBackoff
 from mp_commons.resilience.retry.jitter import FullJitter, JitterStrategy

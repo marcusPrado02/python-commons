@@ -1,14 +1,13 @@
 """Unit tests for §65 Application — File Upload."""
+
 from __future__ import annotations
 
 import asyncio
-
 import hashlib
 
 import pytest
 
 from mp_commons.application.files import (
-    AntivirusScanner,
     FileUploadedEvent,
     FileUploadService,
     FileValidationError,
@@ -126,27 +125,35 @@ class TestInMemoryObjectStore:
             store = InMemoryObjectStore("https://cdn.example.com")
             url = await store.put("images/cat.png", b"\x89PNG", "image/png")
             assert url == "https://cdn.example.com/images/cat.png"
+
         asyncio.run(_run())
+
     def test_exists_after_put(self):
         async def _run():
             store = InMemoryObjectStore()
             await store.put("file.txt", b"content", "text/plain")
             assert await store.exists("file.txt") is True
             assert await store.exists("missing.txt") is False
+
         asyncio.run(_run())
+
     def test_delete_removes_file(self):
         async def _run():
             store = InMemoryObjectStore()
             await store.put("tmp.bin", b"data", "application/octet-stream")
             await store.delete("tmp.bin")
             assert await store.exists("tmp.bin") is False
+
         asyncio.run(_run())
+
     def test_get_returns_data(self):
         async def _run():
             store = InMemoryObjectStore()
             await store.put("f.bin", b"hello", "application/octet-stream")
             assert store.get("f.bin") == b"hello"
+
         asyncio.run(_run())
+
     def test_is_protocol_compatible(self):
         store = InMemoryObjectStore()
         assert isinstance(store, ObjectStore)
@@ -170,7 +177,9 @@ class TestFileUploadService:
             assert isinstance(event, FileUploadedEvent)
             assert event.filename == "report.pdf"
             assert event.destination_key == "docs/report.pdf"
+
         asyncio.run(_run())
+
     def test_upload_raises_on_validation_failure(self):
         async def _run():
             store = InMemoryObjectStore()
@@ -181,7 +190,9 @@ class TestFileUploadService:
                 await svc.upload(f, "large.bin")
             assert not await store.exists("large.bin")
             assert len(svc.events) == 0
+
         asyncio.run(_run())
+
     def test_upload_without_validator_accepts_anything(self):
         async def _run():
             store = InMemoryObjectStore()
@@ -189,7 +200,9 @@ class TestFileUploadService:
             f = UploadedFile.from_bytes("huge.bin", "application/octet-stream", b"x" * 10_000)
             url = await svc.upload(f, "huge.bin")
             assert url.endswith("huge.bin")
+
         asyncio.run(_run())
+
     def test_multiple_uploads_accumulate_events(self):
         async def _run():
             store = InMemoryObjectStore()
@@ -198,7 +211,10 @@ class TestFileUploadService:
                 f = UploadedFile.from_bytes(f"f{i}.txt", "text/plain", b"data")
                 await svc.upload(f, f"uploads/f{i}.txt")
             assert len(svc.events) == 3
+
         asyncio.run(_run())
+
+
 # ---------------------------------------------------------------------------
 # ScanResult
 # ---------------------------------------------------------------------------

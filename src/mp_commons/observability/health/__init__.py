@@ -1,4 +1,11 @@
 """Observability – Health Checks."""
+
+from mp_commons.observability.health.adapters import (
+    ElasticsearchHealthCheck,
+    KafkaHealthCheck,
+    NatsHealthCheck,
+    RabbitMQHealthCheck,
+)
 from mp_commons.observability.health.builtin import (
     DatabaseHealthCheck,
     HttpEndpointHealthCheck,
@@ -10,11 +17,15 @@ from mp_commons.observability.health.registry import HealthRegistry, HealthRepor
 
 __all__ = [
     "DatabaseHealthCheck",
+    "ElasticsearchHealthCheck",
     "HealthCheck",
     "HealthRegistry",
     "HealthReport",
     "HealthStatus",
     "HttpEndpointHealthCheck",
+    "KafkaHealthCheck",
     "LambdaHealthCheck",
+    "NatsHealthCheck",
+    "RabbitMQHealthCheck",
     "RedisHealthCheck",
 ]

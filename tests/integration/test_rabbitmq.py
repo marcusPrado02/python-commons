@@ -3,6 +3,7 @@
 Uses testcontainers to spawn a real RabbitMQ broker.
 Run with: PYTHONPATH=src pytest tests/integration/test_rabbitmq.py -m integration -v
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -13,10 +14,10 @@ from testcontainers.rabbitmq import RabbitMqContainer
 from mp_commons.adapters.rabbitmq import RabbitMQMessageBus
 from mp_commons.kernel.messaging import Message, MessageHeaders
 
-
 # ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------
+
 
 def _run(coro):  # type: ignore[no-untyped-def]
     return asyncio.run(coro)
@@ -32,6 +33,7 @@ def _amqp_url(container: RabbitMqContainer) -> str:
 # ---------------------------------------------------------------------------
 # §31.3 – RabbitMQMessageBus
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.integration
 class TestRabbitMQMessageBusIntegration:

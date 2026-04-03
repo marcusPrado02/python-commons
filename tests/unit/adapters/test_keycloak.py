@@ -1,4 +1,5 @@
 """Tests for §33.1‑33.4 – JWKSClient + OIDCTokenVerifier + KeycloakPolicyEngineAdapter."""
+
 from __future__ import annotations
 
 import asyncio
@@ -15,8 +16,8 @@ import pytest
 
 def _make_rsa_key_pair():
     """Return (private_key, public_key) using `cryptography`."""
-    from cryptography.hazmat.primitives.asymmetric import rsa
     from cryptography.hazmat.backends import default_backend
+    from cryptography.hazmat.primitives.asymmetric import rsa
 
     private_key = rsa.generate_private_key(
         public_exponent=65537,
@@ -159,6 +160,7 @@ class TestOIDCTokenVerifier:
 
     def test_custom_realm_roles_claim(self) -> None:
         import jwt
+
         from mp_commons.adapters.keycloak.verifier import OIDCTokenVerifier
 
         claims = {
@@ -170,9 +172,7 @@ class TestOIDCTokenVerifier:
         }
         token = jwt.encode(claims, self.private_key, algorithm="RS256")
         mock_jwks = _mock_jwks_client(self.public_key)
-        verifier = OIDCTokenVerifier(
-            mock_jwks, audience="my-app", realm_roles_claim="my_roles"
-        )
+        verifier = OIDCTokenVerifier(mock_jwks, audience="my-app", realm_roles_claim="my_roles")
 
         principal = asyncio.run(verifier.verify(token))
         assert any(r.name == "superuser" for r in principal.roles)

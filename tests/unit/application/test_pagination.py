@@ -12,7 +12,6 @@ from mp_commons.application.pagination import (
     SortDirection,
 )
 
-
 # ---------------------------------------------------------------------------
 # PageRequest (11.1)
 # ---------------------------------------------------------------------------
@@ -124,9 +123,7 @@ class TestCursorPage:
         assert page.next_cursor is None
 
     def test_with_cursor(self) -> None:
-        page: CursorPage[str] = CursorPage(
-            items=["a", "b"], next_cursor="tok123", has_more=True
-        )
+        page: CursorPage[str] = CursorPage(items=["a", "b"], next_cursor="tok123", has_more=True)
         assert page.has_more is True
         assert page.next_cursor == "tok123"
 

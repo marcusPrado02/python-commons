@@ -72,9 +72,7 @@ class MongoRepository(Repository[TAggregate], Generic[TAggregate]):
         cursor = self._col.find({})
         return [self._from_document(doc) async for doc in cursor]
 
-    async def find_by(
-        self, spec: Specification[TAggregate]
-    ) -> list[TAggregate]:
+    async def find_by(self, spec: Specification[TAggregate]) -> list[TAggregate]:
         """Filter aggregates by *spec*.
 
         If *spec* exposes a ``to_mongo_filter() -> dict`` method the filter

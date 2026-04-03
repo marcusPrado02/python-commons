@@ -1,4 +1,5 @@
 """Observability – Logger protocol and LogEvent."""
+
 from __future__ import annotations
 
 import dataclasses
@@ -9,6 +10,7 @@ from typing import Any, Protocol
 @dataclasses.dataclass(frozen=True)
 class LogEvent:
     """Structured log entry."""
+
     level: str
     message: str
     logger_name: str

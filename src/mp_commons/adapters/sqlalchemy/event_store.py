@@ -1,4 +1,5 @@
 """SQLAlchemy adapter – SQLAlchemyEventStore (§27.10)."""
+
 from __future__ import annotations
 
 import json
@@ -100,11 +101,7 @@ class SQLAlchemyEventStore(EventStore):
             column("metadata_json"),
             column("occurred_at"),
         )
-        count_stmt = (
-            select(func.count())
-            .select_from(t)
-            .where(column("stream_id") == stream_id)
-        )
+        count_stmt = select(func.count()).select_from(t).where(column("stream_id") == stream_id)
         actual_version: int = (await self._session.execute(count_stmt)).scalar() or 0
 
         if actual_version != expected_version:

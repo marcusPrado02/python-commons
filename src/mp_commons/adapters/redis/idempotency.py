@@ -1,10 +1,11 @@
 """Redis adapter – RedisIdempotencyStore."""
+
 from __future__ import annotations
 
 import json
 
-from mp_commons.kernel.messaging import IdempotencyKey, IdempotencyRecord, IdempotencyStore
 from mp_commons.adapters.redis.cache import RedisCache
+from mp_commons.kernel.messaging import IdempotencyKey, IdempotencyRecord, IdempotencyStore
 
 
 class RedisIdempotencyStore(IdempotencyStore):
@@ -32,7 +33,9 @@ class RedisIdempotencyStore(IdempotencyStore):
         record = await self.get(key)
         if record is None:
             return
-        data = json.dumps({"key": record.key, "response": response.decode(), "status": "COMPLETED"}).encode()
+        data = json.dumps(
+            {"key": record.key, "response": response.decode(), "status": "COMPLETED"}
+        ).encode()
         await self._cache.set(self._key(key), data, ttl=self._ttl)
 
 

@@ -3,6 +3,7 @@
 Uses testcontainers to spawn a real HashiCorp Vault instance (dev mode).
 Run with: PYTHONPATH=src pytest tests/integration/test_vault.py -m integration -v
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -10,9 +11,8 @@ import asyncio
 import pytest
 from testcontainers.vault import VaultContainer
 
-from mp_commons.adapters.vault import VaultSecretStore
+from mp_commons.adapters.vault import VaultSecretStore, VaultTokenRenewer
 from mp_commons.config.secrets import SecretRef
-
 
 # ---------------------------------------------------------------------------
 # helpers
@@ -43,6 +43,7 @@ def _seed_secret(url: str, path: str, data: dict) -> None:
 # ---------------------------------------------------------------------------
 # §34.3 – VaultSecretStore
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.integration
 class TestVaultSecretStoreIntegration:
@@ -114,3 +115,25 @@ class TestVaultSecretStoreIntegration:
                 return await store.get(SecretRef(path="myapp/creds", key="token"))
 
             assert _run(run()) == "new-token"
+
+    def test_token_renewer_runs_and_stops_cleanly(self) -> None:
+        """VaultTokenRenewer background loop starts, ticks, and stops without error."""
+        with VaultContainer(root_token=ROOT_TOKEN) as container:
+            url = _vault_url(container)
+
+            async def run() -> None:
+                import hvac  # type: ignore[import-untyped]
+
+                # The dev-mode root token is non-expiring, but the renewer
+                # should still start, call lookup_self, and exit cleanly.
+                client = hvac.Client(url=url, token=ROOT_TOKEN)
+                renewer = VaultTokenRenewer(
+                    client,
+                    renew_before_seconds=999_999,  # always trigger renewal path
+                    check_interval=0.05,  # fast tick for test speed
+                )
+                async with renewer:
+                    await asyncio.sleep(0.2)  # let it run a few cycles
+                # No exception → renewer lifecycle is correct
+
+            _run(run())

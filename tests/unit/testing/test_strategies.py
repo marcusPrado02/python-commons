@@ -1,4 +1,5 @@
 """Unit tests for Hypothesis strategies – §38.3 (mocked, no hypothesis required)."""
+
 from __future__ import annotations
 
 from decimal import Decimal
@@ -7,10 +8,10 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _make_mock_st() -> MagicMock:
     """Return a mock for hypothesis.strategies that tracks all calls."""
@@ -29,9 +30,11 @@ def _make_mock_st() -> MagicMock:
 # Import guard
 # ===========================================================================
 
+
 class TestRequireHypothesis:
     def test_raises_import_error_without_hypothesis(self):
         import sys
+
         from mp_commons.testing.generators.strategies import _require_hypothesis
 
         with patch.dict(sys.modules, {"hypothesis.strategies": None}):
@@ -43,22 +46,24 @@ class TestRequireHypothesis:
     def test_error_message_mentions_hypothesis(self):
         import mp_commons.testing.generators.strategies as _strat_mod
 
-        with patch(
-            "mp_commons.testing.generators.strategies._require_hypothesis",
-            side_effect=ImportError("Install 'hypothesis'"),
+        with (
+            patch(
+                "mp_commons.testing.generators.strategies._require_hypothesis",
+                side_effect=ImportError("Install 'hypothesis'"),
+            ),
+            pytest.raises(ImportError, match="hypothesis"),
         ):
-            with pytest.raises(ImportError, match="hypothesis"):
-                _strat_mod._require_hypothesis()
+            _strat_mod._require_hypothesis()
 
 
 # ===========================================================================
 # Module-level – import should work without hypothesis installed
 # ===========================================================================
 
+
 class TestModuleImport:
     def test_module_importable_without_hypothesis(self):
         """Importing strategies.py itself must not raise even without hypothesis."""
-        import importlib
         import mp_commons.testing.generators.strategies as mod
 
         assert hasattr(mod, "entity_id_strategy")
@@ -106,6 +111,7 @@ class TestModuleImport:
 # §38.3 – entity_id_strategy
 # ===========================================================================
 
+
 class TestEntityIdStrategy:
     def test_calls_st_uuids(self):
         mock_st = _make_mock_st()
@@ -114,6 +120,7 @@ class TestEntityIdStrategy:
             return_value=mock_st,
         ):
             from mp_commons.testing.generators.strategies import entity_id_strategy
+
             entity_id_strategy()
         mock_st.uuids.assert_called_once()
 
@@ -124,6 +131,7 @@ class TestEntityIdStrategy:
             return_value=mock_st,
         ):
             from mp_commons.testing.generators.strategies import entity_id_strategy
+
             entity_id_strategy()
         # .map() should have been called on the uuids strategy
         mock_st.uuids.return_value.map.assert_called_once()
@@ -131,6 +139,7 @@ class TestEntityIdStrategy:
     def test_map_lambda_produces_valid_entity_id(self):
         """The map function passed to st.uuids() must create a valid EntityId."""
         import uuid
+
         from mp_commons.kernel.types.ids import EntityId
 
         captured_map_fn: list[Any] = []
@@ -144,6 +153,7 @@ class TestEntityIdStrategy:
             return_value=mock_st,
         ):
             from mp_commons.testing.generators.strategies import entity_id_strategy
+
             entity_id_strategy()
 
         assert len(captured_map_fn) == 1
@@ -159,6 +169,7 @@ class TestEntityIdStrategy:
             return_value=mock_st,
         ):
             from mp_commons.testing.generators.strategies import entity_id_strategy
+
             result = entity_id_strategy()
         # Should be the return value of .map()
         assert result is mock_st.uuids.return_value.map.return_value
@@ -169,6 +180,7 @@ class TestEntityIdStrategy:
             side_effect=ImportError("Install 'hypothesis'"),
         ):
             from mp_commons.testing.generators.strategies import entity_id_strategy
+
             with pytest.raises(ImportError, match="hypothesis"):
                 entity_id_strategy()
 
@@ -176,6 +188,7 @@ class TestEntityIdStrategy:
 # ===========================================================================
 # §38.3 – money_strategy
 # ===========================================================================
+
 
 class TestMoneyStrategy:
     def test_calls_st_decimals(self):
@@ -185,6 +198,7 @@ class TestMoneyStrategy:
             return_value=mock_st,
         ):
             from mp_commons.testing.generators.strategies import money_strategy
+
             money_strategy()
         mock_st.decimals.assert_called_once()
 
@@ -195,6 +209,7 @@ class TestMoneyStrategy:
             return_value=mock_st,
         ):
             from mp_commons.testing.generators.strategies import money_strategy
+
             money_strategy()
         kwargs = mock_st.decimals.call_args.kwargs
         assert kwargs["min_value"] == Decimal("0")
@@ -206,6 +221,7 @@ class TestMoneyStrategy:
             return_value=mock_st,
         ):
             from mp_commons.testing.generators.strategies import money_strategy
+
             money_strategy()
         kwargs = mock_st.decimals.call_args.kwargs
         assert kwargs["allow_nan"] is False
@@ -218,6 +234,7 @@ class TestMoneyStrategy:
             return_value=mock_st,
         ):
             from mp_commons.testing.generators.strategies import money_strategy
+
             money_strategy()
         kwargs = mock_st.decimals.call_args.kwargs
         assert kwargs["places"] == 2
@@ -229,6 +246,7 @@ class TestMoneyStrategy:
             return_value=mock_st,
         ):
             from mp_commons.testing.generators.strategies import money_strategy
+
             money_strategy()
         mock_st.sampled_from.assert_called_once()
 
@@ -239,6 +257,7 @@ class TestMoneyStrategy:
             return_value=mock_st,
         ):
             from mp_commons.testing.generators.strategies import money_strategy
+
             money_strategy()
         sampled_arg = mock_st.sampled_from.call_args.args[0]
         assert "BRL" in sampled_arg
@@ -253,6 +272,7 @@ class TestMoneyStrategy:
             return_value=mock_st,
         ):
             from mp_commons.testing.generators.strategies import money_strategy
+
             money_strategy(currencies=custom)
         sampled_arg = mock_st.sampled_from.call_args.args[0]
         assert sampled_arg == custom
@@ -264,8 +284,10 @@ class TestMoneyStrategy:
             return_value=mock_st,
         ):
             from mp_commons.testing.generators.strategies import money_strategy
+
             money_strategy()
         from mp_commons.kernel.types.money import Money
+
         mock_st.builds.assert_called_once()
         assert mock_st.builds.call_args.args[0] is Money
 
@@ -276,6 +298,7 @@ class TestMoneyStrategy:
             return_value=mock_st,
         ):
             from mp_commons.testing.generators.strategies import money_strategy
+
             money_strategy(min_amount="10.00", max_amount="100.00")
         kwargs = mock_st.decimals.call_args.kwargs
         assert kwargs["min_value"] == Decimal("10.00")
@@ -288,6 +311,7 @@ class TestMoneyStrategy:
             return_value=mock_st,
         ):
             from mp_commons.testing.generators.strategies import money_strategy
+
             money_strategy(currencies=("GBP", "JPY"))
         sampled_arg = mock_st.sampled_from.call_args.args[0]
         assert "GBP" in sampled_arg
@@ -299,6 +323,7 @@ class TestMoneyStrategy:
             side_effect=ImportError("Install 'hypothesis'"),
         ):
             from mp_commons.testing.generators.strategies import money_strategy
+
             with pytest.raises(ImportError, match="hypothesis"):
                 money_strategy()
 
@@ -306,6 +331,7 @@ class TestMoneyStrategy:
 # ===========================================================================
 # §38.3 – email_strategy
 # ===========================================================================
+
 
 class TestEmailStrategy:
     def test_calls_st_text_three_times(self):
@@ -316,6 +342,7 @@ class TestEmailStrategy:
             return_value=mock_st,
         ):
             from mp_commons.testing.generators.strategies import email_strategy
+
             email_strategy()
         assert mock_st.text.call_count == 3
 
@@ -326,6 +353,7 @@ class TestEmailStrategy:
             return_value=mock_st,
         ):
             from mp_commons.testing.generators.strategies import email_strategy
+
             email_strategy()
         for call in mock_st.text.call_args_list:
             assert "min_size" in call.kwargs or len(call.args) >= 2
@@ -337,6 +365,7 @@ class TestEmailStrategy:
             return_value=mock_st,
         ):
             from mp_commons.testing.generators.strategies import email_strategy
+
             email_strategy()
         mock_st.builds.assert_called_once()
 
@@ -346,15 +375,14 @@ class TestEmailStrategy:
 
         captured_fn: list[Any] = []
         mock_st = _make_mock_st()
-        mock_st.builds.side_effect = lambda fn, **_kw: (
-            captured_fn.append(fn) or MagicMock()
-        )
+        mock_st.builds.side_effect = lambda fn, **_kw: captured_fn.append(fn) or MagicMock()
 
         with patch(
             "mp_commons.testing.generators.strategies._require_hypothesis",
             return_value=mock_st,
         ):
             from mp_commons.testing.generators.strategies import email_strategy
+
             email_strategy()
 
         assert len(captured_fn) == 1
@@ -366,15 +394,14 @@ class TestEmailStrategy:
         """TLD part should only use lowercase letters (a–z)."""
         mock_st = _make_mock_st()
         calls: list[Any] = []
-        mock_st.text.side_effect = lambda alphabet, **_kw: (
-            calls.append(alphabet) or MagicMock()
-        )
+        mock_st.text.side_effect = lambda alphabet, **_kw: calls.append(alphabet) or MagicMock()
 
         with patch(
             "mp_commons.testing.generators.strategies._require_hypothesis",
             return_value=mock_st,
         ):
             from mp_commons.testing.generators.strategies import email_strategy
+
             email_strategy()
 
         # Third st.text() call is the TLD
@@ -388,5 +415,6 @@ class TestEmailStrategy:
             side_effect=ImportError("Install 'hypothesis'"),
         ):
             from mp_commons.testing.generators.strategies import email_strategy
+
             with pytest.raises(ImportError, match="hypothesis"):
                 email_strategy()

@@ -1,12 +1,12 @@
 """Application email – SmtpEmailSender (requires 'aiosmtplib' extra)."""
+
 from __future__ import annotations
 
+from dataclasses import dataclass
 import email.mime.multipart
 import email.mime.text
-import uuid
-from contextlib import asynccontextmanager
-from dataclasses import dataclass, field
 from typing import Any
+import uuid
 
 from mp_commons.application.email.message import EmailMessage
 
@@ -15,12 +15,12 @@ __all__ = ["SmtpConfig", "SmtpEmailSender"]
 
 def _require_aiosmtplib() -> Any:  # pragma: no cover
     try:
-        import aiosmtplib  # noqa: PLC0415
+        import aiosmtplib
+
         return aiosmtplib
     except ImportError as exc:
         raise ImportError(
-            "aiosmtplib is required for SMTP email sending. "
-            "Install it with: pip install aiosmtplib"
+            "aiosmtplib is required for SMTP email sending. Install it with: pip install aiosmtplib"
         ) from exc
 
 
@@ -61,7 +61,7 @@ class SmtpEmailSender:
             await self._client.quit()
             self._client = None
 
-    async def __aenter__(self) -> "SmtpEmailSender":  # pragma: no cover
+    async def __aenter__(self) -> SmtpEmailSender:  # pragma: no cover
         await self.connect()
         return self
 
@@ -87,7 +87,7 @@ class SmtpEmailSender:
         if self._client is None:
             await self.connect()
         mime = self._build_mime(message)
-        await self._client.send_message(mime)
+        await self._client.send_message(mime)  # type: ignore[union-attr]
         return str(uuid.uuid4())
 
     async def send_bulk(self, messages: list[EmailMessage]) -> list[str]:  # pragma: no cover

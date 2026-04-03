@@ -1,10 +1,12 @@
 """Application CQRS – @command_handler and @query_handler auto-registration decorators (§9.10)."""
+
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import Any
 
 from mp_commons.application.cqrs.commands import Command, CommandHandler, InProcessCommandBus
-from mp_commons.application.cqrs.queries import Query, QueryHandler, InProcessQueryBus
+from mp_commons.application.cqrs.queries import InProcessQueryBus, Query, QueryHandler
 
 # ---------------------------------------------------------------------------
 # Global registries populated at import time by the decorators
@@ -19,7 +21,9 @@ _QUERY_REGISTRY: dict[type[Query], type[QueryHandler[Any, Any]]] = {}
 # ---------------------------------------------------------------------------
 
 
-def command_handler(command_type: type[Command]):
+def command_handler(
+    command_type: type[Command],
+) -> Callable[[type[CommandHandler[Any]]], type[CommandHandler[Any]]]:
     """Class decorator that registers a :class:`CommandHandler` for the given
     command type in the global command registry.
 
@@ -27,12 +31,12 @@ def command_handler(command_type: type[Command]):
 
         @command_handler(CreateOrder)
         class CreateOrderHandler(CommandHandler[CreateOrder]):
-            async def handle(self, command: CreateOrder) -> None:
-                ...
+            async def handle(self, command: CreateOrder) -> None: ...
 
     The handler is instantiated (no-arg constructor) when a bus is built via
     :func:`make_command_bus`.
     """
+
     def decorator(handler_class: type[CommandHandler[Any]]) -> type[CommandHandler[Any]]:
         _COMMAND_REGISTRY[command_type] = handler_class
         return handler_class
@@ -40,7 +44,9 @@ def command_handler(command_type: type[Command]):
     return decorator
 
 
-def query_handler(query_type: type[Query]):
+def query_handler(
+    query_type: type[Query],
+) -> Callable[[type[QueryHandler[Any, Any]]], type[QueryHandler[Any, Any]]]:
     """Class decorator that registers a :class:`QueryHandler` for the given
     query type in the global query registry.
 
@@ -48,9 +54,9 @@ def query_handler(query_type: type[Query]):
 
         @query_handler(GetOrderById)
         class GetOrderByIdHandler(QueryHandler[GetOrderById, Order]):
-            async def handle(self, query: GetOrderById) -> Order:
-                ...
+            async def handle(self, query: GetOrderById) -> Order: ...
     """
+
     def decorator(handler_class: type[QueryHandler[Any, Any]]) -> type[QueryHandler[Any, Any]]:
         _QUERY_REGISTRY[query_type] = handler_class
         return handler_class

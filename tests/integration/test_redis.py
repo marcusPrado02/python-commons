@@ -3,6 +3,7 @@
 Uses testcontainers to spawn a real Redis instance.
 Run with: PYTHONPATH=src pytest tests/integration/test_redis.py -m integration -v
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -20,10 +21,10 @@ from mp_commons.application.rate_limit import Quota, RateLimitDecision
 from mp_commons.kernel.errors import ConflictError
 from mp_commons.kernel.messaging import IdempotencyKey, IdempotencyRecord
 
-
 # ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------
+
 
 def _run(coro):  # type: ignore[no-untyped-def]
     return asyncio.run(coro)
@@ -38,6 +39,7 @@ def _redis_url(container) -> str:  # type: ignore[no-untyped-def]
 # ---------------------------------------------------------------------------
 # §28.5 – RedisRateLimiter
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.integration
 class TestRedisRateLimiterIntegration:
@@ -134,6 +136,7 @@ class TestRedisRateLimiterIntegration:
 # §28.5 – RedisLock
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.integration
 class TestRedisLockIntegration:
     """Real Redis distributed lock tests."""
@@ -222,6 +225,7 @@ class TestRedisLockIntegration:
 # ---------------------------------------------------------------------------
 # §28.5 – RedisIdempotencyStore
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.integration
 class TestRedisIdempotencyStoreIntegration:

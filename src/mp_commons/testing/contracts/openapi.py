@@ -17,6 +17,7 @@ class OpenAPIContractTest:
         class TestOrderAPI(OpenAPIContractTest):
             openapi_url = "http://localhost:8000/openapi.json"
 
+
         @pytest.mark.contract
         async def test_schema(self, contract_test):
             await contract_test.assert_valid_schema()

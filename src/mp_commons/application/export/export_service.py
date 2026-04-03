@@ -1,11 +1,12 @@
 """Application export – ExportService dispatches to correct exporter."""
+
 from __future__ import annotations
 
 import json
 import time
 
-from mp_commons.application.export.request import ExportRequest
 from mp_commons.application.export.csv_export import CsvExporter
+from mp_commons.application.export.request import ExportRequest
 
 __all__ = ["ExportService"]
 
@@ -25,7 +26,8 @@ class ExportService:
 
         elif request.format == "xlsx":
             # Import lazily so missing openpyxl only fails at call time
-            from mp_commons.application.export.excel_export import ExcelExporter  # noqa: PLC0415
+            from mp_commons.application.export.excel_export import ExcelExporter
+
             result = await ExcelExporter().export(request)
 
         elif request.format == "json":

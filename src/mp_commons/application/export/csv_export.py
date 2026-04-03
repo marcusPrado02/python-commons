@@ -1,4 +1,5 @@
 """Application export – CsvExporter."""
+
 from __future__ import annotations
 
 import csv
@@ -29,7 +30,7 @@ class CsvExporter:
         if self._bom:
             buf.write("\ufeff")  # BOM for Excel compatibility
 
-        writer = csv.writer(buf, delimiter=self._delimiter, quoting=self._quoting)
+        writer = csv.writer(buf, delimiter=self._delimiter, quoting=self._quoting)  # type: ignore[arg-type]
         writer.writerow([col.header for col in request.columns])
 
         async for row in request.rows:

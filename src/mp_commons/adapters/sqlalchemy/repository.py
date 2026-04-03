@@ -1,4 +1,5 @@
 """SQLAlchemy adapter – SqlAlchemyRepositoryBase."""
+
 from __future__ import annotations
 
 from typing import Any, Generic, TypeVar

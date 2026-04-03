@@ -1,4 +1,5 @@
 """Unit tests for §81 – Observability SLO / Error Budget."""
+
 import asyncio
 
 import pytest

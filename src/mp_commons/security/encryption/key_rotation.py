@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from mp_commons.security.encryption.fernet import EncryptionProvider
 
 __all__ = ["KeyRotationService"]
@@ -18,16 +20,20 @@ class KeyRotationService:
         return new_provider.encrypt(plaintext)
 
     @staticmethod
-    async def rotate_column(session, model_cls, field_name: str,
-                            old_provider: EncryptionProvider,
-                            new_provider: EncryptionProvider) -> int:
+    async def rotate_column(
+        session: Any,
+        model_cls: Any,
+        field_name: str,
+        old_provider: EncryptionProvider,
+        new_provider: EncryptionProvider,
+    ) -> int:
         """Batch-rotate an encrypted column in the DB.
 
         Returns number of rows updated.
         """
-        from sqlalchemy import select, update
+        from sqlalchemy import select
 
-        col = getattr(model_cls, field_name)
+        getattr(model_cls, field_name)
         result = await session.execute(select(model_cls))
         rows = result.scalars().all()
         count = 0

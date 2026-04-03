@@ -1,7 +1,8 @@
 """Application cache – TaggedCacheStore and InMemory implementation."""
+
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, Protocol, runtime_checkable
 
 __all__ = [
@@ -14,6 +15,7 @@ __all__ = [
 @dataclass(frozen=True)
 class CacheInvalidationEvent:
     """Emitted when a tag is invalidated."""
+
     tag: str
     keys_removed: int = 0
 
@@ -31,12 +33,12 @@ class InMemoryTaggedCacheStore:
 
     def __init__(self) -> None:
         self._data: dict[str, Any] = {}
-        self._tags: dict[str, set[str]] = {}   # tag -> {keys}
+        self._tags: dict[str, set[str]] = {}  # tag -> {keys}
         self._key_tags: dict[str, set[str]] = {}  # key -> {tags}
 
     async def set(self, key: str, value: Any, ttl: int = 60, tags: list[str] | None = None) -> None:
         self._data[key] = value
-        for tag in (tags or []):
+        for tag in tags or []:
             self._tags.setdefault(tag, set()).add(key)
             self._key_tags.setdefault(key, set()).add(tag)
 

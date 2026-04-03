@@ -13,7 +13,7 @@ class InfrastructureError(BaseError):
     default_code = "infrastructure_error"
 
 
-class ConnectionError(InfrastructureError):  # noqa: A001
+class ConnectionError(InfrastructureError):
     """Failed to connect to an external resource (DB, broker, cache, …)."""
 
     default_code = "connection_error"
@@ -28,7 +28,7 @@ class ConnectionError(InfrastructureError):  # noqa: A001
         self.resource = resource
 
 
-class TimeoutError(InfrastructureError):  # noqa: A001
+class TimeoutError(InfrastructureError):
     """An I/O operation exceeded its deadline."""
 
     default_code = "infrastructure_timeout"

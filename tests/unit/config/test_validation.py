@@ -7,7 +7,6 @@ import pytest
 from mp_commons.config.validation import ConfigError, MissingRequiredSettingError
 from mp_commons.kernel.errors import ApplicationError
 
-
 # ---------------------------------------------------------------------------
 # §25.1  ConfigError
 # ---------------------------------------------------------------------------

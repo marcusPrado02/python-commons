@@ -1,4 +1,5 @@
 """Kernel security – Principal, Role, Permission."""
+
 from __future__ import annotations
 
 import dataclasses
@@ -8,6 +9,7 @@ from typing import Any
 @dataclasses.dataclass(frozen=True)
 class Role:
     """Named role (e.g. ADMIN, VIEWER)."""
+
     name: str
 
     def __str__(self) -> str:
@@ -17,6 +19,7 @@ class Role:
 @dataclasses.dataclass(frozen=True)
 class Permission:
     """Fine-grained permission string (e.g. 'orders:write')."""
+
     value: str
 
     def __str__(self) -> str:
@@ -26,6 +29,7 @@ class Permission:
 @dataclasses.dataclass(frozen=True)
 class Principal:
     """Authenticated identity."""
+
     subject: str
     tenant_id: str | None = None
     roles: frozenset[Role] = frozenset()

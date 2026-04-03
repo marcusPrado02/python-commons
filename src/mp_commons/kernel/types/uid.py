@@ -24,6 +24,7 @@ class ULID:
 
     def __post_init__(self) -> None:
         import re
+
         if not re.match(_ULID_RE_VALUE, self.value.upper()):
             raise ValidationError(f"Invalid ULID: {self.value!r}")
 
@@ -31,9 +32,11 @@ class ULID:
         return self.value
 
     @classmethod
-    def generate(cls) -> "ULID":
+    def generate(cls) -> ULID:
+        """Return a new monotonically increasing ULID (requires ``python-ulid``)."""
         try:
             from ulid import ULID as _ULID  # type: ignore[import-untyped]
+
             return cls(str(_ULID()))
         except ImportError as exc:
             raise ImportError("Install 'python-ulid' to generate ULIDs") from exc
@@ -53,9 +56,11 @@ class UUIDv7:
         return str(self.value)
 
     @classmethod
-    def generate(cls) -> "UUIDv7":
+    def generate(cls) -> UUIDv7:
+        """Return a new time-ordered UUIDv7 (requires ``uuid-utils``)."""
         try:
             import uuid_utils  # type: ignore[import-untyped]
+
             return cls(uuid.UUID(str(uuid_utils.uuid7())))
         except ImportError as exc:
             raise ImportError("Install 'uuid-utils' to generate UUIDv7") from exc
@@ -77,7 +82,7 @@ class UID:
     value: str
 
     def __post_init__(self) -> None:
-        if len(self.value) != 12:  # noqa: PLR2004
+        if len(self.value) != 12:
             from mp_commons.kernel.errors.domain import ValidationError
 
             raise ValidationError(f"UID must be exactly 12 characters, got {len(self.value)}")
@@ -86,10 +91,10 @@ class UID:
         return self.value
 
     @classmethod
-    def generate(cls) -> "UID":
+    def generate(cls) -> UID:
         """Return a new cryptographically random 12-char URL-safe base64 ``UID``."""
         raw = secrets.token_bytes(9)  # 9 bytes → 12 base64 chars (no padding)
         return cls(base64.urlsafe_b64encode(raw).decode())
 
 
-__all__ = ["ULID", "UID", "UUIDv7"]
+__all__ = ["UID", "ULID", "UUIDv7"]

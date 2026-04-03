@@ -1,8 +1,9 @@
 """Application scheduler – InMemoryScheduler for unit tests."""
+
 from __future__ import annotations
 
 from mp_commons.application.scheduler.job import Job
-from mp_commons.application.scheduler.scheduler import JobExecutionContext, JobExecutedEvent
+from mp_commons.application.scheduler.scheduler import JobExecutedEvent, JobExecutionContext
 
 __all__ = ["InMemoryScheduler"]
 

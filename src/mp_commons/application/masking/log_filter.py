@@ -17,7 +17,7 @@ class PiiLogFilter(logging.Filter):
         self._masker = DataMasker()
         self._rules = rules
 
-    def filter(self, record: logging.LogRecord) -> bool:  # noqa: A003
+    def filter(self, record: logging.LogRecord) -> bool:
         if isinstance(record.msg, dict):
             record.msg = self._masker.mask(record.msg, self._rules)
         if isinstance(record.args, dict):

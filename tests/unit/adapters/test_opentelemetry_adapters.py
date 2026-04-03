@@ -1,14 +1,15 @@
 """Unit tests for OpenTelemetry adapters (§35.1–35.5) — no otel install."""
+
 from __future__ import annotations
 
 import asyncio
-import sys
+from collections.abc import Iterator
 from contextlib import contextmanager
-from typing import Any, Iterator
+import sys
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 
 # ---------------------------------------------------------------------------
 # Mock OpenTelemetry modules — installed into sys.modules so adapters can
@@ -128,16 +129,18 @@ class TestOtelTracer:
         mocks, originals = _install_otel_mocks()
         try:
             from mp_commons.adapters.opentelemetry.tracer import OtelTracer
+
             OtelTracer(service_name="my-svc")
             mocks["_mock_trace"].get_tracer.assert_called_once_with("my-svc")
         finally:
             _restore_otel_mocks(originals)
 
     def test_start_span_yields_span(self) -> None:
-        mocks, originals = _install_otel_mocks()
+        _mocks, originals = _install_otel_mocks()
         try:
             from mp_commons.adapters.opentelemetry.tracer import OtelTracer
             from mp_commons.observability.tracing import Span
+
             tracer = OtelTracer(service_name="svc")
             with tracer.start_span("op") as span:
                 assert isinstance(span, Span)
@@ -145,49 +148,54 @@ class TestOtelTracer:
             _restore_otel_mocks(originals)
 
     def test_span_set_attribute(self) -> None:
-        mocks, originals = _install_otel_mocks()
+        _mocks, originals = _install_otel_mocks()
         try:
             from mp_commons.adapters.opentelemetry.tracer import OtelTracer
+
             tracer = OtelTracer(service_name="svc")
             with tracer.start_span("op") as span:
                 span.set_attribute("key", "value")
-                span._span.set_attribute.assert_called_once_with("key", "value")  # noqa: SLF001
+                span._span.set_attribute.assert_called_once_with("key", "value")
         finally:
             _restore_otel_mocks(originals)
 
     def test_span_set_status_ok(self) -> None:
-        mocks, originals = _install_otel_mocks()
+        _mocks, originals = _install_otel_mocks()
         try:
             from mp_commons.adapters.opentelemetry.tracer import OtelTracer
+
             tracer = OtelTracer(service_name="svc")
             with tracer.start_span("op") as span:
                 span.set_status_ok()
-                span._span.set_status.assert_called()  # noqa: SLF001
+                span._span.set_status.assert_called()
         finally:
             _restore_otel_mocks(originals)
 
     def test_span_record_exception(self) -> None:
-        mocks, originals = _install_otel_mocks()
+        _mocks, originals = _install_otel_mocks()
         try:
             from mp_commons.adapters.opentelemetry.tracer import OtelTracer
+
             tracer = OtelTracer(service_name="svc")
             exc = ValueError("boom")
             with tracer.start_span("op") as span:
                 span.record_exception(exc)
-                span._span.record_exception.assert_called_once_with(exc)  # noqa: SLF001
+                span._span.record_exception.assert_called_once_with(exc)
         finally:
             _restore_otel_mocks(originals)
 
     def test_start_async_span_yields_span(self) -> None:
-        mocks, originals = _install_otel_mocks()
+        _mocks, originals = _install_otel_mocks()
         try:
             from mp_commons.adapters.opentelemetry.tracer import OtelTracer
             from mp_commons.observability.tracing import Span
+
             tracer = OtelTracer(service_name="svc")
 
             async def run() -> None:
                 async with tracer.start_async_span("async-op") as span:
                     assert isinstance(span, Span)
+
             asyncio.run(run())
         finally:
             _restore_otel_mocks(originals)
@@ -204,6 +212,7 @@ class TestOtelTracer:
                 removed[key] = sys.modules.pop(key)
 
         import builtins
+
         real_import = builtins.__import__
 
         def block(name: str, *args: Any, **kw: Any) -> Any:
@@ -214,7 +223,9 @@ class TestOtelTracer:
         try:
             with patch("builtins.__import__", side_effect=block):
                 import importlib
-                import mp_commons.adapters.opentelemetry.tracer as tracer_mod  # noqa: PLC0415
+
+                import mp_commons.adapters.opentelemetry.tracer as tracer_mod
+
                 importlib.reload(tracer_mod)
                 with pytest.raises(ImportError, match="mp-commons\\[otel\\]"):
                     tracer_mod._require_otel()
@@ -232,6 +243,7 @@ class TestOtelMetrics:
         mocks, originals = _install_otel_mocks()
         try:
             from mp_commons.adapters.opentelemetry.metrics import OtelMetrics
+
             OtelMetrics(meter_name="test-meter")
             mocks["_mock_metrics"].get_meter.assert_called_once_with("test-meter")
         finally:
@@ -241,6 +253,7 @@ class TestOtelMetrics:
         mocks, originals = _install_otel_mocks()
         try:
             from mp_commons.adapters.opentelemetry.metrics import OtelMetrics
+
             m = OtelMetrics()
             c = m.counter("requests", description="Total requests")
             mocks["_mock_meter"].create_counter.assert_called_once()
@@ -255,6 +268,7 @@ class TestOtelMetrics:
         mocks, originals = _install_otel_mocks()
         try:
             from mp_commons.adapters.opentelemetry.metrics import OtelMetrics
+
             m = OtelMetrics()
             c = m.counter("hits")
             c.add()
@@ -268,6 +282,7 @@ class TestOtelMetrics:
         mocks, originals = _install_otel_mocks()
         try:
             from mp_commons.adapters.opentelemetry.metrics import OtelMetrics
+
             m = OtelMetrics()
             h = m.histogram("latency", unit="ms")
             mocks["_mock_meter"].create_histogram.assert_called_once()
@@ -279,17 +294,18 @@ class TestOtelMetrics:
             _restore_otel_mocks(originals)
 
     def test_gauge_set_inc_dec(self) -> None:
-        mocks, originals = _install_otel_mocks()
+        _mocks, originals = _install_otel_mocks()
         try:
             from mp_commons.adapters.opentelemetry.metrics import OtelMetrics
+
             m = OtelMetrics()
             g = m.gauge("connections")
             g.set(10.0)
-            assert g._value == 10.0  # noqa: SLF001
+            assert g._value == 10.0
             g.inc()
-            assert g._value == 11.0  # noqa: SLF001
+            assert g._value == 11.0
             g.dec()
-            assert g._value == 10.0  # noqa: SLF001
+            assert g._value == 10.0
         finally:
             _restore_otel_mocks(originals)
 
@@ -304,6 +320,7 @@ class TestOtelPropagator:
         mocks, originals = _install_otel_mocks()
         try:
             from mp_commons.adapters.opentelemetry.propagator import OtelPropagator
+
             p = OtelPropagator()
             headers: dict[str, str] = {}
             result = p.inject(headers)
@@ -316,6 +333,7 @@ class TestOtelPropagator:
         mocks, originals = _install_otel_mocks()
         try:
             from mp_commons.adapters.opentelemetry.propagator import OtelPropagator
+
             p = OtelPropagator()
             headers = {"traceparent": "00-abc-def-01"}
             result = p.extract(headers)
@@ -327,11 +345,14 @@ class TestOtelPropagator:
     def test_inject_propagates_header_mutation(self) -> None:
         mocks, originals = _install_otel_mocks()
         try:
+
             def _side(d: dict, **_: Any) -> None:
                 d["traceparent"] = "00-trace-span-01"
+
             mocks["_mock_propagate"].inject.side_effect = _side
 
             from mp_commons.adapters.opentelemetry.propagator import OtelPropagator
+
             p = OtelPropagator()
             headers: dict[str, str] = {}
             result = p.inject(headers)
@@ -347,9 +368,10 @@ class TestOtelPropagator:
 
 class TestOtelLoggingEnricher:
     def test_enricher_injects_valid_ids(self) -> None:
-        mocks, originals = _install_otel_mocks()
+        _mocks, originals = _install_otel_mocks()
         try:
             from mp_commons.adapters.opentelemetry.enricher import OtelLoggingEnricher
+
             enricher = OtelLoggingEnricher()
             result = enricher(None, None, {"event": "user.login"})
             assert "trace_id" in result
@@ -365,7 +387,9 @@ class TestOtelLoggingEnricher:
             # Make span context invalid
             mocks["_mock_span_ctx"].is_valid = False
             import importlib
+
             import mp_commons.adapters.opentelemetry.enricher as enricher_mod
+
             importlib.reload(enricher_mod)
             enricher = enricher_mod.OtelLoggingEnricher()
             result = enricher(None, None, {"event": "x"})
@@ -386,6 +410,7 @@ class TestOtelLoggingEnricher:
                 removed[key] = sys.modules.pop(key)
 
         import builtins
+
         real_import = builtins.__import__
 
         def block(name: str, *args: Any, **kw: Any) -> Any:
@@ -394,6 +419,7 @@ class TestOtelLoggingEnricher:
             return real_import(name, *args, **kw)
 
         import importlib
+
         import mp_commons.adapters.opentelemetry.enricher as enricher_mod
 
         try:
@@ -406,9 +432,10 @@ class TestOtelLoggingEnricher:
             sys.modules.update(removed)
 
     def test_enricher_returns_event_dict_unmodified_type(self) -> None:
-        mocks, originals = _install_otel_mocks()
+        _mocks, originals = _install_otel_mocks()
         try:
             from mp_commons.adapters.opentelemetry.enricher import OtelLoggingEnricher
+
             enricher = OtelLoggingEnricher()
             event_dict: dict[str, Any] = {"event": "test", "level": "info"}
             result = enricher(None, None, event_dict)

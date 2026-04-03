@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import asyncio
-import time
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
-from typing import Any, Awaitable, Callable, Generic, TypeVar
+import time
+from typing import Generic, TypeVar
 
 __all__ = [
-    "ThrottledError",
     "ThrottlePolicy",
+    "ThrottledError",
     "TokenBucket",
 ]
 

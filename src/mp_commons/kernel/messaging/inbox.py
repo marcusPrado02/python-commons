@@ -1,14 +1,17 @@
 """Kernel messaging – inbox pattern ports."""
+
 from __future__ import annotations
 
 import abc
 import dataclasses
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from uuid import uuid4
 
 
-class InboxStatus(str, Enum):
+class InboxStatus(StrEnum):
+    """Lifecycle states of a kernel :class:`InboxRecord`."""
+
     RECEIVED = "RECEIVED"
     PROCESSED = "PROCESSED"
     FAILED = "FAILED"
@@ -34,16 +37,24 @@ class InboxRepository(abc.ABC):
     """Port: persistence for inbox records."""
 
     @abc.abstractmethod
-    async def save(self, record: InboxRecord) -> None: ...
+    async def save(self, record: InboxRecord) -> None:
+        """Persist *record* to the inbox store (upsert semantics)."""
+        ...
 
     @abc.abstractmethod
-    async def find_by_message_id(self, message_id: str) -> InboxRecord | None: ...
+    async def find_by_message_id(self, message_id: str) -> InboxRecord | None:
+        """Return the inbox record for *message_id*, or ``None`` if unseen."""
+        ...
 
     @abc.abstractmethod
-    async def mark_processed(self, record_id: str) -> None: ...
+    async def mark_processed(self, record_id: str) -> None:
+        """Transition *record_id* to ``PROCESSED`` status."""
+        ...
 
     @abc.abstractmethod
-    async def mark_failed(self, record_id: str, error: str) -> None: ...
+    async def mark_failed(self, record_id: str, error: str) -> None:
+        """Transition *record_id* to ``FAILED`` and store the *error* message."""
+        ...
 
 
 class InboxStore(abc.ABC):

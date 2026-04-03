@@ -1,4 +1,5 @@
 """NATS adapter – NatsMessageBus."""
+
 from __future__ import annotations
 
 import json
@@ -10,6 +11,7 @@ from mp_commons.kernel.messaging import Message, MessageBus
 def _require_nats() -> Any:
     try:
         import nats  # type: ignore[import-untyped]
+
         return nats
     except ImportError as exc:
         raise ImportError("Install 'mp-commons[nats]' to use the NATS adapter") from exc
@@ -33,7 +35,7 @@ class NatsMessageBus(MessageBus):
         if self._nc:
             await self._nc.close()
 
-    async def __aenter__(self) -> "NatsMessageBus":
+    async def __aenter__(self) -> NatsMessageBus:
         await self.connect()
         return self
 

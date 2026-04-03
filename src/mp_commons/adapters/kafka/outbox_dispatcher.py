@@ -1,11 +1,12 @@
 """Kafka adapter – KafkaOutboxDispatcher."""
+
 from __future__ import annotations
 
 import logging
 from typing import Any
 
-from mp_commons.kernel.messaging import Message, MessageHeaders, OutboxDispatcher, OutboxRepository
 from mp_commons.adapters.kafka.producer import KafkaProducer
+from mp_commons.kernel.messaging import Message, MessageHeaders, OutboxDispatcher, OutboxRepository
 
 logger = logging.getLogger(__name__)
 

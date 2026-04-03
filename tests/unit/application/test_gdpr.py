@@ -1,23 +1,20 @@
 """Unit tests for §71 – GDPR / Data Subject Rights."""
-import asyncio
 
-import pytest
+import asyncio
 
 from mp_commons.application.gdpr import (
     ConsentRecord,
     DataErasedEvent,
     DataPortabilityExporter,
-    DataSubjectRequest,
-    Erasable,
     ErasureResult,
     ErasureService,
     InMemoryConsentStore,
 )
 
-
 # ---------------------------------------------------------------------------
 # ErasureService
 # ---------------------------------------------------------------------------
+
 
 class TestErasureService:
     def _make_handler(self, scope: str, success: bool = True, raises: bool = False):
@@ -64,6 +61,7 @@ class TestErasureService:
 # DataPortabilityExporter
 # ---------------------------------------------------------------------------
 
+
 class TestDataPortabilityExporter:
     def _make_handler(self, scope: str, data: dict):
         class _H:
@@ -88,6 +86,7 @@ class TestDataPortabilityExporter:
 # ---------------------------------------------------------------------------
 # ConsentStore
 # ---------------------------------------------------------------------------
+
 
 class TestConsentStore:
     def test_save_and_find(self):

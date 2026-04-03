@@ -1,4 +1,5 @@
 """Application Workflow Engine."""
+
 from mp_commons.application.workflow.engine import (
     InMemoryWorkflowInstanceStore,
     WorkflowDefinition,

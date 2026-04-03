@@ -1,8 +1,10 @@
 """Application export – ExportRequest and ColumnDef."""
+
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import AsyncIterator, Literal
+from collections.abc import AsyncIterator
+from dataclasses import dataclass
+from typing import Literal
 
 __all__ = ["ColumnDef", "ExportRequest"]
 
@@ -11,8 +13,8 @@ __all__ = ["ColumnDef", "ExportRequest"]
 class ColumnDef:
     """Defines a single column in an export."""
 
-    key: str          # dict key to read from each row
-    header: str       # column header text
+    key: str  # dict key to read from each row
+    header: str  # column header text
     format: str = ""  # optional format hint, e.g. "date", "currency"
 
 

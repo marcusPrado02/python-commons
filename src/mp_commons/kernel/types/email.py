@@ -8,9 +8,7 @@ from typing import Any, Final
 
 from mp_commons.kernel.errors.domain import ValidationError
 
-_EMAIL_PATTERN: Final = re.compile(
-    r"^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$"
-)
+_EMAIL_PATTERN: Final = re.compile(r"^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$")
 
 
 @dataclasses.dataclass(frozen=True, slots=True)

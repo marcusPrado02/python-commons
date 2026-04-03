@@ -1,7 +1,6 @@
 """Unit tests for §74 – Inbox Pattern."""
-import asyncio
 
-import pytest
+import asyncio
 
 from mp_commons.application.inbox import (
     InboxProcessor,

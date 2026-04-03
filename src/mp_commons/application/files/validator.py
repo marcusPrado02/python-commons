@@ -1,4 +1,5 @@
 """Application files – FileValidator."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -14,11 +15,11 @@ class ValidationResult:
     errors: tuple[str, ...] = field(default_factory=tuple)
 
     @classmethod
-    def ok(cls) -> "ValidationResult":
+    def ok(cls) -> ValidationResult:
         return cls(valid=True, errors=())
 
     @classmethod
-    def fail(cls, *errors: str) -> "ValidationResult":
+    def fail(cls, *errors: str) -> ValidationResult:
         return cls(valid=False, errors=errors)
 
 
@@ -52,9 +53,7 @@ class FileValidator:
             and file.content_type not in self.allowed_content_types
         ):
             allowed = ", ".join(sorted(self.allowed_content_types))
-            errors.append(
-                f"Content type '{file.content_type}' is not allowed. Allowed: {allowed}"
-            )
+            errors.append(f"Content type '{file.content_type}' is not allowed. Allowed: {allowed}")
         if errors:
             return ValidationResult.fail(*errors)
         return ValidationResult.ok()

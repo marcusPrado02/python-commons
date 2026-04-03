@@ -1,4 +1,5 @@
 """Application scheduler – APSchedulerAdapter (requires apscheduler>=4 extra)."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -11,12 +12,12 @@ __all__ = ["APSchedulerAdapter"]
 
 def _require_apscheduler() -> Any:  # pragma: no cover
     try:
-        import apscheduler  # noqa: PLC0415
+        import apscheduler
+
         return apscheduler
     except ImportError as exc:
         raise ImportError(
-            "APScheduler>=4.0 is required. "
-            "Install it with: pip install 'apscheduler>=4'"
+            "APScheduler>=4.0 is required. Install it with: pip install 'apscheduler>=4'"
         ) from exc
 
 
@@ -29,8 +30,9 @@ class APSchedulerAdapter:
 
     def _get_scheduler(self) -> Any:  # pragma: no cover
         if self._scheduler is None:
-            apscheduler = _require_apscheduler()
-            from apscheduler.schedulers.async_ import AsyncScheduler  # noqa: PLC0415
+            _require_apscheduler()
+            from apscheduler.schedulers.async_ import AsyncScheduler
+
             self._scheduler = AsyncScheduler()
         return self._scheduler
 
@@ -47,8 +49,8 @@ class APSchedulerAdapter:
         await scheduler.start_in_background()
 
     async def _register_job(self, scheduler: Any, job: Job) -> None:  # pragma: no cover
-        from apscheduler.triggers.cron import CronTrigger  # noqa: PLC0415
-        from apscheduler.triggers.interval import IntervalTrigger  # noqa: PLC0415
+        from apscheduler.triggers.cron import CronTrigger
+        from apscheduler.triggers.interval import IntervalTrigger
 
         async def _handler() -> None:
             ctx = JobExecutionContext(job=job)
@@ -57,7 +59,6 @@ class APSchedulerAdapter:
         if job.cron:
             trigger = CronTrigger.from_crontab(job.cron)
         else:
-            from datetime import timedelta  # noqa: PLC0415
             trigger = IntervalTrigger(seconds=job.interval_seconds)
 
         await scheduler.add_schedule(_handler, trigger=trigger, id=job.id)

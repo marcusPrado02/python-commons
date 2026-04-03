@@ -1,7 +1,6 @@
 """Unit tests for §78 – Cache-Aside Policy."""
-import asyncio
 
-import pytest
+import asyncio
 
 from mp_commons.resilience.cache import CacheAsidePolicy
 

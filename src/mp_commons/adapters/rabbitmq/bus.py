@@ -1,4 +1,5 @@
 """RabbitMQ adapter – RabbitMQMessageBus."""
+
 from __future__ import annotations
 
 import json
@@ -11,6 +12,7 @@ from mp_commons.resilience.retry.policy import RetryPolicy
 def _require_aio_pika() -> Any:
     try:
         import aio_pika  # type: ignore[import-untyped]
+
         return aio_pika
     except ImportError as exc:
         raise ImportError("Install 'mp-commons[rabbitmq]' (aio-pika) to use this adapter") from exc
@@ -44,7 +46,7 @@ class RabbitMQMessageBus(MessageBus):
         if self._connection:
             await self._connection.close()
 
-    async def __aenter__(self) -> "RabbitMQMessageBus":
+    async def __aenter__(self) -> RabbitMQMessageBus:
         await self.connect()
         return self
 

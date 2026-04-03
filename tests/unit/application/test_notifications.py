@@ -1,9 +1,11 @@
 """Unit tests for §64 Application — Push Notifications / SMS."""
+
 from __future__ import annotations
 
 import asyncio
 
 import pytest
+
 from mp_commons.application.notifications import (
     InMemoryPushSender,
     InMemorySmsSender,
@@ -75,7 +77,9 @@ class TestInMemoryPushSender:
             assert len(results) == 2
             assert all(r.success for r in results)
             assert {r.token for r in results} == {"t1", "t2"}
+
         asyncio.run(_run())
+
     def test_reset(self):
         async def _run():
             sender = InMemoryPushSender()
@@ -83,7 +87,9 @@ class TestInMemoryPushSender:
             await sender.send(notif)
             sender.reset()
             assert sender.count == 0
+
         asyncio.run(_run())
+
     def test_is_protocol_compatible(self):
         sender = InMemoryPushSender()
         assert isinstance(sender, PushNotificationSender)
@@ -94,7 +100,10 @@ class TestInMemoryPushSender:
             for i in range(4):
                 await sender.send(PushNotification(device_tokens=[f"tok{i}"], title="t", body="b"))
             assert sender.count == 4
+
         asyncio.run(_run())
+
+
 # ---------------------------------------------------------------------------
 # SmsMessage
 # ---------------------------------------------------------------------------
@@ -127,7 +136,9 @@ class TestInMemorySmsSender:
             assert sender.count == 1
             assert sender.last() is sms
             assert msg_id == "mem-sms-1"
+
         asyncio.run(_run())
+
     def test_send_sequential_ids(self):
         async def _run():
             sender = InMemorySmsSender()
@@ -135,7 +146,9 @@ class TestInMemorySmsSender:
             id2 = await sender.send(SmsMessage(to="+2", body="b"))
             assert id1 == "mem-sms-1"
             assert id2 == "mem-sms-2"
+
         asyncio.run(_run())
+
     def test_reset(self):
         async def _run():
             sender = InMemorySmsSender()
@@ -143,7 +156,9 @@ class TestInMemorySmsSender:
             sender.reset()
             assert sender.count == 0
             assert sender.last() is None
+
         asyncio.run(_run())
+
     def test_is_protocol_compatible(self):
         sender = InMemorySmsSender()
         assert isinstance(sender, SmsSender)

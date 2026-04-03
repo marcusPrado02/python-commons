@@ -15,7 +15,8 @@ class UnitOfWork(abc.ABC):
     @abc.abstractmethod
     async def rollback(self) -> None: ...
 
-    async def __aenter__(self) -> "UnitOfWork":
+    async def __aenter__(self) -> UnitOfWork:
+        """Enter the transactional block and return ``self``."""
         return self
 
     async def __aexit__(
@@ -24,6 +25,7 @@ class UnitOfWork(abc.ABC):
         exc_val: BaseException | None,
         exc_tb: Any,
     ) -> None:
+        """Commit on clean exit, rollback on exception."""
         if exc_type is None:
             await self.commit()
         else:

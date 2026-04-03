@@ -1,4 +1,5 @@
 """Application search – SearchQuery value object."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -10,6 +11,7 @@ __all__ = ["Filter", "SearchQuery", "SortField"]
 @dataclass(frozen=True)
 class Filter:
     """A field-level filter applied to search results."""
+
     field: str
     value: Any
     op: Literal["eq", "neq", "gt", "gte", "lt", "lte", "in", "contains"] = "eq"
