@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v2
+      - uses: astral-sh/setup-uv@v7
       - name: Set up Python
         run: uv python install 3.12
       - name: Install dev deps
@@ -36,7 +36,7 @@ jobs:
         python-version: ["3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v2
+      - uses: astral-sh/setup-uv@v7
       - name: Set up Python ${{ matrix.python-version }}
         run: uv python install ${{ matrix.python-version }}
       - name: Install dev deps
@@ -81,7 +81,7 @@ jobs:
           --health-retries 5
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v2
+      - uses: astral-sh/setup-uv@v7
       - name: Set up Python 3.12
         run: uv python install 3.12
       - name: Install dev deps
@@ -99,7 +99,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v2
+      - uses: astral-sh/setup-uv@v7
       - name: Set up Python
         run: uv python install 3.12
       - name: bandit
@@ -154,7 +154,7 @@ jobs:
       id-token: write   # OIDC token for PyPI Trusted Publishing
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v2
+      - uses: astral-sh/setup-uv@v7
       - name: Build
         run: uv build
       - name: Generate SBOM (CycloneDX JSON)
